@@ -55,6 +55,7 @@ def configure(conf):
 
   if not Options.options.debug:
     conf.define('NDEBUG', 1)
+    conf.define('JUBATUS_DISABLE_ASSERTIONS', 1)
 
   if Options.options.gcov:
     conf.env.append_value('CXXFLAGS', '-fprofile-arcs')
