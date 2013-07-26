@@ -1,10 +1,12 @@
 import Options
+from functools import partial
 from waflib.Errors import TaskNotReady
 import os
 import sys
 
 VERSION = '0.4.5'
 APPNAME = 'jubatus'
+CORENAME = 'jubatus_core'
 
 top = '.'
 out = 'build'
@@ -123,7 +125,26 @@ def build(bld):
 
   bld(name = 'core_headers', export_includes = './')
 
+  def add_prefix(bld, paths):
+    prefix_dir = os.path.dirname(bld.cur_script.relpath())
+    return [os.path.join(prefix_dir, str(path)) for path in paths]
+
+  bld.add_prefix = partial(add_prefix, bld)
+  bld.core_sources = []
+  bld.core_headers = []
+  bld.core_use = []
   bld.recurse(subdirs)
+
+  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = bld.env['VERSION'])
+  bld.install_files('${PREFIX}/include/', list(set(bld.core_headers)), relative_trick=True)
+
+  bld(source = 'jubatus_core.pc.in',
+      prefix = bld.env['PREFIX'],
+      exec_prefix = '${prefix}',
+      libdir = bld.env['LIBDIR'],
+      includedir = '${prefix}/include',
+      PACKAGE = CORENAME,
+      VERSION = VERSION)
 
 def cpplint(ctx):
   import fnmatch, tempfile

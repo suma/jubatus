@@ -1,5 +1,5 @@
 
-subdirs = ['jsonconfig']
+subdirs = []
 
 def options(opt):
   opt.recurse(subdirs)
@@ -9,36 +9,14 @@ def configure(conf):
 
 def build(bld):
   import Options
-  src = 'exception.cpp key_manager.cpp vector_util.cpp'
-  src += ' jsonconfig/config.cpp jsonconfig/exception.cpp'
-
-  bld.shlib(
-    source = src,
-    target = 'jubacommon',
-    includes = '.',
-    use = 'PFICOMMON'
-    )
-
-  test_src = [
-    'exception_test.cpp',
-    'byte_buffer_test.cpp',
-    'key_manager_test.cpp',
-    'vector_util_test.cpp',
-     'jsonconfig_test.cpp',
-    ]
-
-  def make_test(s):
-    bld.program(
-      features = 'gtest',
-      source = s,
-      target = s[0:s.rfind('.')],
-      includes = '.',
-      use = 'jubacommon'
-      )
-  for s in test_src:
-    make_test(s)
-
-  bld.install_files('${PREFIX}/include/jubatus/core/common/', [
+  source = [
+      'exception.cpp',
+      'key_manager.cpp',
+      'vector_util.cpp',
+      'jsonconfig/config.cpp',
+      'jsonconfig/exception.cpp',
+      ]
+  headers = [
       'byte_buffer.hpp',
       'exception.hpp',
       'exception_info.hpp',
@@ -48,5 +26,33 @@ def build(bld):
       'type.hpp',
       'unordered_map.hpp',
       'vector_util.hpp',
-      ])
+      'jsonconfig/cast.hpp',
+      'jsonconfig/config.hpp',
+      'jsonconfig/exception.hpp',
+      ]
+  use = ['PFICOMMON', 'MSGPACK']
+
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(headers))
+  bld.core_use.extend(use)
+
+  test_src = [
+      'exception_test.cpp',
+      'byte_buffer_test.cpp',
+      'key_manager_test.cpp',
+      'vector_util_test.cpp',
+      'jsonconfig_test.cpp',
+    ]
+
+  def make_test(s):
+    bld.program(
+      features = 'gtest',
+      source = s,
+      target = s[0:s.rfind('.')],
+      includes = '.',
+      use = 'PFICOMMON MSGPACK jubatus_core'
+      )
+  for s in test_src:
+    make_test(s)
+
   bld.recurse(subdirs)

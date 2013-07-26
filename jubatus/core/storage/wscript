@@ -9,7 +9,7 @@ def make_test(bld, src):
     features = 'gtest',
     source = src,
     target = src[0:src.rindex('.')],
-    use = 'jubastorage',
+    use = 'jubatus_core',
     )
 
 def make_tests(bld, srcs):
@@ -17,20 +17,33 @@ def make_tests(bld, srcs):
     make_test(bld, src)
 
 def build(bld):
-  cppfiles = ['storage_factory.cpp', 'storage_base.cpp', 'local_storage.cpp',
-              'local_storage_mixture.cpp',
-              'sparse_matrix_storage.cpp', 'inverted_index_storage.cpp', 'bit_vector.cpp', 'bit_index_storage.cpp',
-              'lsh_vector.cpp',
-              'lsh_util.cpp',
-              'lsh_index_storage.cpp']
-  use = 'PFICOMMON jubacommon MSGPACK'
+  source = [
+      'storage_factory.cpp',
+      'storage_base.cpp',
+      'local_storage.cpp',
+      'local_storage_mixture.cpp',
+      'sparse_matrix_storage.cpp',
+      'inverted_index_storage.cpp',
+      'bit_vector.cpp', 'bit_index_storage.cpp',
+      'lsh_vector.cpp',
+      'lsh_util.cpp',
+      'lsh_index_storage.cpp',
+      ]
+  header = [
+      'storage_base.hpp',
+      'storage_type.hpp',
+      'storage_factory.hpp',
+      'bit_vector.hpp',
+      'sparse_matrix_storage.hpp',
+      'recommender_storage_base.hpp',
+      'local_storage.hpp',
+      'local_storage_mixture.hpp',
+      ]
+  use = ['PFICOMMON', 'MSGPACK']
 
-  bld.shlib(
-    source = cppfiles,
-    target = 'jubastorage',
-    includes = '.',
-    use = use
-    )
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(header))
+  bld.core_use.extend(use)
 
   make_tests(bld, [
       'storage_test.cpp',
@@ -46,12 +59,3 @@ def build(bld):
       'bit_index_storage_test.cpp',
       'storage_type_test.cpp',
       ])
-
-  bld.install_files('${PREFIX}/include/jubatus/core/storage',
-                    ['storage_base.hpp',
-                     'storage_type.hpp',
-                     'storage_factory.hpp',
-                     'bit_vector.hpp',
-                     'sparse_matrix_storage.hpp',
-                     'recommender_storage_base.hpp',
-                     ])

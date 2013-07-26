@@ -2,13 +2,20 @@ def options(opt): pass
 def configure(conf): pass
 
 def build(bld):
-  bld.shlib(
-    source = ['stat.cpp', 'mixable_stat.cpp'],
-    target = 'jubatus_stat',
-    includes = '.',
-    use = 'PFICOMMON'
-    )
-  
+  source = [
+      'stat.cpp',
+      'mixable_stat.cpp'
+      ]
+  headers = [
+      'stat.hpp',
+      'mixable_stat.hpp',
+      ]
+  use = ['PFICOMMON', 'MSGPACK']
+
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(headers))
+  bld.core_use.extend(use)
+
   bld.program(
     features = 'gtest',
     source = [
@@ -16,10 +23,5 @@ def build(bld):
       ],
     target = 'stat_test',
     includes = '.',
-    use = 'jubatus_stat'
+    use = 'PFICOMMON MSGPACK jubatus_core'
     )
-
-  bld.install_files('${PREFIX}/include/jubatus/core/stat', [
-      'stat.hpp',
-      'mixable_stat.hpp',
-      ])

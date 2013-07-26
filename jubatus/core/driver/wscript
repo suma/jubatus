@@ -15,13 +15,22 @@ def build(bld):
       'linear_function_mixer.cpp',
       'mixable_weight_manager.cpp',
       ]
+  header = [
+      'classifier.hpp',
+      'regression.hpp',
+      'recommender.hpp',
+      'stat.hpp',
+      'anomaly.hpp',
+      'graph.hpp',
+      'diffv.hpp',
+      'linear_function_mixer.hpp',
+      'mixable_weight_manager.hpp',
+      ]
+  use = ['PFICOMMON', 'MSGPACK']
 
-  bld.shlib(
-    source = source,
-    target = 'jubatus_driver',
-    includes = '.',
-    use = 'PFICOMMON jubacommon MSGPACK jubaconverter jubastorage jubatus_classifier jubatus_regression jubatus_recommender jubatus_stat jubatus_anomaly jubatus_graph'
-    )
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(header))
+  bld.core_use.extend(use)
 
   def make_test(t):
     bld.program(
@@ -29,7 +38,7 @@ def build(bld):
       source=t + '.cpp',
       target=t,
       includes='.',
-      use='jubatus_driver'
+      use='PFICOMMON MSGPACK jubatus_core'
       )
 
   tests = [
@@ -44,15 +53,3 @@ def build(bld):
 
   for t in tests:
     make_test(t)
-
-  bld.install_files('${PREFIX}/include/jubatus/core/driver', [
-      'classifier.hpp',
-      'regression.hpp',
-      'recommender.hpp',
-      'stat.hpp',
-      'anomaly.hpp',
-      'graph.hpp',
-      'diffv.hpp',
-      'linear_function_mixer.hpp',
-      'mixable_weight_manager.hpp',
-      ])

@@ -5,13 +5,19 @@ def configure(conf):
   pass
 
 def build(bld):
+
+  headers = [
+      'mixable.hpp',
+      ]
+  bld.core_headers.extend(bld.add_prefix(headers))
+
   def make_test(t):
     bld.program(
       features='gtest',
       source=t + '.cpp',
       target=t,
       includes='.',
-      use='MSGPACK',
+      use='PFICOMMON MSGPACK jubatus_core',
       )
 
   tests = [
@@ -20,7 +26,3 @@ def build(bld):
 
   for t in tests:
     make_test(t)
-
-  bld.install_files('${PREFIX}/include/jubatus/core/framework', [
-      'mixable.hpp',
-      ])
