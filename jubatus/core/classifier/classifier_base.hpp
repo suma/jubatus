@@ -32,10 +32,21 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class classifier_base {
+class multiclass_classifier {
  public:
-  explicit classifier_base(jubatus::core::storage::storage_base* storage_base);
-  virtual ~classifier_base();
+  virtual ~multiclass_classifier();
+  virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
+  virtual std::string classify(const common::sfv_t& fv) const = 0;
+  virtual void classify_with_scores(const common::sfv_t& fv,
+      classify_result& scores) const = 0;
+  virtual std::string name() const = 0;
+};
+
+// abstract class
+class linear_classifier : public multiclass_classifier {
+ public:
+  explicit linear_classifier(jubatus::core::storage::storage_base* storage_base);
+  virtual ~linear_classifier();
   virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
 
   std::string classify(const common::sfv_t& fv) const;

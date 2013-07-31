@@ -26,13 +26,13 @@ namespace core {
 namespace classifier {
 
 passive_aggressive_2::passive_aggressive_2(storage::storage_base* storage)
-    : classifier_base(storage) {
+    : linear_classifier(storage) {
 }
 
 passive_aggressive_2::passive_aggressive_2(
     const classifier_config& config,
     storage::storage_base* storage)
-    : classifier_base(storage),
+    : linear_classifier(storage),
       config_(config) {
 }
 

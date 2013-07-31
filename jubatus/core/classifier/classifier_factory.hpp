@@ -38,11 +38,11 @@ class config;
 
 namespace classifier {
 
-class classifier_base;
+class multiclass_classifier;
 
 class classifier_factory {
  public:
-  static classifier_base* create_classifier(
+  static multiclass_classifier* create_classifier(
     const std::string& name,
     const common::jsonconfig::config& param,
     storage::storage_base* storage);

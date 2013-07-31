@@ -25,7 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class normal_herd : public classifier_base {
+class normal_herd : public linear_classifier {
  public:
   explicit normal_herd(storage::storage_base* storage);
   normal_herd(const classifier_config& config, storage::storage_base* storage);

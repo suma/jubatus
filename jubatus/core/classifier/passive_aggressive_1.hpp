@@ -25,7 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class passive_aggressive_1 : public classifier_base {
+class passive_aggressive_1 : public linear_classifier {
  public:
   explicit passive_aggressive_1(storage::storage_base* storage);
   passive_aggressive_1(

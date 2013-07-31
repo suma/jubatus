@@ -25,7 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class confidence_weighted : public classifier_base {
+class confidence_weighted : public linear_classifier {
  public:
   explicit confidence_weighted(storage::storage_base* storage);
   confidence_weighted(

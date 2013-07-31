@@ -29,17 +29,17 @@ namespace core {
 namespace classifier {
 
 normal_herd::normal_herd(storage::storage_base* storage)
-    : classifier_base(storage) {
-  classifier_base::use_covars_ = true;
+    : linear_classifier(storage) {
+  linear_classifier::use_covars_ = true;
   config_.C = 0.1f;
 }
 
 normal_herd::normal_herd(
     const classifier_config& config,
     storage::storage_base* storage)
-    : classifier_base(storage),
+    : linear_classifier(storage),
       config_(config) {
-  classifier_base::use_covars_ = true;
+  linear_classifier::use_covars_ = true;
 }
 
 void normal_herd::train(const common::sfv_t& sfv, const string& label) {

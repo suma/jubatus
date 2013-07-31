@@ -38,7 +38,7 @@ class classifier {
   // TODO(suma): where is the owner of model, mixer, and converter?
   classifier(
       storage::storage_base* model_storage,
-      jubatus::core::classifier::classifier_base* classifier_method,
+      jubatus::core::classifier::multiclass_classifier* classifier_method,
       pfi::lang::shared_ptr<fv_converter::datum_to_fv_converter> converter);
   virtual ~classifier();
 
@@ -60,7 +60,7 @@ class classifier {
   pfi::lang::shared_ptr<framework::mixable_holder> mixable_holder_;
 
   pfi::lang::shared_ptr<fv_converter::datum_to_fv_converter> converter_;
-  pfi::lang::shared_ptr<jubatus::core::classifier::classifier_base> classifier_;
+  pfi::lang::shared_ptr<jubatus::core::classifier::multiclass_classifier> classifier_;
   linear_function_mixer mixable_classifier_model_;
   mixable_weight_manager wm_;
 };

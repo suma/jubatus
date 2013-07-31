@@ -25,7 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class arow : public classifier_base {
+class arow : public linear_classifier {
  public:
   explicit arow(storage::storage_base* stroage);
   arow(const classifier_config& config, storage::storage_base* stroage);

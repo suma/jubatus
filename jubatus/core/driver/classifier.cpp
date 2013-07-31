@@ -39,7 +39,7 @@ namespace driver {
 
 classifier::classifier(
     storage::storage_base* model_storage,
-    jubatus::core::classifier::classifier_base* classifier_method,
+    jubatus::core::classifier::multiclass_classifier* classifier_method,
     pfi::lang::shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : mixable_holder_(new mixable_holder),
       converter_(converter),
@@ -75,7 +75,7 @@ jubatus::core::classifier::classify_result classifier::classify(
 }
 
 void classifier::clear() {
-  classifier_->clear();
+  get_model()->clear();
   wm_.clear();
 }
 

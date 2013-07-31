@@ -86,7 +86,7 @@ string get_max_label(const classify_result& result) {
 }
 }  // namespace
 
-typedef pair<core::storage::storage_base*, core::classifier::classifier_base*>
+typedef pair<core::storage::storage_base*, core::classifier::multiclass_classifier*>
   storage_pair;
 
 class classifier_test : public ::testing::TestWithParam<storage_pair> {
@@ -223,7 +223,7 @@ TEST_P(classifier_test, save_load) {
   std::string save_data;
 
   save_model(classifier_->get_mixable_holder(), save_data);
-  classifier_->clear();
+  classifier_->get_model()->clear();
   load_model(classifier_->get_mixable_holder(), save_data);
 
   my_test();

@@ -29,7 +29,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-classifier_base* classifier_factory::create_classifier(
+multiclass_classifier* classifier_factory::create_classifier(
     const std::string& name,
     const common::jsonconfig::config& param,
     jubatus::core::storage::storage_base* storage) {

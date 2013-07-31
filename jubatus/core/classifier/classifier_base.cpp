@@ -35,15 +35,18 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-classifier_base::classifier_base(storage::storage_base* storage)
+multiclass_classifier::~multiclass_classifier() {
+}
+
+linear_classifier::linear_classifier(storage::storage_base* storage)
     : storage_(storage),
       use_covars_(false) {
 }
 
-classifier_base::~classifier_base() {
+linear_classifier::~linear_classifier() {
 }
 
-void classifier_base::classify_with_scores(
+void linear_classifier::classify_with_scores(
     const common::sfv_t& sfv,
     classify_result& scores) const {
   scores.clear();
@@ -56,7 +59,7 @@ void classifier_base::classify_with_scores(
   }
 }
 
-string classifier_base::classify(const common::sfv_t& fv) const {
+string linear_classifier::classify(const common::sfv_t& fv) const {
   classify_result result;
   classify_with_scores(fv, result);
   float max_score = -FLT_MAX;
@@ -71,11 +74,11 @@ string classifier_base::classify(const common::sfv_t& fv) const {
   return max_class;
 }
 
-void classifier_base::clear() {
+void linear_classifier::clear() {
   storage_->clear();
 }
 
-void classifier_base::update_weight(
+void linear_classifier::update_weight(
     const common::sfv_t& sfv,
     float step_width,
     const string& pos_label,
@@ -83,7 +86,7 @@ void classifier_base::update_weight(
   storage_->bulk_update(sfv, step_width, pos_label, neg_label);
 }
 
-string classifier_base::get_largest_incorrect_label(
+string linear_classifier::get_largest_incorrect_label(
     const common::sfv_t& fv,
     const string& label,
     classify_result& scores) const {
@@ -103,7 +106,7 @@ string classifier_base::get_largest_incorrect_label(
   return max_class;
 }
 
-float classifier_base::calc_margin(
+float linear_classifier::calc_margin(
     const common::sfv_t& fv,
     const string& label,
     string& incorrect_label) const {
@@ -122,7 +125,7 @@ float classifier_base::calc_margin(
   return incorrect_score - correct_score;
 }
 
-float classifier_base::calc_margin_and_variance(
+float linear_classifier::calc_margin_and_variance(
     const common::sfv_t& sfv,
     const string& label,
     string& incorrect_label,
@@ -149,7 +152,7 @@ float classifier_base::calc_margin_and_variance(
   return margin;
 }
 
-float classifier_base::squared_norm(const common::sfv_t& fv) {
+float linear_classifier::squared_norm(const common::sfv_t& fv) {
   float ret = 0.f;
   for (size_t i = 0; i < fv.size(); ++i) {
     ret += fv[i].second * fv[i].second;
