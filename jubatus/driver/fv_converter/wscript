@@ -1,0 +1,121 @@
+import Options
+
+def options(opt):
+  opt.add_option('--disable-re2',
+                 action='store_true',
+                 default=False,
+                 help='do not use re2')
+def configure(conf):
+  conf.check_cxx(lib = 'dl')
+
+  if not Options.options.disable_re2:
+    conf.check_cxx(lib = 're2', define_name = 'HAVE_RE2',
+                   errmsg = 'not found (add "--disable-re2" option if not necessary)')
+
+  libpat = conf.env.cxxshlib_PATTERN
+  conf.define('LIBSPLITTER_SAMPLE', libpat % 'splitter_sample')
+  conf.define('LIBFILTER_SAMPLE', libpat % 'filter_sample')
+  conf.define('LIBNUM_FEATURE_SAMPLE', libpat % 'num_feature_sample')
+  conf.define('LIBNUM_FILTER_SAMPLE', libpat % 'num_filter_sample')
+
+def build(bld):
+  source = [
+      'util.cpp',
+      'json_converter.cpp',
+      'converter_config.cpp',
+      'key_matcher_factory.cpp',
+      'splitter_factory.cpp',
+      'num_feature_factory.cpp',
+      'string_filter_factory.cpp',
+      'num_filter_factory.cpp',
+      'dynamic_loader.cpp',
+      'dynamic_splitter.cpp',
+      'dynamic_num_feature.cpp',
+      'dynamic_string_filter.cpp',
+      'dynamic_num_filter.cpp',
+      ]
+  header = [
+      'converter_config.hpp',
+      'json_converter.hpp',
+      ]
+  use = ['PFICOMMON', 'MSGPACK', 'DL', 'jubatus_core', 'core_headers']
+
+  if bld.env.HAVE_RE2:
+    source.append('re2_match.cpp')
+    source.append('re2_filter.cpp')
+    use.append('RE2')
+
+  bld.driver_sources.extend(bld.add_prefix(source))
+  bld.driver_headers.extend(bld.add_prefix(header))
+  bld.driver_use.extend(use)
+
+  n = bld.path.get_bld().make_node('test_input')
+  n.mkdir()
+  bld(rule = 'cp ${SRC} ${TGT}',
+      source = bld.path.ant_glob('test_input/*'),
+      target = n)
+
+  bld.shlib(
+    source = 'test_splitter.cpp',
+    target = 'splitter_sample',
+    install_path = None,
+    name = 'splitter_sample',
+    use = 'core_headers'
+    )
+
+  bld.shlib(
+    source = 'test_num_feature.cpp',
+    target = 'num_feature_sample',
+    install_path = None,
+    name = 'num_feature_sample',
+    use = 'core_headers'
+    )
+
+  bld.shlib(
+    source = 'test_num_filter.cpp',
+    target = 'num_filter_sample',
+    install_path = None,
+    name = 'num_filter_sample',
+    use = 'core_headers'
+    )
+
+  bld.shlib(
+    source = 'test_string_filter.cpp',
+    target = 'filter_sample',
+    install_path = None,
+    name = 'filter_sample',
+    use = 'core_headers'
+    )
+
+
+  def make_test(t,use):
+    bld.program(
+      features='gtest',
+      source=t + '.cpp',
+      target=t,
+      includes='.',
+      use=use + ['jubatus_driver']
+      )
+
+  tests = [
+      'json_converter_test',
+      'key_matcher_factory_test',
+      'splitter_factory_test',
+      'num_feature_factory_test',
+      'string_filter_factory_test',
+      'num_filter_factory_test',
+      'converter_config_test',
+      'dynamic_splitter_test',
+      'dynamic_num_feature_test',
+      'dynamic_string_filter_test',
+      'dynamic_num_filter_test',
+      'dynamic_loader_test',
+      ]
+
+  if bld.env.HAVE_RE2:
+    tests.append('re2_match_test')
+    tests.append('re2_filter_test')
+
+  for t in tests:
+    make_test(t, use)
+

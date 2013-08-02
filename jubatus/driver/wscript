@@ -1,0 +1,55 @@
+subdirs = "fv_converter"
+
+def options(opt):
+  opt.recurse(subdirs)
+
+def configure(conf):
+  conf.recurse(subdirs)
+
+def build(bld):
+  source = [
+      'classifier.cpp',
+      'regression.cpp',
+      'recommender.cpp',
+      'stat.cpp',
+      'anomaly.cpp',
+      'graph.cpp',
+      ]
+  header = [
+      'classifier.hpp',
+      'regression.hpp',
+      'recommender.hpp',
+      'stat.hpp',
+      'anomaly.hpp',
+      'graph.hpp',
+      'diffv.hpp',
+      'plugin.hpp'
+      ]
+  use = ['PFICOMMON', 'MSGPACK', 'jubatus_core', 'core_headers']
+
+  bld.driver_sources.extend(bld.add_prefix(source))
+  bld.driver_headers.extend(bld.add_prefix(header))
+  bld.driver_use.extend(use)
+
+  def make_test(t, use):
+    bld.program(
+      features='gtest',
+      source=t + '.cpp',
+      target=t,
+      includes='.',
+      use=use + ['jubatus_driver']
+      )
+
+  tests = [
+    'anomaly_test',
+    'classifier_test',
+    'graph_test',
+    'regression_test',
+    'recommender_test',
+    'stat_test',
+    ]
+
+  for t in tests:
+    make_test(t, use)
+
+  bld.recurse(subdirs)

@@ -23,16 +23,12 @@
 #include <pficommon/lang/shared_ptr.h>
 #include <pficommon/text/json.h>
 #include "character_ngram.hpp"
-#include "converter_config.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "datum.hpp"
 #include "exception.hpp"
 #include "match_all.hpp"
 #include "num_feature_impl.hpp"
 #include "num_filter_impl.hpp"
-#ifdef HAVE_RE2
-#  include "re2_filter.hpp"
-#endif
 #include "space_splitter.hpp"
 #include "weight_manager.hpp"
 #include "without_split.hpp"
@@ -192,7 +188,6 @@ TEST(datum_to_fv_converter, weight) {
 TEST(datum_to_fv_converter, register_string_rule) {
   datum_to_fv_converter conv;
   init_weight_manager(conv);
-  initialize_converter(converter_config(), conv);
 
   std::vector<splitter_weight_type> p;
   p.push_back(splitter_weight_type(FREQ_BINARY, TERM_BINARY));
@@ -265,19 +260,6 @@ TEST(datum_to_fv_converter, register_string_filter) {
     conv.convert(datum, feature);
     EXPECT_EQ(1u, feature.size());
   }
-
-#ifdef HAVE_RE2
-  conv.register_string_filter(shared_ptr<key_matcher>(new match_all()),
-      shared_ptr<string_filter>(new re2_filter("<[^>]*>", "")),
-      "_filtered");
-
-  {
-    std::vector<std::pair<std::string, float> > feature;
-    conv.convert(datum, feature);
-    EXPECT_EQ(2u, feature.size());
-    EXPECT_EQ("/text_filtered$aaa@str#bin/bin", feature[1].first);
-  }
-#endif
 }
 
 TEST(datum_to_fv_converter, register_num_filter) {

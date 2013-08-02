@@ -1,6 +1,6 @@
 import Options
 
-subdirs = "core"
+subdirs = "core driver"
 
 def options(opt):
   opt.recurse(subdirs)

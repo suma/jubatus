@@ -6,7 +6,6 @@ import sys
 
 VERSION = '0.4.5'
 APPNAME = 'jubatus'
-CORENAME = 'jubatus_core'
 
 top = '.'
 out = 'build'
@@ -42,12 +41,10 @@ def configure(conf):
   conf.write_config_header('jubatus/config.hpp', guard="JUBATUS_CONFIG_HPP_", remove=False)
 
   conf.check_cxx(lib = 'msgpack')
-  conf.check_cxx(lib = 'dl')
 
   # pkg-config tests
   conf.find_program('pkg-config') # make sure that pkg-config command exists
   try:
-    conf.check_cfg(package = 'libglog', args = '--cflags --libs')
     conf.check_cfg(package = 'pficommon', args = '--cflags --libs')
   except conf.errors.ConfigurationError:
     e = sys.exc_info()[1]
@@ -77,20 +74,37 @@ def build(bld):
     return [os.path.join(prefix_dir, str(path)) for path in paths]
 
   bld.add_prefix = partial(add_prefix, bld)
+
   bld.core_sources = []
   bld.core_headers = []
   bld.core_use = []
+
+  bld.driver_sources = []
+  bld.driver_headers = []
+  bld.driver_use = []
+
   bld.recurse(subdirs)
 
+  # core
   bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = bld.env['JUBATUS_VERSION'])
   bld.install_files('${PREFIX}/include/', list(set(bld.core_headers)), relative_trick=True)
+  # driver
+  bld.shlib(source=list(set(bld.driver_sources)), target='jubatus_driver', use=list(set(bld.driver_use)), vnum = bld.env['JUBATUS_VERSION'])
+  bld.install_files('${PREFIX}/include/', list(set(bld.driver_headers)), relative_trick=True)
 
   bld(source = 'jubatus_core.pc.in',
       prefix = bld.env['PREFIX'],
       exec_prefix = '${prefix}',
       libdir = bld.env['LIBDIR'],
       includedir = '${prefix}/include',
-      PACKAGE = CORENAME,
+      PACKAGE = 'jubatus_core',
+      VERSION = VERSION)
+  bld(source = 'jubatus_driver.pc.in',
+      prefix = bld.env['PREFIX'],
+      exec_prefix = '${prefix}',
+      libdir = bld.env['LIBDIR'],
+      includedir = '${prefix}/include',
+      PACKAGE = 'jubatus_driver',
       VERSION = VERSION)
 
 def cpplint(ctx):

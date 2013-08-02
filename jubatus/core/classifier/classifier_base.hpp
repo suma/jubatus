@@ -45,7 +45,7 @@ class multiclass_classifier {
 // abstract class
 class linear_classifier : public multiclass_classifier {
  public:
-  explicit linear_classifier(jubatus::core::storage::storage_base* storage_base);
+  explicit linear_classifier(jubatus::core::storage::storage_base* base);
   virtual ~linear_classifier();
   virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
 
