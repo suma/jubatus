@@ -27,6 +27,7 @@
 #include "jubatus/core/framework/linear_function_mixer.hpp"
 #include "jubatus/core/framework/mixable_weight_manager.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
+#include "mixable_holder.hpp"
 
 namespace jubatus {
 namespace driver {
@@ -40,7 +41,7 @@ class classifier {
       pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter);
   virtual ~classifier();
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder> get_mixable_holder() const {
+  pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
     return mixable_holder_;
   }
 
@@ -55,7 +56,7 @@ class classifier {
   void clear();
 
  private:
-  pfi::lang::shared_ptr<core::framework::mixable_holder> mixable_holder_;
+  pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
   pfi::lang::shared_ptr<jubatus::core::classifier::multiclass_classifier>

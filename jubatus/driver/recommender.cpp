@@ -34,7 +34,6 @@ using std::string;
 using std::vector;
 using std::pair;
 using jubatus::core::common::sfv_t;
-using jubatus::core::framework::mixable_holder;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::fv_converter::weight_manager;
 using pfi::lang::shared_ptr;

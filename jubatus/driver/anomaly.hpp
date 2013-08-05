@@ -25,6 +25,7 @@
 #include "jubatus/core/framework/mixable.hpp"
 #include "jubatus/core/framework/mixable_weight_manager.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
+#include "mixable_holder.hpp"
 
 namespace jubatus {
 namespace driver {
@@ -61,7 +62,7 @@ class anomaly {
       pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter);
   virtual ~anomaly();
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder> get_mixable_holder() const {
+  pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
     return mixable_holder_;
   }
 
@@ -79,7 +80,7 @@ class anomaly {
   std::vector<std::string> get_all_rows() const;
 
  private:
-  pfi::lang::shared_ptr<core::framework::mixable_holder> mixable_holder_;
+  pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
   mixable_anomaly anomaly_;

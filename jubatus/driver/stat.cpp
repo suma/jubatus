@@ -21,8 +21,6 @@
 
 #include "jubatus/core/framework/mixable.hpp"
 
-using jubatus::core::framework::mixable_holder;
-
 namespace jubatus {
 namespace driver {
 

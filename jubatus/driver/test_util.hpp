@@ -24,6 +24,7 @@
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
 #include "jubatus/core/framework/mixable.hpp"
 #include "../driver/fv_converter/converter_config.hpp"
+#include "mixable_holder.hpp"
 
 
 pfi::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>
@@ -50,7 +51,7 @@ pfi::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>
 }
 
 void save_model(pfi::lang::shared_ptr<
-  jubatus::core::framework::mixable_holder>
+  jubatus::driver::mixable_holder>
   holder, std::string& data) {
   std::stringstream os;
   std::vector<jubatus::core::framework::mixable0*> mixables =
@@ -62,7 +63,7 @@ void save_model(pfi::lang::shared_ptr<
 }
 
 void load_model(pfi::lang::shared_ptr<
-  jubatus::core::framework::mixable_holder> holder,
+  jubatus::driver::mixable_holder> holder,
   const std::string& data) {
   std::stringstream is(data);
   std::vector<jubatus::core::framework::mixable0*> mixables =

@@ -26,6 +26,7 @@
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
 #include "jubatus/core/framework/linear_function_mixer.hpp"
 #include "jubatus/core/framework/mixable_weight_manager.hpp"
+#include "mixable_holder.hpp"
 
 namespace jubatus {
 namespace driver {
@@ -38,7 +39,7 @@ class regression {
       pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter);
   virtual ~regression();
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder> get_mixable_holder() const {
+  pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
     return mixable_holder_;
   }
 
@@ -50,7 +51,7 @@ class regression {
   float estimate(const core::fv_converter::datum& data) const;
 
  private:
-  pfi::lang::shared_ptr<core::framework::mixable_holder> mixable_holder_;
+  pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
   pfi::lang::shared_ptr<jubatus::core::regression::regression_base> regression_;

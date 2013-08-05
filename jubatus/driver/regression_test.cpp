@@ -27,6 +27,7 @@
 #include "jubatus/core/fv_converter/datum.hpp"
 #include "../driver/fv_converter/converter_config.hpp"
 #include "regression.hpp"
+#include "mixable_holder.hpp"
 
 #include "test_util.hpp"
 

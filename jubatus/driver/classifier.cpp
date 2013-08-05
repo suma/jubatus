@@ -26,13 +26,13 @@
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
 #include "jubatus/core/storage/storage_factory.hpp"
 #include "jubatus/driver/fv_converter/converter_config.hpp"
+#include "mixable_holder.hpp"
 
 using std::string;
 using std::vector;
 using std::pair;
 using jubatus::core::common::sfv_t;
 using jubatus::core::fv_converter::datum;
-using jubatus::core::framework::mixable_holder;
 using jubatus::core::fv_converter::weight_manager;
 
 namespace jubatus {

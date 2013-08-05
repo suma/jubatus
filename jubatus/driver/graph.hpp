@@ -25,6 +25,7 @@
 #include "jubatus/core/graph/graph_type.hpp"
 #include "jubatus/core/graph/graph_wo_index.hpp"
 #include "jubatus/core/framework/mixable.hpp"
+#include "mixable_holder.hpp"
 
 namespace jubatus {
 namespace driver {
@@ -63,7 +64,7 @@ class graph {
   explicit graph(jubatus::core::graph::graph_base* graph_method);
   virtual ~graph();
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder> get_mixable_holder() const {
+  pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
     return mixable_holder_;
   }
 
@@ -115,7 +116,7 @@ class graph {
       const jubatus::core::graph::property& p);
 
  private:
-  pfi::lang::shared_ptr<core::framework::mixable_holder> mixable_holder_;
+  pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 
   mixable_graph graph_;
 };

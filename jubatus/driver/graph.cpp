@@ -29,7 +29,6 @@
 using std::string;
 using std::vector;
 using std::pair;
-using jubatus::core::framework::mixable_holder;
 using jubatus::core::graph::node_id_t;
 using jubatus::core::graph::edge_id_t;
 using jubatus::core::graph::preset_query;
