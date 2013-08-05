@@ -21,33 +21,33 @@
 #include <pficommon/text/json.h>
 
 #include "regression_factory.hpp"
-#include "regression.hpp"
-#include "../storage/local_storage.hpp"
-#include "../common/exception.hpp"
-#include "../common/jsonconfig.hpp"
+#include "jubatus/core/regression/regression.hpp"
+#include "jubatus/core/storage/local_storage.hpp"
+#include "jubatus/core/common/exception.hpp"
+#include "jubatus/core/common/jsonconfig.hpp"
+
+using jubatus::core::storage::local_storage;
+using jubatus::core::regression::regression_base;
+using jubatus::core::regression::passive_aggressive;
 
 namespace jubatus {
-namespace core {
-namespace regression {
+namespace driver {
 
 TEST(regression_factory, trivial) {
-  regression::regression_factory f;
-  storage::local_storage s;
-  common::jsonconfig::config param(pfi::text::json::to_json(
-      regression::passive_aggressive::config()));
-  pfi::lang::scoped_ptr<regression::regression_base>
-    r(f.create_regression("PA", param, &s));
-  EXPECT_EQ(typeid(*r), typeid(regression::passive_aggressive&));
+  local_storage s;
+  core::common::jsonconfig::config param(pfi::text::json::to_json(
+      passive_aggressive::config()));
+  pfi::lang::scoped_ptr<regression_base>
+    r(regression_factory::create_regression("PA", param, &s));
+  EXPECT_EQ(typeid(*r), typeid(passive_aggressive&));
 }
 
 TEST(regression_factory, unknown) {
-  regression::regression_factory f;
-  storage::local_storage s;
-  common::jsonconfig::config param;
-  ASSERT_THROW(f.create_regression("unknown_regression", param, &s),
-               common::unsupported_method);
+  local_storage s;
+  core::common::jsonconfig::config param;
+  ASSERT_THROW(regression_factory::create_regression("unknown_regression", param, &s),
+               core::common::unsupported_method);
 }
 
-}  // namespace regression
-}  // namespace core
+}  // namespace driver
 }  // namespace jubatus

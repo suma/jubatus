@@ -17,21 +17,23 @@
 #include "anomaly_factory.hpp"
 
 #include <string>
-
 #include <pficommon/text/json.h>
 
-#include "../common/exception.hpp"
-#include "../common/jsonconfig.hpp"
-#include "anomaly.hpp"
+#include "jubatus/core/anomaly/anomaly.hpp"
+#include "jubatus/core/common/exception.hpp"
+#include "jubatus/core/common/jsonconfig.hpp"
+#include "recommender_factory.hpp"
 
+using jubatus::core::anomaly::anomaly_base;
+using jubatus::core::anomaly::lof;
+using jubatus::core::storage::lof_storage;
 using jubatus::core::common::jsonconfig::config;
 using jubatus::core::common::jsonconfig::config_cast_check;
 using pfi::text::json::json;
 using std::string;
 
 namespace jubatus {
-namespace core {
-namespace anomaly {
+namespace driver {
 
 namespace {
 struct anomaly_config {
@@ -50,19 +52,18 @@ anomaly_base* anomaly_factory::create_anomaly(
     const config& param) {
   if (name == "lof") {
     anomaly_config conf = config_cast_check<anomaly_config>(param);
-    storage::lof_storage::config config =
-        config_cast_check<storage::lof_storage::config>(param);
+    lof_storage::config config =
+        config_cast_check<lof_storage::config>(param);
     return new lof(
         config,
-        recommender::recommender_factory::create_recommender(
+        recommender_factory::create_recommender(
             conf.method,
             conf.parameter));
   } else {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(name));
+    throw JUBATUS_EXCEPTION(jubatus::core::common::unsupported_method(name));
   }
 };
 
-}  // namespace anomaly
-}  // namespace core
+}  // namespace driver
 }  // namespace jubatus
 

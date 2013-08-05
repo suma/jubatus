@@ -22,7 +22,6 @@
 
 #include <pficommon/lang/shared_ptr.h>
 
-#include "jubatus/core/anomaly/anomaly_factory.hpp"
 #include "jubatus/core/common/vector_util.hpp"
 #include "jubatus/core/fv_converter/datum.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"

@@ -14,32 +14,33 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "storage_factory.hpp"
+#ifndef JUBATUS_DRIVER_RECOMMENDER_FACTORY_HPP_
+#define JUBATUS_DRIVER_RECOMMENDER_FACTORY_HPP_
 
 #include <string>
 
-#include "../common/exception.hpp"
-#include "storage_base.hpp"
-#include "local_storage.hpp"
-#include "local_storage_mixture.hpp"
-
 namespace jubatus {
 namespace core {
-namespace storage {
-
-storage_base* storage_factory::create_storage(const std::string& name) {
-  if (name == "local") {
-    return static_cast<storage_base*>(new local_storage);
-  } else if (name == "local_mixture") {
-    return static_cast<storage_base*>(new local_storage_mixture);
-  }
-
-  // maybe bug or configuration mistake
-  throw JUBATUS_EXCEPTION(
-      jubatus::core::common::exception::runtime_error(
-          std::string("failed to create storage: ") + name));
-}
-
-}  // namespace storage
+namespace common {
+namespace jsonconfig {
+class config;
+}  // namespace jsonconfig
+}  // namespace common
+namespace recommender {
+class recommender_base;
+}  // namespace recommender
 }  // namespace core
+
+namespace driver {
+
+class recommender_factory {
+ public:
+  static core::recommender::recommender_base* create_recommender(
+      const std::string& name,
+      const core::common::jsonconfig::config& param);
+};
+
+}  // namespace driver
 }  // namespace jubatus
+
+#endif  // JUBATUS_DRIVER_RECOMMENDER_FACTORY_HPP_

@@ -8,11 +8,9 @@ def build(bld):
   source = [
       'regression_base.cpp',
       'passive_aggressive.cpp',
-      'regression_factory.cpp'
       ]
   headers = [
       'regression_base.hpp',
-      'regression_factory.hpp',
       'regression.hpp',
       'passive_aggressive.hpp',
       ]
@@ -32,12 +30,6 @@ def build(bld):
 
   test_source = [
       'regression_test.cpp',
-      'regression_factory_test.cpp',
       ]
   for s in test_source:
       make_test(s)
-
-  bld.install_files('${PREFIX}/include/jubatus/core/regression', [
-      'regression_base.hpp',
-      'regression_factory.hpp',
-      ])

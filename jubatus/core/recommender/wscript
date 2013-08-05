@@ -11,13 +11,11 @@ def build(bld):
       'inverted_index.cpp',
       'minhash.cpp',
       'lsh.cpp',
-      'recommender_factory.cpp',
       'lsh_util.cpp',
       'euclid_lsh.cpp',
       ]
   header = [
       'recommender_base.hpp',
-      'recommender_factory.hpp',
       'recommender_type.hpp',
       'recommender.hpp',
       'euclid_lsh.hpp',

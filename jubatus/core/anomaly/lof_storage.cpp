@@ -26,9 +26,7 @@
 
 #include "anomaly_type.hpp"
 #include "../common/exception.hpp"
-#include "../common/jsonconfig.hpp"
 #include "../recommender/euclid_lsh.hpp"
-#include "../recommender/recommender_factory.hpp"
 
 using jubatus::core::storage::lof_storage;
 using pfi::data::serialization::binary_iarchive;
@@ -61,10 +59,8 @@ lof_storage::config::config()
 lof_storage::lof_storage()
     : neighbor_num_(DEFAULT_NEIGHBOR_NUM),
       reverse_nn_num_(DEFAULT_REVERSE_NN_NUM),
-      nn_engine_(recommender::recommender_factory::create_recommender(
-          "euclid_lsh",
-          common::jsonconfig::config(pfi::text::json::to_json(
-              recommender::euclid_lsh::config())))) {
+      nn_engine_(
+          new recommender::euclid_lsh(recommender::euclid_lsh::config())) {
 }
 
 lof_storage::lof_storage(recommender::recommender_base* nn_engine)

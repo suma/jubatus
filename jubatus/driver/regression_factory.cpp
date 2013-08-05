@@ -19,29 +19,30 @@
 #include <stdexcept>
 #include <string>
 
-#include "regression.hpp"
-#include "../common/exception.hpp"
-#include "../common/jsonconfig.hpp"
+#include "jubatus/core/regression/regression.hpp"
+#include "jubatus/core/common/exception.hpp"
+#include "jubatus/core/common/jsonconfig.hpp"
 
 using jubatus::core::common::jsonconfig::config_cast_check;
+using jubatus::core::regression::regression_base;
+using jubatus::core::regression::passive_aggressive;
+using jubatus::core::storage::storage_base;
 
 namespace jubatus {
-namespace core {
-namespace regression {
+namespace driver {
 
 regression_base* regression_factory::create_regression(
     const std::string& name,
-    const common::jsonconfig::config& param,
-    jubatus::core::storage::storage_base* storage) {
+    const core::common::jsonconfig::config& param,
+    storage_base* storage) {
   if (name == "PA" || name == "passive_aggressive") {
-    return new regression::passive_aggressive(
-      config_cast_check<regression::passive_aggressive::config>(param),
+    return new passive_aggressive(
+      config_cast_check<passive_aggressive::config>(param),
       storage);
   } else {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(name));
+    throw JUBATUS_EXCEPTION(core::common::unsupported_method(name));
   }
 }
 
-}  // namespace regression
-}  // namespace core
+}  // namespace driver
 }  // namespace jubatus

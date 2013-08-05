@@ -18,7 +18,6 @@ def make_tests(bld, srcs):
 
 def build(bld):
   source = [
-      'storage_factory.cpp',
       'storage_base.cpp',
       'local_storage.cpp',
       'local_storage_mixture.cpp',
@@ -32,7 +31,6 @@ def build(bld):
   header = [
       'storage_base.hpp',
       'storage_type.hpp',
-      'storage_factory.hpp',
       'bit_vector.hpp',
       'sparse_matrix_storage.hpp',
       'recommender_storage_base.hpp',
@@ -47,7 +45,6 @@ def build(bld):
 
   make_tests(bld, [
       'storage_test.cpp',
-      'storage_factory_test.cpp',
       'local_storage_mixture_test.cpp',
       'sparse_matrix_storage_test.cpp',
       'fixed_size_heap_test.cpp',

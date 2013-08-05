@@ -7,11 +7,9 @@ def build(bld):
   source = [
     'graph_base.cpp',
     'graph_wo_index.cpp',
-    'graph_factory.cpp'
     ]
   header = [
       'graph_base.hpp',
-      'graph_factory.hpp',
       'graph_type.hpp',
       'graph_wo_index.hpp',
       ]

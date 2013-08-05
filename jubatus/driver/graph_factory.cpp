@@ -14,34 +14,32 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_GRAPH_GRAPH_FACTORY_HPP_
-#define JUBATUS_CORE_GRAPH_GRAPH_FACTORY_HPP_
-
+#include <stdexcept>
 #include <string>
 
+#include "graph_factory.hpp"
+#include "jubatus/core/graph/graph.hpp"
+#include "jubatus/core/common/exception.hpp"
+#include "jubatus/core/common/jsonconfig.hpp"
+
+using jubatus::core::common::jsonconfig::config_cast_check;
+using jubatus::core::graph::graph_base;
+using jubatus::core::graph::graph_wo_index;
+using jubatus::core::graph::unknown_graph;
+
 namespace jubatus {
-namespace core {
-namespace common {
-namespace jsonconfig {
+namespace driver {
 
-class config;
-
-}  // namespace jsonconfig
-}  // namespace common
-
-namespace graph {
-
-class graph_base;
-
-class graph_factory {
- public:
-  static graph_base* create_graph(
+graph_base* graph_factory::create_graph(
     const std::string& name,
-    const common::jsonconfig::config& param);
-};
+    const core::common::jsonconfig::config& param) {
+  if (name == "graph_wo_index") {
+    return new graph_wo_index(
+      config_cast_check<graph_wo_index::config>(param));
+  } else {
+    throw JUBATUS_EXCEPTION(unknown_graph(name));
+  }
+}
 
-}  // namespace graph
-}  // namespace core
+}  // namespace driver
 }  // namespace jubatus
-
-#endif  // JUBATUS_CORE_GRAPH_GRAPH_FACTORY_HPP_

@@ -31,7 +31,6 @@
 #include "anomaly_storage_base.hpp"
 #include "../common/type.hpp"
 #include "../recommender/recommender_base.hpp"
-#include "../recommender/recommender_factory.hpp"
 
 namespace jubatus {
 namespace core {

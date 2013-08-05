@@ -13,11 +13,9 @@ def build(bld):
       'confidence_weighted.cpp',
       'arow.cpp',
       'normal_herd.cpp',
-      'classifier_factory.cpp',
       ]
   headers = [
       'classifier_base.hpp',
-      'classifier_factory.hpp',
       'classifier_type.hpp',
       'classifier_config.hpp',
       'classifier.hpp',
@@ -39,7 +37,6 @@ def build(bld):
      features = 'gtest',
      source = [
          'classifier_test.cpp',
-         'classifier_factory.cpp'
      ],
      target = "classifier_test",
      includes = '.',

@@ -14,6 +14,12 @@ def build(bld):
       'stat.cpp',
       'anomaly.cpp',
       'graph.cpp',
+      'anomaly_factory.cpp',
+      'classifier_factory.cpp',
+      'recommender_factory.cpp',
+      'regression_factory.cpp',
+      'graph_factory.cpp',
+      'storage_factory.cpp',
       ]
   header = [
       'classifier.hpp',
@@ -24,6 +30,12 @@ def build(bld):
       'graph.hpp',
       'diffv.hpp',
       'plugin.hpp'
+      'anomaly_factory.hpp',
+      'classifier_factory.hpp',
+      'recommender_factory.hpp',
+      'regression_factory.hpp',
+      'graph_factory.hpp',
+      'storage_factory.hpp',
       ]
   use = ['PFICOMMON', 'MSGPACK', 'jubatus_core', 'core_headers']
 
@@ -47,6 +59,7 @@ def build(bld):
     'regression_test',
     'recommender_test',
     'stat_test',
+    'regression_factory_test',
     ]
 
   for t in tests:

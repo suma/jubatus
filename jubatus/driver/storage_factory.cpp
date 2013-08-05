@@ -14,42 +14,34 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_CLASSIFIER_CLASSIFIER_FACTORY_HPP_
-#define JUBATUS_CORE_CLASSIFIER_CLASSIFIER_FACTORY_HPP_
+#include "storage_factory.hpp"
 
 #include <string>
-#include <pficommon/text/json.h>
+
+#include "jubatus/core/common/exception.hpp"
+#include "jubatus/core/storage/storage_base.hpp"
+#include "jubatus/core/storage/local_storage.hpp"
+#include "jubatus/core/storage/local_storage_mixture.hpp"
+
+using jubatus::core::storage::storage_base;
+using jubatus::core::storage::local_storage;
+using jubatus::core::storage::local_storage_mixture;
 
 namespace jubatus {
-namespace core {
-namespace storage {
+namespace driver {
 
-class storage_base;
+storage_base* storage_factory::create_storage(const std::string& name) {
+  if (name == "local") {
+    return static_cast<storage_base*>(new local_storage);
+  } else if (name == "local_mixture") {
+    return static_cast<storage_base*>(new local_storage_mixture);
+  }
 
-}  // namespace storage
+  // maybe bug or configuration mistake
+  throw JUBATUS_EXCEPTION(
+      jubatus::core::common::exception::runtime_error(
+          std::string("failed to create storage: ") + name));
+}
 
-namespace common {
-namespace jsonconfig {
-
-class config;
-
-}  // namespace jsonconfig
-}  // namespace common
-
-namespace classifier {
-
-class multiclass_classifier;
-
-class classifier_factory {
- public:
-  static multiclass_classifier* create_classifier(
-    const std::string& name,
-    const common::jsonconfig::config& param,
-    storage::storage_base* storage);
-};
-
-}  // namespace classifier
-}  // namespace core
+}  // namespace driver
 }  // namespace jubatus
-
-#endif  // JUBATUS_CORE_CLASSIFIER_CLASSIFIER_FACTORY_HPP_

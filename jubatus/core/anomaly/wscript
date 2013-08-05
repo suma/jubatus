@@ -6,14 +6,12 @@ def configure(ctx):
 
 def build(bld):
   source = [
-    'anomaly_base.cpp',
-    'anomaly_factory.cpp',
-    'lof.cpp',
-    'lof_storage.cpp',
-    ]
+      'anomaly_base.cpp',
+      'lof.cpp',
+      'lof_storage.cpp',
+      ]
   headers = [
       'anomaly_base.hpp',
-      'anomaly_factory.hpp',
       'anomaly_type.hpp',
       'anomaly_storage_base.hpp',
       'lof.hpp',

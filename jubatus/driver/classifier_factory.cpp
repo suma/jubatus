@@ -18,21 +18,30 @@
 
 #include <string>
 
-#include "classifier.hpp"
-#include "../common/exception.hpp"
-#include "../common/jsonconfig.hpp"
-#include "../storage/storage_base.hpp"
+#include "jubatus/core/classifier/classifier.hpp"
+#include "jubatus/core/common/exception.hpp"
+#include "jubatus/core/common/jsonconfig.hpp"
+#include "jubatus/core/storage/storage_base.hpp"
 
 using jubatus::core::common::jsonconfig::config_cast_check;
+using jubatus::core::classifier::multiclass_classifier;
+using jubatus::core::classifier::classifier_config;
+using jubatus::core::classifier::perceptron;
+using jubatus::core::classifier::passive_aggressive;
+using jubatus::core::classifier::passive_aggressive_1;
+using jubatus::core::classifier::passive_aggressive_2;
+using jubatus::core::classifier::confidence_weighted;
+using jubatus::core::classifier::arow;
+using jubatus::core::classifier::normal_herd;
+using jubatus::core::storage::storage_base;
 
 namespace jubatus {
-namespace core {
-namespace classifier {
+namespace driver {
 
 multiclass_classifier* classifier_factory::create_classifier(
     const std::string& name,
-    const common::jsonconfig::config& param,
-    jubatus::core::storage::storage_base* storage) {
+    const core::common::jsonconfig::config& param,
+    storage_base* storage) {
   if (name == "perceptron") {
     // perceptron doesn't have parameter
     return new perceptron(storage);
@@ -54,10 +63,9 @@ multiclass_classifier* classifier_factory::create_classifier(
     return new normal_herd(
         config_cast_check<classifier_config>(param), storage);
   } else {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(name));
+    throw JUBATUS_EXCEPTION(core::common::unsupported_method(name));
   }
 }
 
-}  // namespace classifier
-}  // namespace core
+}  // namespace driver
 }  // namespace jubatus

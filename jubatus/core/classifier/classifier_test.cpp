@@ -24,7 +24,6 @@
 #include <gtest/gtest.h>
 #include <pficommon/lang/cast.h>
 
-#include "classifier_factory.hpp"
 #include "classifier.hpp"
 #include "../storage/local_storage.hpp"
 #include "../common/exception.hpp"
@@ -146,18 +145,6 @@ typedef testing::Types<
   classifier_types;
 
 INSTANTIATE_TYPED_TEST_CASE_P(cl, classifier_test, classifier_types);
-
-TEST(classifier_factory, exception) {
-  common::jsonconfig::config param(to_json(classifier_config()));
-  local_storage* p = new local_storage;
-  ASSERT_THROW(classifier_factory::create_classifier("pa", param, p),
-      common::unsupported_method);
-  ASSERT_THROW(classifier_factory::create_classifier("", param, p),
-      common::unsupported_method);
-  ASSERT_THROW(classifier_factory::create_classifier("saitama", param, p),
-      common::unsupported_method);
-  delete p;
-}
 
 }  // namespace classifier
 }  // namespace core
