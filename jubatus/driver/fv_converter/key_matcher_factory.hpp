@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_
-#define JUBATUS_CORE_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_
+#ifndef JUBATUS_DRIVER_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_
+#define JUBATUS_DRIVER_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_
 
 #include <string>
 #include "jubatus/core/fv_converter/key_matcher.hpp"
@@ -33,4 +33,4 @@ class key_matcher_factory {
 }  // namespace driver
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_
+#endif  // JUBATUS_DRIVER_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_

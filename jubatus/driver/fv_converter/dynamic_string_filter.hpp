@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_FV_CONVERTER_DYNAMIC_STRING_FILTER_HPP_
-#define JUBATUS_CORE_FV_CONVERTER_DYNAMIC_STRING_FILTER_HPP_
+#ifndef JUBATUS_DRIVER_FV_CONVERTER_DYNAMIC_STRING_FILTER_HPP_
+#define JUBATUS_DRIVER_FV_CONVERTER_DYNAMIC_STRING_FILTER_HPP_
 
 #include <map>
 #include <string>
@@ -45,4 +45,4 @@ class dynamic_string_filter : public core::fv_converter::string_filter {
 }  // namespace driver
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_FV_CONVERTER_DYNAMIC_STRING_FILTER_HPP_
+#endif  // JUBATUS_DRIVER_FV_CONVERTER_DYNAMIC_STRING_FILTER_HPP_

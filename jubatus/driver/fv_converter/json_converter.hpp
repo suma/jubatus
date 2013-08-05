@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_FV_CONVERTER_JSON_CONVERTER_HPP_
-#define JUBATUS_CORE_FV_CONVERTER_JSON_CONVERTER_HPP_
+#ifndef JUBATUS_DRIVER_FV_CONVERTER_JSON_CONVERTER_HPP_
+#define JUBATUS_DRIVER_FV_CONVERTER_JSON_CONVERTER_HPP_
 
 #include "jubatus/core/fv_converter/datum.hpp"
 
@@ -43,4 +43,4 @@ class json_converter {
 }  // namespace driver
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_FV_CONVERTER_JSON_CONVERTER_HPP_
+#endif  // JUBATUS_DRIVER_FV_CONVERTER_JSON_CONVERTER_HPP_
