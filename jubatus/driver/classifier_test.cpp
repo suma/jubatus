@@ -103,7 +103,7 @@ class classifier_test : public ::testing::TestWithParam<storage_pair> {
 
   void my_test();
 
-  pfi::lang::shared_ptr<core::driver::classifier> classifier_;
+  pfi::lang::shared_ptr<classifier> classifier_;
 };
 
 TEST_P(classifier_test, simple) {
@@ -314,5 +314,4 @@ INSTANTIATE_TEST_CASE_P(classifier_test_instance,
 
 
 }  // driver namespace
-}  // core namespace
 }  // jubatus namespace

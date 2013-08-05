@@ -44,7 +44,7 @@ class anomaly_test : public ::testing::Test {
     lsh_config.bin_width = 8.2;
     lsh_config.seed = 1234;
 
-    anomaly_.reset(new driver::anomaly(
+    anomaly_.reset(new anomaly(
           new core::anomaly::lof(lof_config,
             new core::recommender::euclid_lsh(lsh_config)),
         make_fv_converter()));
@@ -54,7 +54,7 @@ class anomaly_test : public ::testing::Test {
     anomaly_.reset();
   }
 
-  pfi::lang::shared_ptr<core::driver::anomaly> anomaly_;
+  pfi::lang::shared_ptr<anomaly> anomaly_;
 };
 
 TEST_F(anomaly_test, small) {
@@ -92,5 +92,4 @@ TEST_F(anomaly_test, small) {
 }
 
 }  // driver namespace
-}  // core namespace
 }  // jubatus namespace

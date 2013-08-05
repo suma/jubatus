@@ -24,6 +24,9 @@
 #endif
 #include "string_filter_factory.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+using jubatus::core::fv_converter::string_filter;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

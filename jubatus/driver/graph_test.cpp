@@ -40,7 +40,7 @@ class graph_test : public ::testing::Test {
     core::graph::graph_wo_index::config config;
     config.alpha = 0.9f;
     config.landmark_num = 5;
-    graph_.reset(new core::driver::graph(
+    graph_.reset(new graph(
           new core::graph::graph_wo_index(config)));
   }
 
@@ -48,7 +48,7 @@ class graph_test : public ::testing::Test {
     graph_.reset();
   }
 
-  pfi::lang::shared_ptr<core::driver::graph> graph_;
+  pfi::lang::shared_ptr<graph> graph_;
 };
 
 TEST_F(graph_test, simple) {
@@ -134,5 +134,4 @@ TEST_F(graph_test, simple) {
 }
 
 }  // driver namespace
-}  // core namespace
 }  // jubatus namespace

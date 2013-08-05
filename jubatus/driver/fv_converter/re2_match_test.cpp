@@ -18,6 +18,8 @@
 #include "jubatus/core/fv_converter/exception.hpp"
 #include "re2_match.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

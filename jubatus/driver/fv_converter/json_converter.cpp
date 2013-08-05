@@ -28,6 +28,7 @@ using pfi::text::json::json_integer;
 using pfi::text::json::json_null;
 using pfi::text::json::json_object;
 using pfi::text::json::json_string;
+using jubatus::core::fv_converter::datum;
 
 namespace jubatus {
 namespace driver {

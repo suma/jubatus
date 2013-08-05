@@ -28,14 +28,14 @@ class stat_test : public ::testing::Test {
  protected:
   virtual void SetUp() {
     const int32_t window_size = 128;
-    stat_.reset(new core::driver::stat(new core::stat::stat(window_size)));
+    stat_.reset(new stat(new core::stat::stat(window_size)));
   }
 
   virtual void TearDown() {
     stat_.reset();
   }
 
-  pfi::lang::shared_ptr<core::driver::stat> stat_;
+  pfi::lang::shared_ptr<stat> stat_;
 };
 
 TEST_F(stat_test, small) {
@@ -55,5 +55,4 @@ TEST_F(stat_test, small) {
 }
 
 }  // driver namespace
-}  // core namespace
 }  // jubatus namespace

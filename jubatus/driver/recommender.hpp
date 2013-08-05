@@ -58,7 +58,7 @@ class recommender {
  public:
   recommender(
       jubatus::core::recommender::recommender_base* recommender_method,
-      pfi::lang::shared_ptr<datum_to_fv_converter> converter);
+      pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter);
   virtual ~recommender();
 
   pfi::lang::shared_ptr<core::framework::mixable_holder> get_mixable_holder() const {
@@ -89,7 +89,7 @@ class recommender {
  private:
   pfi::lang::shared_ptr<core::framework::mixable_holder> mixable_holder_;
 
-  pfi::lang::shared_ptr<datum_to_fv_converter> converter_;
+  pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
   mixable_recommender recommender_;
   core::framework::mixable_weight_manager wm_;
 };

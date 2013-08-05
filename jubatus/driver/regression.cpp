@@ -43,7 +43,7 @@ regression::regression(
       converter_(converter),
       regression_(regression_method) {
   mixable_regression_model_.set_model(
-      core::linear_function_mixer::model_ptr(model_storage));
+      core::framework::linear_function_mixer::model_ptr(model_storage));
   wm_.set_model(core::framework::mixable_weight_manager::model_ptr(new weight_manager));
 
   mixable_holder_->register_mixable(&mixable_regression_model_);
@@ -61,8 +61,7 @@ void regression::train(const pair<float, datum>& data) {
   regression_->train(v, data.first);
 }
 
-float regression::estimate(
-    const fv_converter::datum& data) const {
+float regression::estimate(const datum& data) const {
   sfv_t v;
   converter_->convert(data, v);
   float value = regression_->estimate(v);

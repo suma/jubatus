@@ -17,6 +17,8 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_JSON_CONVERTER_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_JSON_CONVERTER_HPP_
 
+#include "jubatus/core/fv_converter/datum.hpp"
+
 namespace pfi {
 namespace text {
 namespace json {
@@ -29,13 +31,12 @@ namespace jubatus {
 namespace driver {
 namespace fv_converter {
 
-struct datum;
-
 class json_converter {
  public:
   static const char* NULL_STRING;
 
-  static void convert(const pfi::text::json::json& jason, datum& ret_datum);
+  static void convert(const pfi::text::json::json& jason,
+      core::fv_converter::datum& ret_datum);
 };
 
 }  // namespace fv_converter

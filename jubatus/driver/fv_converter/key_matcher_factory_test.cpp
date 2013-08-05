@@ -20,6 +20,9 @@
 #include "jubatus/core/fv_converter/key_matcher.hpp"
 #include "key_matcher_factory.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+using jubatus::core::fv_converter::key_matcher;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

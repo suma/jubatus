@@ -24,6 +24,8 @@
 #include "jubatus/core/fv_converter/exception.hpp"
 #include "dynamic_splitter.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

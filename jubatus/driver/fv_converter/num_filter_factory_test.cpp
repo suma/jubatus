@@ -22,6 +22,10 @@
 #include "jubatus/core/fv_converter/num_filter_impl.hpp"
 #include "num_filter_factory.hpp"
 
+using jubatus::core::fv_converter::add_filter;
+using jubatus::core::fv_converter::converter_exception;
+using jubatus::core::fv_converter::num_filter;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

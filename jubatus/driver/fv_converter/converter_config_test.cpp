@@ -27,6 +27,9 @@
 
 using std::string;
 using pfi::data::optional;
+using jubatus::core::fv_converter::datum;
+using jubatus::core::fv_converter::converter_exception;
+using jubatus::core::fv_converter::datum_to_fv_converter;
 
 namespace jubatus {
 namespace driver {
@@ -106,19 +109,19 @@ TEST(converter_config, hash_negative) {
 }
 
 TEST(make_fv_converter, empty) {
-  EXPECT_THROW(make_fv_converter(""), fv_converter::converter_exception);
+  EXPECT_THROW(make_fv_converter(""), converter_exception);
 }
 
 TEST(make_fv_converter, invalid_config_json) {
-  EXPECT_THROW(make_fv_converter("{"), fv_converter::converter_exception);
+  EXPECT_THROW(make_fv_converter("{"), converter_exception);
 }
 
 TEST(make_fv_converter, config_json_parse_error) {
-  EXPECT_THROW(make_fv_converter("AA"), fv_converter::converter_exception);
+  EXPECT_THROW(make_fv_converter("AA"), converter_exception);
 }
 
 TEST(make_fv_converter, config_cast_error) {
-  EXPECT_THROW(make_fv_converter("{}"), fv_converter::converter_exception);
+  EXPECT_THROW(make_fv_converter("{}"), converter_exception);
 }
 
 }  // namespace fv_converter

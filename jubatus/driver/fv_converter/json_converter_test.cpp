@@ -24,6 +24,7 @@
 #include "json_converter.hpp"
 
 using pfi::text::json::json;
+using jubatus::core::fv_converter::datum;
 
 namespace jubatus {
 namespace driver {

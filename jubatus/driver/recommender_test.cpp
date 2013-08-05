@@ -57,7 +57,7 @@ class recommender_test : public ::testing::Test {
     recommender_.reset();
   }
 
-  pfi::lang::shared_ptr<core::driver::recommender> recommender_;
+  pfi::lang::shared_ptr<recommender> recommender_;
 };
 
 

@@ -21,6 +21,8 @@
 #include "jubatus/core/fv_converter/string_filter.hpp"
 #include "jubatus/core/fv_converter/exception.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

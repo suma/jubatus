@@ -24,6 +24,9 @@
 #include "jubatus/core/fv_converter/word_splitter.hpp"
 #include "splitter_factory.hpp"
 
+using jubatus::core::fv_converter::word_splitter;
+using jubatus::core::fv_converter::converter_exception;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

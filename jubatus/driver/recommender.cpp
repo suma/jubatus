@@ -44,13 +44,13 @@ namespace driver {
 
 recommender::recommender(
     jubatus::core::recommender::recommender_base* recommender_method,
-    pfi::lang::shared_ptr<fv_converter::datum_to_fv_converter> converter)
+    pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter)
     : mixable_holder_(new mixable_holder),
       converter_(converter) {
   pfi::lang::shared_ptr<jubatus::core::recommender::recommender_base>
       recommender_method_p(recommender_method);
   recommender_.set_model(recommender_method_p);
-  wm_.set_model(mixable_weight_manager::model_ptr(new weight_manager));
+  wm_.set_model(core::framework::mixable_weight_manager::model_ptr(new weight_manager));
 
   mixable_holder_->register_mixable(&recommender_);
   mixable_holder_->register_mixable(&wm_);
@@ -83,7 +83,7 @@ datum recommender::complete_row_from_id(const std::string& id) {
   recommender_.get_model()->complete_row(id, v);
 
   datum ret;
-  fv_converter::revert_feature(v, ret);
+  core::fv_converter::revert_feature(v, ret);
   return ret;
 }
 
@@ -94,7 +94,7 @@ datum recommender::complete_row_from_datum(
   recommender_.get_model()->complete_row(u, v);
 
   datum ret;
-  fv_converter::revert_feature(v, ret);
+  core::fv_converter::revert_feature(v, ret);
   return ret;
 }
 
@@ -138,7 +138,7 @@ datum recommender::decode_row(const std::string& id) {
   recommender_.get_model()->decode_row(id, v);
 
   datum ret;
-  fv_converter::revert_feature(v, ret);
+  core::fv_converter::revert_feature(v, ret);
   return ret;
 }
 

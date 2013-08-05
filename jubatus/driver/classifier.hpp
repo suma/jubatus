@@ -60,7 +60,7 @@ class classifier {
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
   pfi::lang::shared_ptr<jubatus::core::classifier::multiclass_classifier>
     classifier_;
-  core::framework::framework::linear_function_mixer mixable_classifier_model_;
+  core::framework::linear_function_mixer mixable_classifier_model_;
   core::framework::mixable_weight_manager wm_;
 };
 

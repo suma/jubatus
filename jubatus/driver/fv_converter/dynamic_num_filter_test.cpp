@@ -20,6 +20,8 @@
 #include "jubatus/core/fv_converter/exception.hpp"
 #include "dynamic_num_filter.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {

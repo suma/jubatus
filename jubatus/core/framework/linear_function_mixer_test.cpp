@@ -104,7 +104,6 @@ class storage_mock_1 : public storage_mock_base {
 
 }  // namespace storage
 
-namespace core {
 namespace framework {
 
 TEST(linear_function_mixer, diff) {

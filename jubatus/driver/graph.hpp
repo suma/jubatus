@@ -25,7 +25,6 @@
 #include "jubatus/core/graph/graph_type.hpp"
 #include "jubatus/core/graph/graph_wo_index.hpp"
 #include "jubatus/core/framework/mixable.hpp"
-#include "linear_function_mixer.hpp"
 
 namespace jubatus {
 namespace driver {

@@ -50,7 +50,7 @@ class regression_test : public ::testing::Test {
     config.C = std::numeric_limits<float>::max();
     config.epsilon = 0.1f;
     regression_.reset(
-      new core::driver::regression(
+      new regression(
         storage,
         new core::regression::passive_aggressive(config, storage),
         make_fv_converter()));
@@ -62,7 +62,7 @@ class regression_test : public ::testing::Test {
 
   void my_test();
 
-  pfi::lang::shared_ptr<core::driver::regression> regression_;
+  pfi::lang::shared_ptr<regression> regression_;
 };
 
 datum convert_vector(const vector<double>& vec) {

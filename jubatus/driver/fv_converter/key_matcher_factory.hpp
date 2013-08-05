@@ -18,16 +18,15 @@
 #define JUBATUS_CORE_FV_CONVERTER_KEY_MATCHER_FACTORY_HPP_
 
 #include <string>
+#include "jubatus/core/fv_converter/key_matcher.hpp"
 
 namespace jubatus {
 namespace driver {
 namespace fv_converter {
 
-class key_matcher;
-
 class key_matcher_factory {
  public:
-  key_matcher* create_matcher(const std::string& matcher);
+  core::fv_converter::key_matcher* create_matcher(const std::string& matcher);
 };
 
 }  // namespace fv_converter

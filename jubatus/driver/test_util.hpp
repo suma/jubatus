@@ -32,20 +32,20 @@ pfi::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>
     converter(
         new jubatus::core::fv_converter::datum_to_fv_converter);
 
-  jubatus::core::fv_converter::string_rule str_rule;
+  jubatus::driver::fv_converter::string_rule str_rule;
   str_rule.key = "*";
   str_rule.type = "str";
   str_rule.sample_weight = "bin";
   str_rule.global_weight = "bin";
-  jubatus::core::fv_converter::num_rule num_rule;
+  jubatus::driver::fv_converter::num_rule num_rule;
   num_rule.key = "*";
   num_rule.type = "num";
 
-  jubatus::core::fv_converter::converter_config c;
+  jubatus::driver::fv_converter::converter_config c;
   c.string_rules.push_back(str_rule);
   c.num_rules.push_back(num_rule);
 
-  jubatus::core::fv_converter::initialize_converter(c, *converter);
+  jubatus::driver::fv_converter::initialize_converter(c, *converter);
   return converter;
 }
 

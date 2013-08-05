@@ -23,6 +23,9 @@
 #include "jubatus/core/fv_converter/num_feature.hpp"
 #include "num_feature_factory.hpp"
 
+using jubatus::core::fv_converter::converter_exception;
+using jubatus::core::fv_converter::num_feature;
+
 namespace jubatus {
 namespace driver {
 namespace fv_converter {
