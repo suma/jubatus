@@ -294,6 +294,14 @@ bool lsh_index_storage::load(istream& is) {
   return true;
 }
 
+void lsh_index_storage::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void lsh_index_storage::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 void lsh_index_storage::get_diff(string& diff) const {
   diff = serialize_diff(master_table_diff_);
 }

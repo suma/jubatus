@@ -25,12 +25,13 @@
 #include <pficommon/data/unordered_map.h>
 #include "../common/key_manager.hpp"
 #include "storage_type.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class sparse_matrix_storage {
+class sparse_matrix_storage : public framework::model {
  public:
   sparse_matrix_storage();
   ~sparse_matrix_storage();
@@ -55,7 +56,10 @@ class sparse_matrix_storage {
 
   bool save(std::ostream&);
   bool load(std::istream&);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
 
+  MSGPACK_DEFINE(tbl_, column2id_);
  private:
   friend class pfi::data::serialization::access;
   template <class Ar>

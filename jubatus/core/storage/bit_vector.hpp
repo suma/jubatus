@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
 
 namespace jubatus {
@@ -67,6 +68,7 @@ class bit_vector {
     std::swap(bit_num_, v.bit_num_);
   }
 
+  MSGPACK_DEFINE(bits_, bit_num_);
  private:
   friend class pfi::data::serialization::access;
   template <class Ar>

@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
 #include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
@@ -28,12 +29,14 @@
 #include "../common/key_manager.hpp"
 #include "sparse_matrix_storage.hpp"
 #include "recommender_storage_base.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class inverted_index_storage : public recommender_storage_base {
+class inverted_index_storage : public recommender_storage_base,
+  public framework::model {
  public:
   inverted_index_storage();
   ~inverted_index_storage();
@@ -57,7 +60,10 @@ class inverted_index_storage : public recommender_storage_base {
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
 
+  MSGPACK_DEFINE(inv_, column2norm_, column2id_);
  private:
   static float calc_l2norm(const common::sfv_t& sfv);
   float calc_columnl2norm(uint64_t column_id) const;

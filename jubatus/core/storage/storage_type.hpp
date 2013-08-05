@@ -28,6 +28,9 @@
 #include <pficommon/data/serialization.h>
 #include "bit_vector.hpp"
 
+// to msgpack
+#include "../common/unordered_map.hpp"
+
 namespace jubatus {
 namespace core {
 namespace storage {

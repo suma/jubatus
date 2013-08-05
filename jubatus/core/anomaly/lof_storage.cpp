@@ -205,6 +205,14 @@ bool lof_storage::load(istream& is) {
   return true;
 }
 
+void lof_storage::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void lof_storage::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 void lof_storage::set_nn_engine(recommender::recommender_base* nn_engine) {
   nn_engine_.reset(nn_engine);
 }

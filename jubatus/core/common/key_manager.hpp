@@ -18,11 +18,13 @@
 #define JUBATUS_CORE_COMMON_KEY_MANAGER_HPP_
 
 #include <stdint.h>
+#include <msgpack.hpp>
 #include <string>
 #include <vector>
 #include <pficommon/data/unordered_map.h>
 #include <pficommon/data/serialization.h>
 #include <pficommon/data/serialization/unordered_map.h>
+#include "unordered_map.hpp"
 
 namespace jubatus {
 namespace core {
@@ -55,6 +57,8 @@ class key_manager {
 
   void init_by_id2key(const std::vector<std::string>& id2key);
   std::vector<std::string> get_all_id2key() const;
+
+  MSGPACK_DEFINE(key2id_, id2key_);
 
  private:
   friend class pfi::data::serialization::access;

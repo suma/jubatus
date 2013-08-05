@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
 #include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/intern.h>
@@ -74,8 +75,11 @@ class local_storage_mixture : public storage_base {
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
   std::string type() const;
 
+  MSGPACK_DEFINE(tbl_, class2id_);  // without diff
  private:
   friend class pfi::data::serialization::access;
   template <class Ar>

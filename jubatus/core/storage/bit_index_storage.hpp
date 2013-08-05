@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
 #include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
@@ -28,12 +29,14 @@
 #include "sparse_matrix_storage.hpp"
 #include "bit_vector.hpp"
 #include "recommender_storage_base.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class bit_index_storage : public recommender_storage_base {
+class bit_index_storage : public recommender_storage_base,
+  public framework::model {
  public:
   bit_index_storage();
   ~bit_index_storage();
@@ -52,10 +55,14 @@ class bit_index_storage : public recommender_storage_base {
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
 
   void get_diff(std::string& diff) const;
   void set_mixed_and_clear_diff(const std::string& mixed_diff);
   void mix(const std::string& lhs, std::string& rhs) const;
+
+  MSGPACK_DEFINE(bitvals_);
 
  private:
   friend class pfi::data::serialization::access;

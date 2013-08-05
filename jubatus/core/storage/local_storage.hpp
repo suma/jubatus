@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
 #include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
@@ -73,8 +74,11 @@ class local_storage : public storage_base {
 
   bool save(std::ostream&);
   bool load(std::istream&);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
   std::string type() const;
 
+  MSGPACK_DEFINE(tbl_, class2id_);
  protected:
   // map_features3_t tbl_;
   id_features3_t tbl_;

@@ -21,12 +21,14 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <msgpack.hpp>
 #include <pficommon/data/unordered_map.h>
 #include <pficommon/data/unordered_set.h>
 #include "lsh_vector.hpp"
 #include "recommender_storage_base.hpp"
 #include "storage_type.hpp"
 #include "../common/key_manager.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
@@ -37,6 +39,7 @@ struct lsh_entry {
   bit_vector simhash_bv;
   float norm;
 
+  MSGPACK_DEFINE(lsh_hash, simhash_bv, norm);
   template <typename Ar>
   void serialize(Ar& ar) {
     ar & MEMBER(lsh_hash) & MEMBER(simhash_bv) & MEMBER(norm);
@@ -47,7 +50,8 @@ typedef pfi::data::unordered_map<std::string, lsh_entry> lsh_master_table_t;
 
 typedef pfi::data::unordered_map<uint64_t, std::vector<uint64_t> > lsh_table_t;
 
-class lsh_index_storage : public recommender_storage_base {
+class lsh_index_storage : public recommender_storage_base,
+  public framework::model {
  public:
   lsh_index_storage();
   lsh_index_storage(size_t lsh_num, size_t table_num, uint32_t seed);
@@ -85,11 +89,14 @@ class lsh_index_storage : public recommender_storage_base {
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
 
   virtual void get_diff(std::string& diff) const;
   virtual void set_mixed_and_clear_diff(const std::string& mixed_diff);
   virtual void mix(const std::string& lhs, std::string& rhs) const;
 
+  MSGPACK_DEFINE(master_table_, lsh_table_, shift_, table_num_, key_manager_);
  private:
   typedef pfi::data::unordered_map<uint64_t, std::vector<uint64_t> >lsh_table_t;
 

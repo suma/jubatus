@@ -30,13 +30,16 @@
 
 #include "anomaly_storage_base.hpp"
 #include "../common/type.hpp"
+#include "../common/unordered_map.hpp"
 #include "../recommender/recommender_base.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class lof_storage : public anomaly_storage_base {
+class lof_storage : public anomaly_storage_base,
+  public framework::model {
  public:
   static const uint32_t DEFAULT_NEIGHBOR_NUM;
   static const uint32_t DEFAULT_REVERSE_NN_NUM;
@@ -88,6 +91,8 @@ class lof_storage : public anomaly_storage_base {
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
 
   // just for test
   void set_nn_engine(core::recommender::recommender_base* nn_engine);
@@ -96,11 +101,13 @@ class lof_storage : public anomaly_storage_base {
   virtual void set_mixed_and_clear_diff(const std::string& mixed_diff);
   virtual void mix(const std::string& lhs, std::string& rhs) const;
 
+  MSGPACK_DEFINE(lof_table_, neighbor_num_, reverse_nn_num_);
  private:
   struct lof_entry {
     float kdist;
     float lrd;
 
+    MSGPACK_DEFINE(kdist, lrd);
     template<typename Ar>
     void serialize(Ar& ar) {
       ar & MEMBER(kdist) & MEMBER(lrd);

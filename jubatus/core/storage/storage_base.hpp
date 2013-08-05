@@ -26,12 +26,13 @@
 #include "storage_type.hpp"
 #include "../common/exception.hpp"
 #include "../common/type.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class storage_base {
+class storage_base : public framework::model {
  public:
   virtual ~storage_base() {
   }
@@ -60,6 +61,8 @@ class storage_base {
 
   virtual bool save(std::ostream&) = 0;
   virtual bool load(std::istream&) = 0;
+  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void load(msgpack::object&) = 0;
 
   virtual void update(
       const std::string& feature,

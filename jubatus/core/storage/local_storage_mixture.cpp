@@ -248,6 +248,14 @@ bool local_storage_mixture::load(std::istream& is) {
   return true;
 }
 
+void local_storage_mixture::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void local_storage_mixture::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 std::string local_storage_mixture::type() const {
   return "local_storage_mixture";
 }

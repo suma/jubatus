@@ -50,10 +50,12 @@ class lof : public anomaly_base {
 
   void save(std::ostream&);
   void load(std::istream&);
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
 
+  MSGPACK_DEFINE(orig_, lof_index_);
   // static float calc_distance(common::sfv_t& q1, common::sfv_t& q2);
   // static float calc_l2norm(common::sfv_t& q1, common::sfv_t& q2);
-
  private:
   virtual bool save_impl(std::ostream& os);
   virtual bool load_impl(std::istream& is);

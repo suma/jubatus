@@ -27,12 +27,13 @@
 #include "../storage/sparse_matrix_storage.hpp"
 #include "anomaly_storage_base.hpp"
 #include "anomaly_type.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace anomaly {
 
-class anomaly_base {
+class anomaly_base : public framework::model {
  public:
   anomaly_base();
   virtual ~anomaly_base();
@@ -52,6 +53,8 @@ class anomaly_base {
 
   void save(std::ostream&);
   void load(std::istream&);
+  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void load(msgpack::object&) = 0;
 
   // static float calc_distance(sfv_t& q1, sfv_t& q2);
   // static float calc_l2norm(sfv_t& query);

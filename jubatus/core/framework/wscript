@@ -8,10 +8,12 @@ def build(bld):
   source = [
       'linear_function_mixer.cpp',
       'mixable_weight_manager.cpp',
+      'model.cpp',
       ]
 
   header = [
       'mixable.hpp',
+      'model.hpp',
       'linear_function_mixer.hpp',
       'mixable_weight_manager.hpp',
       ]
@@ -29,6 +31,7 @@ def build(bld):
 
   tests = [
     'mixable_test',
+    'model_test',
     'linear_function_mixer_test',
     ]
 

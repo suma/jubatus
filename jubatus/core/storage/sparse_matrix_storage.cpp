@@ -173,6 +173,14 @@ bool sparse_matrix_storage::load(istream& is) {
   return true;
 }
 
+void sparse_matrix_storage::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void sparse_matrix_storage::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 }  // namespace storage
 }  // namespace core
 }  // namespace jubatus
