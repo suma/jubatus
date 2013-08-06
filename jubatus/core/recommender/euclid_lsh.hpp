@@ -91,6 +91,11 @@ class euclid_lsh : public recommender_base {
   virtual core::storage::lsh_index_storage* get_storage();
   virtual const core::storage::lsh_index_storage* get_const_storage() const;
 
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
+
+  MSGPACK_DEFINE(lsh_index_, projection_);
+  // without bin_width_, num_probe_, retain_projection_
  private:
   friend class pfi::data::serialization::access;
   template <typename Ar>

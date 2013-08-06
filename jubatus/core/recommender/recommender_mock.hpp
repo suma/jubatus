@@ -67,6 +67,10 @@ class recommender_mock : public recommender_base {
   virtual const core::storage::recommender_storage_base*
       get_const_storage() const;
 
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
+
+  MSGPACK_DEFINE(orig_, storage_);
  private:
   virtual bool save_impl(std::ostream&);
   virtual bool load_impl(std::istream&);

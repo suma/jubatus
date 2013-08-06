@@ -112,9 +112,10 @@ TYPED_TEST_P(recommender_random_test, random) {
 
   // save the recommender
   stringstream oss;
-  r.save(oss);
+ // r.save(oss);
+  static_cast<recommender_base*>(&r)->save(oss);
   TypeParam r2;
-  r2.load(oss);
+  static_cast<recommender_base*>(&r2)->load(oss);
 
   // Run the same test
   ids.clear();
@@ -176,9 +177,9 @@ TYPED_TEST_P(recommender_random_test, save_load) {
 
   // save and load
   stringstream ss;
-  r.save(ss);
+  static_cast<recommender_base*>(&r)->save(ss);
   TypeParam r2;
-  r2.load(ss);
+  static_cast<recommender_base*>(&r2)->load(ss);
 
   vector<string> row_ids;
   r2.get_all_row_ids(row_ids);

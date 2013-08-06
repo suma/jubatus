@@ -233,6 +233,14 @@ bool euclid_lsh::load_impl(istream& is) {
   return true;
 }
 
+void euclid_lsh::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void euclid_lsh::load(msgpack::object& o) {
+  o.convert(this);
+}
+
 }  // namespace recommender
 }  // namespace core
 }  // namespace jubatus

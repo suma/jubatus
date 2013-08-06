@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
 #include "../storage/recommender_storage_base.hpp"
 #include "recommender_type.hpp"
@@ -60,6 +61,7 @@ class recommender_mock_storage
   virtual void set_mixed_and_clear_diff(const std::string& mixed_diff);
   virtual void mix(const std::string& lhs, std::string& rhs) const;
 
+  MSGPACK_DEFINE(similar_relation_, neighbor_relation_);
  private:
   typedef std::map<common::sfv_t, std::vector<std::pair<std::string, float> > >
     relation_type;

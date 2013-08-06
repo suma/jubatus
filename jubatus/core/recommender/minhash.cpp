@@ -170,16 +170,27 @@ float minhash::calc_hash(uint64_t a, uint64_t b, float val) {
 string minhash::type() const {
   return string("minhash");
 }
+
 bool minhash::save_impl(std::ostream& os) {
   pfi::data::serialization::binary_oarchive oa(os);
   oa << row2minhashvals_;
   return true;
 }
+
 bool minhash::load_impl(std::istream& is) {
   pfi::data::serialization::binary_iarchive ia(is);
   ia >> row2minhashvals_;
   return true;
 }
+
+void minhash::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, row2minhashvals_);
+}
+
+void minhash::load(msgpack::object& o) {
+  o.convert(&row2minhashvals_);
+}
+
 core::storage::recommender_storage_base* minhash::get_storage() {
   return &row2minhashvals_;
 }

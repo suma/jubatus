@@ -126,6 +126,14 @@ bool recommender_mock::save_impl(ostream& os) {
   return true;
 }
 
+void recommender_mock::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void recommender_mock::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 bool recommender_mock::load_impl(istream& is) {
   pfi::data::serialization::binary_iarchive bi(is);
   bi >> *this;

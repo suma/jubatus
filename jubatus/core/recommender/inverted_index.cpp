@@ -100,6 +100,14 @@ bool inverted_index::load_impl(std::istream& is) {
   return true;
 }
 
+void inverted_index::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, inv_);
+}
+
+void inverted_index::load(msgpack::object& o) {
+  o.convert(&inv_);
+}
+
 core::storage::recommender_storage_base* inverted_index::get_storage() {
   return &inv_;
 }

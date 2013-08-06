@@ -88,6 +88,12 @@ class recommender_impl : public recommender_base {
     return string("recommender_impl");
   }
 
+  void save(framework::msgpack_writer&) {
+  }
+
+  void load(msgpack::object&) {
+  }
+
   bool save_impl(std::ostream&) {
     return true;
   }

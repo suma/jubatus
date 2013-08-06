@@ -99,7 +99,6 @@ class lof_storage : public anomaly_storage_base {
   virtual void set_mixed_and_clear_diff(const std::string& mixed_diff);
   virtual void mix(const std::string& lhs, std::string& rhs) const;
 
-  MSGPACK_DEFINE(lof_table_, neighbor_num_, reverse_nn_num_);
  private:
   struct lof_entry {
     float kdist;

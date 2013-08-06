@@ -148,6 +148,14 @@ bool lsh::load_impl(std::istream& is) {
   return true;
 }
 
+void lsh::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void lsh::load(msgpack::object& o) {
+  o.convert(this);
+}
+
 core::storage::recommender_storage_base* lsh::get_storage() {
   return &row2lshvals_;
 }

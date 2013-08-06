@@ -23,6 +23,7 @@
 #include <pficommon/data/unordered_map.h>
 #include <pficommon/lang/shared_ptr.h>
 #include "../common/type.hpp"
+#include "../framework/model.hpp"
 #include "../storage/sparse_matrix_storage.hpp"
 #include "../storage/recommender_storage_base.hpp"
 #include "recommender_type.hpp"
@@ -31,7 +32,7 @@ namespace jubatus {
 namespace core {
 namespace recommender {
 
-class recommender_base {
+class recommender_base : public framework::model {
  public:
   recommender_base();
   virtual ~recommender_base();
@@ -70,6 +71,8 @@ class recommender_base {
 
   void save(std::ostream&);
   void load(std::istream&);
+  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void load(msgpack::object&) = 0;
 
   static float calc_similality(common::sfv_t& q1, common::sfv_t& q2);
   static float calc_l2norm(const common::sfv_t& query);

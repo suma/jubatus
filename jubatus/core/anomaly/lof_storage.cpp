@@ -206,11 +206,25 @@ bool lof_storage::load(istream& is) {
 }
 
 void lof_storage::save(framework::msgpack_writer& writer) {
-  msgpack::pack(writer, *this);
+  msgpack::packer<framework::msgpack_writer> pk(writer);
+  pk.pack_array(4);
+
+  pk.pack(lof_table_);
+  pk.pack(neighbor_num_);
+  pk.pack(reverse_nn_num_);
+  nn_engine_->save(writer);
 }
 
-void lof_storage::load(msgpack::object& obj) {
-  obj.convert(this);
+void lof_storage::load(msgpack::object& o) {
+  size_t size = o.via.array.size;
+  if (o.type != msgpack::type::ARRAY || size != 4) {
+    throw msgpack::type_error();
+  }
+
+  o.via.array.ptr[0].convert(&lof_table_);
+  o.via.array.ptr[1].convert(&neighbor_num_);
+  o.via.array.ptr[2].convert(&reverse_nn_num_);
+  nn_engine_->load(o.via.array.ptr[3]);
 }
 
 void lof_storage::set_nn_engine(recommender::recommender_base* nn_engine) {
