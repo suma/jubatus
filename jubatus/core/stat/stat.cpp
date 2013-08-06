@@ -164,6 +164,15 @@ bool stat::load(std::istream& is) {
   ia >> *this;
   return true;
 }
+
+void stat::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void stat::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 std::string stat::type() const {
   return "stat";
 }

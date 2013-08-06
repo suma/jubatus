@@ -59,6 +59,8 @@ class stub_storage : public storage_base {
   }
 
  public:
+  MSGPACK_DEFINE(data_);
+
   void get_status(std::map<std::string, std::string>&) {
   }
 
@@ -117,6 +119,14 @@ class stub_storage : public storage_base {
     pfi::data::serialization::binary_iarchive ia(is);
     ia >> *this;
     return true;
+  }
+
+  void save(framework::msgpack_writer& writer) {
+    msgpack::pack(writer, *this);
+  }
+
+  void load(msgpack::object& obj) {
+    obj.convert(this);
   }
 
   void clear() {

@@ -28,6 +28,7 @@
 
 #include "../common/exception.hpp"
 #include "../common/type.hpp"
+#include "../common/unordered_map.hpp"
 
 namespace jubatus {
 namespace core {
@@ -48,6 +49,7 @@ struct eigen_vector_info {
 
   friend class pfi::data::serialization::access;
 
+  MSGPACK_DEFINE(score, out_degree_num);
   template<class Ar>
   void serialize(Ar& ar) {
     ar & MEMBER(score) & MEMBER(out_degree_num);
@@ -115,6 +117,8 @@ struct shortest_path_tree {
   node_id_t landmark;
   spt_edges from_root;
   spt_edges to_root;
+
+  MSGPACK_DEFINE(landmark, from_root, to_root);
 
   friend class pfi::data::serialization::access;
 

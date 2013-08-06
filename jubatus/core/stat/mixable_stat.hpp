@@ -53,6 +53,10 @@ class mixable_stat : public stat {
   bool save(std::ostream&);
   bool load(std::istream&);
 
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
+
+  MSGPACK_DEFINE(e_, n_, window_size_, window_, stats_);
  private:
   friend class pfi::data::serialization::access;
   template<class Archive>

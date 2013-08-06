@@ -18,12 +18,13 @@
 #define JUBATUS_CORE_ANOMALY_ANOMALY_STORAGE_BASE_HPP_
 
 #include <string>
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class anomaly_storage_base {
+class anomaly_storage_base : public framework::model {
  public:
   virtual ~anomaly_storage_base() {
   }
@@ -31,6 +32,9 @@ class anomaly_storage_base {
   virtual void get_diff(std::string& diff) const = 0;
   virtual void set_mixed_and_clear_diff(const std::string& mixed_diff) = 0;
   virtual void mix(const std::string& lhs, std::string& rhs) const = 0;
+
+  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void load(msgpack::object&) = 0;
 };
 
 }  // namespace storage

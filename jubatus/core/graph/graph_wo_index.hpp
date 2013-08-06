@@ -26,6 +26,7 @@
 #include <pficommon/data/serialization.h>
 
 #include "graph_base.hpp"
+#include "../common/unordered_map.hpp"
 
 namespace jubatus {
 namespace core {
@@ -95,6 +96,12 @@ class graph_wo_index : public graph_base {
 
   void mix(const std::string& diff, std::string& mixed);
 
+  void save(framework::msgpack_writer&);
+  void load(msgpack::object&);
+
+  //MSGPACK_DEFINE(local_nodes_);
+  MSGPACK_DEFINE(local_nodes_, local_edges_, global_nodes_, eigen_scores_,
+      spts_);
  private:
   typedef pfi::data::unordered_map<node_id_t, node_info> node_info_map;
   typedef pfi::data::unordered_map<edge_id_t, edge_info> edge_info_map;

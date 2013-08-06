@@ -33,7 +33,7 @@ namespace jubatus {
 namespace core {
 namespace anomaly {
 
-class anomaly_base : public framework::model {
+class anomaly_base {
  public:
   anomaly_base();
   virtual ~anomaly_base();
@@ -53,8 +53,6 @@ class anomaly_base : public framework::model {
 
   void save(std::ostream&);
   void load(std::istream&);
-  virtual void save(framework::msgpack_writer&) = 0;
-  virtual void load(msgpack::object&) = 0;
 
   // static float calc_distance(sfv_t& q1, sfv_t& q2);
   // static float calc_l2norm(sfv_t& query);
@@ -65,7 +63,6 @@ class anomaly_base : public framework::model {
   virtual bool save_impl(std::ostream&) = 0;
   virtual bool load_impl(std::istream&) = 0;
 
-  core::storage::sparse_matrix_storage orig_;
 };
 
 }  // namespace anomaly

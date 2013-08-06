@@ -24,12 +24,13 @@
 #include <vector>
 
 #include "graph_type.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace graph {
 
-class graph_base {
+class graph_base : public framework::model {
  public:
   graph_base();
   virtual ~graph_base();
@@ -74,6 +75,8 @@ class graph_base {
 
   void save(std::ostream&);
   void load(std::istream&);
+  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void load(msgpack::object&) = 0;
 
  private:
   virtual bool save_imp(std::ostream& os) = 0;

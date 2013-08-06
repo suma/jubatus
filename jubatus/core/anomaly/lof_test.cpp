@@ -55,15 +55,6 @@ class lof_impl : public lof {
   lof_impl()
       : lof(lof_storage::config(),
            new recommender::euclid_lsh(recommender::euclid_lsh::config())) {
-    // make mock
-    orig_.set("r1", "a1", 0.0);
-    orig_.set("r1", "a2", 0.0);
-
-    orig_.set("r2", "a1", 0.0);
-    orig_.set("r2", "a2", 1.0);
-
-    orig_.set("r3", "a1", 1.0);
-    orig_.set("r3", "a1", -1.0);
   }
 
   float calc_anomaly_score(const common::sfv_t& query) const {

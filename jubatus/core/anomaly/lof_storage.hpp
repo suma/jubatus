@@ -32,14 +32,12 @@
 #include "../common/type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../recommender/recommender_base.hpp"
-#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace storage {
 
-class lof_storage : public anomaly_storage_base,
-  public framework::model {
+class lof_storage : public anomaly_storage_base {
  public:
   static const uint32_t DEFAULT_NEIGHBOR_NUM;
   static const uint32_t DEFAULT_REVERSE_NN_NUM;

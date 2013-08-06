@@ -383,6 +383,14 @@ bool graph_wo_index::load_imp(std::istream& is) {
   return true;
 }
 
+void graph_wo_index::save(framework::msgpack_writer& writer) {
+  msgpack::pack(writer, *this);
+}
+
+void graph_wo_index::load(msgpack::object& obj) {
+  obj.convert(this);
+}
+
 void graph_wo_index::update_index() {
   update_spt();
 }

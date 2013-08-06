@@ -67,6 +67,11 @@ class storage_mock_base : public storage::storage_base {
     return true;
   }
 
+  void save(framework::msgpack_writer&) {
+  }
+  void load(msgpack::object&) {
+  }
+
   void update(
       const std::string& feature,
       const std::string& inc_class,

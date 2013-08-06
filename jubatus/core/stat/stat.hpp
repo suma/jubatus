@@ -23,11 +23,14 @@
 #include <deque>
 #include <string>
 #include <utility>
+#include <msgpack.hpp>
 #include <pficommon/concurrent/rwmutex.h>
 #include <pficommon/data/serialization.h>
 #include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
 #include "../common/exception.hpp"
+#include "../common/unordered_map.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
@@ -49,7 +52,7 @@ class stat_error : public common::exception::jubaexception<stat_error> {
   std::string msg_;
 };
 
-class stat {
+class stat : public framework::model {
  public:
   explicit stat(size_t window_size);
   virtual ~stat();
@@ -74,8 +77,11 @@ class stat {
 
   virtual bool save(std::ostream&);
   virtual bool load(std::istream&);
+  virtual void save(framework::msgpack_writer&);
+  virtual void load(msgpack::object&);
   std::string type() const;
 
+  MSGPACK_DEFINE(window_size_, window_, stats_);
  protected:
   struct stat_val {
     stat_val()
@@ -148,6 +154,8 @@ class stat {
       }
     }
 
+    MSGPACK_DEFINE(n_, sum_, sum2_, max_, min_);
+
     friend class pfi::data::serialization::access;
     template<class Archive>
     void serialize(Archive& ar) {
@@ -163,6 +171,7 @@ class stat {
 
   std::deque<std::pair<uint64_t, std::pair<std::string, double> > > window_;
   pfi::data::unordered_map<std::string, stat_val> stats_;
+  size_t window_size_;
 
  private:
   friend class pfi::data::serialization::access;
@@ -170,7 +179,6 @@ class stat {
   void serialize(Archive& ar) {
     ar & window_size_ & window_ & stats_;
   }
-  size_t window_size_;
 };
 }  // namespace stat
 }  // namespace core

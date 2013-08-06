@@ -133,14 +133,6 @@ bool lof::load_impl(istream& is) {
   return true;
 }
 
-void lof::save(framework::msgpack_writer& writer) {
-  msgpack::pack(writer, *this);
-}
-
-void lof::load(msgpack::object& obj) {
-  obj.convert(this);
-}
-
 }  // namespace anomaly
 }  // namespace core
 }  // namespace jubatus

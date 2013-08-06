@@ -81,6 +81,16 @@ bool mixable_stat::load(std::istream& is) {
   return true;
 }
 
+void mixable_stat::save(framework::msgpack_writer& writer) {
+  stat::save(writer);
+  msgpack::pack(writer, *this);
+}
+
+void mixable_stat::load(msgpack::object& obj) {
+  stat::load(obj);
+  obj.convert(this);
+}
+
 }  // namespace stat
 }  // namespace core
 }  // namespace jubatus
