@@ -20,6 +20,7 @@
 #include <istream>
 #include <ostream>
 #include <string>
+#include <msgpack.hpp>
 #include <pficommon/data/unordered_map.h>
 #include "../common/type.hpp"
 #include "counter.hpp"
@@ -69,6 +70,7 @@ class weight_manager {
     ar & MEMBER(diff_weights_) & MEMBER(master_weights_);
   }
 
+  MSGPACK_DEFINE(diff_weights_, master_weights_);
  private:
   size_t get_document_count() const {
     return diff_weights_.get_document_count() +

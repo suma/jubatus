@@ -6,12 +6,14 @@ def configure(conf):
 
 def build(bld):
   source = [
+      'linear_mixable.cpp',
       'linear_function_mixer.cpp',
       'mixable_weight_manager.cpp',
       'model.cpp',
       ]
 
   header = [
+      'linear_mixable.hpp',
       'mixable.hpp',
       'model.hpp',
       'linear_function_mixer.hpp',
