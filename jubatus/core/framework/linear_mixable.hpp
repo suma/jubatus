@@ -43,7 +43,7 @@ class linear_mixable {
   virtual diff_object convert_diff_object(const msgpack::object&) const = 0;
   // mix assumes fold left?
   virtual void mix(const msgpack::object& obj, diff_object) const = 0;
-  virtual void get_diff(msgpack_writer&) = 0;
+  virtual void get_diff(msgpack_writer&) const = 0;
   virtual void put_diff(const msgpack::object& obj) = 0;
 };
 
