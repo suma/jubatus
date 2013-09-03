@@ -45,7 +45,7 @@ class linear_mixable_weight_manager : public model, public linear_mixable {
  public:
   linear_mixable_weight_manager(pfi::lang::shared_ptr<fv_converter::weight_manager> wm);
 
-  void save(msgpack_writer&);
+  void save(msgpack_writer&) const;
   void load(msgpack::object&);
 
   diff_object convert_diff_object(const msgpack::object&) const;

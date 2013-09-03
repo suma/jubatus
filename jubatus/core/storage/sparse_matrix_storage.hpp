@@ -56,7 +56,7 @@ class sparse_matrix_storage : public framework::model {
 
   bool save(std::ostream&);
   bool load(std::istream&);
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   MSGPACK_DEFINE(tbl_, column2id_);

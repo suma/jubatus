@@ -67,7 +67,7 @@ class recommender_mock : public recommender_base {
   virtual const core::storage::recommender_storage_base*
       get_const_storage() const;
 
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   MSGPACK_DEFINE(orig_, storage_);

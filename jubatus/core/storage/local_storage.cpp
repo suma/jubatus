@@ -187,7 +187,7 @@ bool local_storage::load(std::istream& is) {
   return true;
 }
 
-void local_storage::save(framework::msgpack_writer& writer) {
+void local_storage::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

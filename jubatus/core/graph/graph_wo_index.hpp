@@ -96,7 +96,7 @@ class graph_wo_index : public graph_base {
 
   void mix(const std::string& diff, std::string& mixed);
 
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   //MSGPACK_DEFINE(local_nodes_);

@@ -191,7 +191,7 @@ bool bit_index_storage::load(std::istream& is) {
   return true;
 }
 
-void bit_index_storage::save(framework::msgpack_writer& writer) {
+void bit_index_storage::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

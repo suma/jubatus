@@ -205,7 +205,7 @@ bool lof_storage::load(istream& is) {
   return true;
 }
 
-void lof_storage::save(framework::msgpack_writer& writer) {
+void lof_storage::save(framework::msgpack_writer& writer) const {
   msgpack::packer<framework::msgpack_writer> pk(writer);
   pk.pack_array(4);
 

@@ -126,7 +126,7 @@ bool recommender_mock::save_impl(ostream& os) {
   return true;
 }
 
-void recommender_mock::save(framework::msgpack_writer& writer) {
+void recommender_mock::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

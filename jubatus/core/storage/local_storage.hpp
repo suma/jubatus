@@ -74,7 +74,7 @@ class local_storage : public storage_base {
 
   bool save(std::ostream&);
   bool load(std::istream&);
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
   std::string type() const;
 

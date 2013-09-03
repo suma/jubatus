@@ -29,7 +29,7 @@ struct int_model {
   int value;
   MSGPACK_DEFINE(value);
 
-  void save(msgpack_writer& buf) {
+  void save(msgpack_writer& buf) const {
     msgpack::pack(buf, *this);
   }
 

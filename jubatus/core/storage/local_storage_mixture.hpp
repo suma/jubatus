@@ -75,7 +75,7 @@ class local_storage_mixture : public storage_base {
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
   std::string type() const;
 

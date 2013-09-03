@@ -173,7 +173,7 @@ bool sparse_matrix_storage::load(istream& is) {
   return true;
 }
 
-void sparse_matrix_storage::save(framework::msgpack_writer& writer) {
+void sparse_matrix_storage::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

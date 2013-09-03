@@ -64,7 +64,7 @@ class minhash : public recommender_base {
   core::storage::recommender_storage_base* get_storage();
   const core::storage::recommender_storage_base* get_const_storage() const;
 
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
  private:

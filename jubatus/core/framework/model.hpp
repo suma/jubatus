@@ -52,7 +52,7 @@ class model {
   virtual ~model();
 
   // by msgpack
-  virtual void save(msgpack_writer&) = 0;
+  virtual void save(msgpack_writer&) const = 0;
   virtual void load(msgpack::object&) = 0;
   // You can calculate only serialized size by msgpack_writer.
   // TODO: virtual void check(msgpack::unpacker&) const = 0;

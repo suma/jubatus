@@ -164,7 +164,7 @@ bool stat::load(std::istream& is) {
   return true;
 }
 
-void stat::save(framework::msgpack_writer& writer) {
+void stat::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

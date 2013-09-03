@@ -88,7 +88,7 @@ class recommender_impl : public recommender_base {
     return string("recommender_impl");
   }
 
-  void save(framework::msgpack_writer&) {
+  void save(framework::msgpack_writer&) const {
   }
 
   void load(msgpack::object&) {

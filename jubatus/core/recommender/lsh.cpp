@@ -148,7 +148,7 @@ bool lsh::load_impl(std::istream& is) {
   return true;
 }
 
-void lsh::save(framework::msgpack_writer& writer) {
+void lsh::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

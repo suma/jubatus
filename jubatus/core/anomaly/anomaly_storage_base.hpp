@@ -33,7 +33,7 @@ class anomaly_storage_base : public framework::model {
   virtual void set_mixed_and_clear_diff(const std::string& mixed_diff) = 0;
   virtual void mix(const std::string& lhs, std::string& rhs) const = 0;
 
-  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void save(framework::msgpack_writer&) const = 0;
   virtual void load(msgpack::object&) = 0;
 };
 

@@ -248,7 +248,7 @@ bool local_storage_mixture::load(std::istream& is) {
   return true;
 }
 
-void local_storage_mixture::save(framework::msgpack_writer& writer) {
+void local_storage_mixture::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

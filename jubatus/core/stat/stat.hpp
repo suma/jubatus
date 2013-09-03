@@ -77,7 +77,7 @@ class stat : public framework::model {
 
   virtual bool save(std::ostream&);
   virtual bool load(std::istream&);
-  virtual void save(framework::msgpack_writer&);
+  virtual void save(framework::msgpack_writer&) const;
   virtual void load(msgpack::object&);
   std::string type() const;
 

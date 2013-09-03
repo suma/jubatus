@@ -61,7 +61,7 @@ class storage_base : public framework::model {
 
   virtual bool save(std::ostream&) = 0;
   virtual bool load(std::istream&) = 0;
-  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void save(framework::msgpack_writer&) const = 0;
   virtual void load(msgpack::object&) = 0;
 
   virtual void update(

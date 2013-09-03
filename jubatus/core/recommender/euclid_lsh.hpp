@@ -91,7 +91,7 @@ class euclid_lsh : public recommender_base {
   virtual core::storage::lsh_index_storage* get_storage();
   virtual const core::storage::lsh_index_storage* get_const_storage() const;
 
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   MSGPACK_DEFINE(lsh_index_, projection_);

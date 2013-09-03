@@ -100,7 +100,7 @@ bool inverted_index::load_impl(std::istream& is) {
   return true;
 }
 
-void inverted_index::save(framework::msgpack_writer& writer) {
+void inverted_index::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, inv_);
 }
 

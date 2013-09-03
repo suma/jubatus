@@ -53,7 +53,7 @@ class mixable_stat : public stat {
   bool save(std::ostream&);
   bool load(std::istream&);
 
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   MSGPACK_DEFINE(e_, n_, window_size_, window_, stats_);

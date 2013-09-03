@@ -183,7 +183,7 @@ bool minhash::load_impl(std::istream& is) {
   return true;
 }
 
-void minhash::save(framework::msgpack_writer& writer) {
+void minhash::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, row2minhashvals_);
 }
 

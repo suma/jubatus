@@ -55,7 +55,7 @@ class bit_index_storage : public recommender_storage_base,
 
   bool save(std::ostream& os);
   bool load(std::istream& is);
-  void save(framework::msgpack_writer&);
+  void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   void get_diff(std::string& diff) const;

@@ -31,7 +31,7 @@ class msgpack_writer;
 class diff_object_raw {
  public:
   virtual ~diff_object_raw();
-  virtual void convert_binary(msgpack_writer&) = 0;
+  virtual void convert_binary(msgpack_writer&) const = 0;
 };
 
 typedef pfi::lang::shared_ptr<diff_object_raw> diff_object;

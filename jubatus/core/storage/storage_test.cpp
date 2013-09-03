@@ -121,7 +121,7 @@ class stub_storage : public storage_base {
     return true;
   }
 
-  void save(framework::msgpack_writer& writer) {
+  void save(framework::msgpack_writer& writer) const {
     msgpack::pack(writer, *this);
   }
 

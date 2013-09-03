@@ -382,7 +382,7 @@ bool graph_wo_index::load_imp(std::istream& is) {
   return true;
 }
 
-void graph_wo_index::save(framework::msgpack_writer& writer) {
+void graph_wo_index::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

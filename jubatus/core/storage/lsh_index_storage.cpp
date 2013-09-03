@@ -294,7 +294,7 @@ bool lsh_index_storage::load(istream& is) {
   return true;
 }
 
-void lsh_index_storage::save(framework::msgpack_writer& writer) {
+void lsh_index_storage::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

@@ -233,7 +233,7 @@ bool euclid_lsh::load_impl(istream& is) {
   return true;
 }
 
-void euclid_lsh::save(framework::msgpack_writer& writer) {
+void euclid_lsh::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 

@@ -67,7 +67,7 @@ class storage_mock_base : public storage::storage_base {
     return true;
   }
 
-  void save(framework::msgpack_writer&) {
+  void save(framework::msgpack_writer&) const {
   }
   void load(msgpack::object&) {
   }

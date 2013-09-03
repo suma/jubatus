@@ -81,7 +81,7 @@ bool mixable_stat::load(std::istream& is) {
   return true;
 }
 
-void mixable_stat::save(framework::msgpack_writer& writer) {
+void mixable_stat::save(framework::msgpack_writer& writer) const {
   stat::save(writer);
   msgpack::pack(writer, *this);
 }

@@ -71,7 +71,7 @@ class recommender_base : public framework::model {
 
   void save(std::ostream&);
   void load(std::istream&);
-  virtual void save(framework::msgpack_writer&) = 0;
+  virtual void save(framework::msgpack_writer&) const = 0;
   virtual void load(msgpack::object&) = 0;
 
   static float calc_similality(common::sfv_t& q1, common::sfv_t& q2);

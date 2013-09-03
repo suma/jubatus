@@ -53,7 +53,7 @@ namespace {
 
 class weight_diff : public diff_object_raw {
  public:
-  void convert_binary(msgpack_writer& writer) {
+  void convert_binary(msgpack_writer& writer) const {
     msgpack::pack(writer, weights_);
   }
 
@@ -66,7 +66,7 @@ linear_mixable_weight_manager::linear_mixable_weight_manager(shared_ptr<weight_m
   : weight_manager_(wm) {
 }
 
-void linear_mixable_weight_manager::save(msgpack_writer& writer) {
+void linear_mixable_weight_manager::save(msgpack_writer& writer) const {
   msgpack::pack(writer, *weight_manager_);
 }
 
