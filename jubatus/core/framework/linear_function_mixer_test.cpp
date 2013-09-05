@@ -60,15 +60,9 @@ class storage_mock_base : public storage::storage_base {
   void get_status(std::map<std::string, std::string>&) {
   }
 
-  bool save(std::ostream&) {
-    return true;
-  }
-  bool load(std::istream&) {
-    return true;
-  }
-
   void save(framework::msgpack_writer&) const {
   }
+
   void load(msgpack::object&) {
   }
 

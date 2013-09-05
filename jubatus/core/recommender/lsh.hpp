@@ -60,17 +60,15 @@ class lsh : public recommender_base {
   void update_row(const std::string& id, const sfv_diff_t& diff);
   void get_all_row_ids(std::vector<std::string>& ids) const;
   std::string type() const;
-  core::storage::recommender_storage_base* get_storage();
-  const core::storage::recommender_storage_base* get_const_storage() const;
 
-  void save(framework::msgpack_writer&) const;
-  void load(msgpack::object&);
+  framework::linear_mixable* get_linear_mixable();
+  const framework::linear_mixable* get_const_linear_mixable() const;
 
-  MSGPACK_DEFINE(column2baseval_, row2lshvals_);
+ protected:
+  void save_impl(framework::msgpack_writer&) const;
+  void load_impl(msgpack::object&);
+
  private:
-  bool save_impl(std::ostream&);
-  bool load_impl(std::istream&);
-
   void calc_lsh_values(const common::sfv_t& sfv, storage::bit_vector& bv) const;
   void generate_column_base(const std::string& column);
   void generate_column_bases(const common::sfv_t& v);
@@ -78,7 +76,8 @@ class lsh : public recommender_base {
   // bases for lsh
   pfi::data::unordered_map<std::string, std::vector<float> > column2baseval_;
 
-  core::storage::bit_index_storage row2lshvals_;
+  storage::bit_index_storage row2lshvals_;
+  storage::mixable_bit_index_storage mixable_storage_;
 
   const uint64_t base_num_;
 };

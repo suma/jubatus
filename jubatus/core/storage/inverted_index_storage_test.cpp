@@ -88,7 +88,7 @@ TEST(inverted_index_storage, diff) {
   s.get_diff(diff);
 
   inverted_index_storage t;
-  t.set_mixed_and_clear_diff(diff);
+  t.put_diff(diff);
   EXPECT_EQ(1.0, t.get("c1", "r1"));
   EXPECT_EQ(1.0, t.get("c2", "r1"));
   EXPECT_EQ(0.0, t.get("c3", "r1"));
@@ -114,7 +114,7 @@ TEST(inverted_index_storage, mix) {
   // d2 --> d1
   s2.mix(d2, d1);
 
-  s2.set_mixed_and_clear_diff(d1);
+  s2.put_diff(d1);
 
   // expected:
   //  c1: (1, 2, 0)   = (1,1,0) << (0,2,0)

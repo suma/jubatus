@@ -230,7 +230,7 @@ TEST(lsh_index_storage, get_and_set_diff) {
   string d1;
   s1.get_diff(d1);
 
-  s2.set_mixed_and_clear_diff(d1);
+  s2.put_diff(d1);
 
   vector<pair<string, float> > ids;
   s2.similar_row(make_hash("1 2 3 4"), 1, 0, 1, ids);
@@ -268,7 +268,7 @@ TEST(lsh_index_storage, mix) {
   s3.set_row("r2", h0, 1);
   s3.set_row("r3", h0, 1);
   s3.set_row("r4", h0, 1);
-  s3.set_mixed_and_clear_diff(d2);
+  s3.put_diff(d2);
 
   // r1, r2 and r3 are overwritten by d2
 
@@ -310,7 +310,7 @@ TEST(lsh_index_storage, set_and_remove_arround_mix) {
 
   s1.mix(d1, d2);
 
-  s1.set_mixed_and_clear_diff(d2);
+  s1.put_diff(d2);
   s1.remove_row("r3");
 
   vector<pair<string, float> > ids;

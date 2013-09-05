@@ -110,34 +110,21 @@ string recommender_mock::type() const {
   return "recommender_mock";
 }
 
-core::storage::recommender_storage_base* recommender_mock::get_storage() {
-  return &storage_;
+framework::linear_mixable* recommender_mock::get_linear_mixable() {
+  return NULL;
 }
 
-const core::storage::recommender_storage_base*
-    recommender_mock::get_const_storage()
-    const {
-  return &storage_;
+const framework::linear_mixable* recommender_mock::get_const_linear_mixable()
+  const {
+  return NULL;
 }
 
-bool recommender_mock::save_impl(ostream& os) {
-  pfi::data::serialization::binary_oarchive bo(os);
-  bo << *this;
-  return true;
-}
-
-void recommender_mock::save(framework::msgpack_writer& writer) const {
+void recommender_mock::save_impl(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
 
-void recommender_mock::load(msgpack::object& obj) {
+void recommender_mock::load_impl(msgpack::object& obj) {
   obj.convert(this);
-}
-
-bool recommender_mock::load_impl(istream& is) {
-  pfi::data::serialization::binary_iarchive bi(is);
-  bi >> *this;
-  return true;
 }
 
 }  // namespace recommender

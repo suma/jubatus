@@ -25,15 +25,15 @@
 
 #include "../common/type.hpp"
 #include "../storage/sparse_matrix_storage.hpp"
-#include "anomaly_storage_base.hpp"
 #include "anomaly_type.hpp"
 #include "../framework/model.hpp"
+#include "../framework/mixable.hpp"
 
 namespace jubatus {
 namespace core {
 namespace anomaly {
 
-class anomaly_base {
+class anomaly_base : public framework::model {
  public:
   anomaly_base();
   virtual ~anomaly_base();
@@ -47,22 +47,19 @@ class anomaly_base {
   virtual void get_all_row_ids(std::vector<std::string>& ids) const = 0;
 
   virtual std::string type() const = 0;
-  virtual core::storage::anomaly_storage_base* get_storage() = 0;
-  virtual const core::storage::anomaly_storage_base*
-      get_const_storage() const = 0;
 
-  void save(std::ostream&);
-  void load(std::istream&);
+  // For MIX
+  virtual framework::linear_mixable* get_linear_mixable() = 0;
+  virtual const framework::linear_mixable* get_const_linear_mixable() const = 0;
 
+  // model
+  virtual void save(framework::msgpack_writer&) const = 0;
+  virtual void load(msgpack::object&) = 0;
   // static float calc_distance(sfv_t& q1, sfv_t& q2);
   // static float calc_l2norm(sfv_t& query);
 
  protected:
   static const uint32_t NEIGHBOR_NUM;
-
-  virtual bool save_impl(std::ostream&) = 0;
-  virtual bool load_impl(std::istream&) = 0;
-
 };
 
 }  // namespace anomaly

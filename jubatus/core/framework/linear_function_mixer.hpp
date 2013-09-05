@@ -26,16 +26,34 @@ namespace jubatus {
 namespace core {
 namespace framework {
 
-class linear_function_mixer : public mixable<
-    storage::storage_base, diffv> {
+class linear_function_mixer : public linear_mixable {
  public:
-  diffv get_diff_impl() const;
+  typedef storage::storage_base model_type;
+  typedef pfi::lang::shared_ptr<model_type> model_ptr;
 
-  void mix_impl(const diffv& lhs, const diffv& rhs, diffv& mixed) const;
+  linear_function_mixer(model_ptr model)
+    : model_(model) {
+    if (!model) {
+      throw JUBATUS_EXCEPTION(common::config_not_set());
+    }
+  }
 
-  void put_diff_impl(const diffv& v);
+  model_ptr get_model() const {
+    return model_;
+  }
 
-  void clear();
+  void mix(const diffv& lhs, diffv& mixed) const;
+  void get_diff(diffv&) const;
+  void put_diff(const diffv& v);
+
+  // linear mixable
+  diff_object convert_diff_object(const msgpack::object&) const;
+  void mix(const msgpack::object& obj, diff_object) const;
+  void get_diff(msgpack_writer&) const;
+  void put_diff(const diff_object& obj);
+
+ private:
+  model_ptr model_;
 };
 
 }  // namespace framework

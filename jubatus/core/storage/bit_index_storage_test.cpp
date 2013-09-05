@@ -87,7 +87,7 @@ TEST(bit_index_storage, diff) {
   string d1;
   s1.get_diff(d1);
 
-  s2.set_mixed_and_clear_diff(d1);
+  s2.put_diff(d1);
   bit_vector v;
   s2.get_row("r1", v);
   EXPECT_TRUE(make_vector("0101") == v);
@@ -120,7 +120,7 @@ TEST(bit_index_storage, mix) {
   s3.set_row("r2", make_vector("1111"));
   s3.set_row("r3", make_vector("1111"));
   s3.set_row("r4", make_vector("1111"));
-  s3.set_mixed_and_clear_diff(d2);
+  s3.put_diff(d2);
 
   // r1, r2 and r3 are overwritten by d2
   // r4 is no longer retained

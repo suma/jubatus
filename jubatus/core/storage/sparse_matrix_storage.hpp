@@ -20,8 +20,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
 #include "../common/key_manager.hpp"
 #include "storage_type.hpp"
@@ -54,19 +52,11 @@ class sparse_matrix_storage : public framework::model {
   void get_all_row_ids(std::vector<std::string>& ids) const;
   void clear();
 
-  bool save(std::ostream&);
-  bool load(std::istream&);
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   MSGPACK_DEFINE(tbl_, column2id_);
  private:
-  friend class pfi::data::serialization::access;
-  template <class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(tbl_) & MEMBER(column2id_);
-  }
-
   tbl_t tbl_;
   common::key_manager column2id_;
 };

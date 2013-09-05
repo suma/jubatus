@@ -20,8 +20,6 @@
 #include <map>
 #include <string>
 #include <msgpack.hpp>
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
 #include "storage_base.hpp"
 #include "../common/key_manager.hpp"
@@ -72,8 +70,6 @@ class local_storage : public storage_base {
 
   void clear();
 
-  bool save(std::ostream&);
-  bool load(std::istream&);
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
   std::string type() const;
@@ -83,13 +79,6 @@ class local_storage : public storage_base {
   // map_features3_t tbl_;
   id_features3_t tbl_;
   common::key_manager class2id_;
-
- private:
-  friend class pfi::data::serialization::access;
-  template <class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(tbl_) & MEMBER(class2id_);
-  }
 };
 
 }  // namespace storage

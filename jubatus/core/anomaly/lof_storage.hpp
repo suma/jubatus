@@ -28,16 +28,30 @@
 #include <pficommon/lang/scoped_ptr.h>
 #include <pficommon/text/json.h>
 
-#include "anomaly_storage_base.hpp"
+#include "../framework/model.hpp"
+#include "../framework/mixable.hpp"
 #include "../common/type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../recommender/recommender_base.hpp"
 
 namespace jubatus {
 namespace core {
-namespace storage {
+namespace anomaly {
 
-class lof_storage : public anomaly_storage_base {
+struct lof_entry {
+  float kdist;
+  float lrd;
+
+  MSGPACK_DEFINE(kdist, lrd);
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & MEMBER(kdist) & MEMBER(lrd);
+  }
+};
+
+typedef pfi::data::unordered_map<std::string, lof_entry> lof_table_t;
+
+class lof_storage : public framework::model {
  public:
   static const uint32_t DEFAULT_NEIGHBOR_NUM;
   static const uint32_t DEFAULT_REVERSE_NN_NUM;
@@ -87,75 +101,22 @@ class lof_storage : public anomaly_storage_base {
   float get_kdist(const std::string& row) const;
   float get_lrd(const std::string& row) const;
 
-  bool save(std::ostream& os);
-  bool load(std::istream& is);
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
   // just for test
   void set_nn_engine(core::recommender::recommender_base* nn_engine);
 
-  virtual void get_diff(std::string& diff) const;
-  virtual void set_mixed_and_clear_diff(const std::string& mixed_diff);
-  virtual void mix(const std::string& lhs, std::string& rhs) const;
+  // for linear_mixable
+  void mix(const lof_table_t& lhs, lof_table_t& rhs) const;
+  void get_diff(lof_table_t&) const;
+  void put_diff(const lof_table_t& mixed_diff);
 
  private:
-  struct lof_entry {
-    float kdist;
-    float lrd;
-
-    MSGPACK_DEFINE(kdist, lrd);
-    template<typename Ar>
-    void serialize(Ar& ar) {
-      ar & MEMBER(kdist) & MEMBER(lrd);
-    }
-  };
-
-  typedef pfi::data::unordered_map<std::string, lof_entry> lof_table_t;
-
-  static void mark_removed(lof_entry& entry);
-  static bool is_removed(const lof_entry& entry);
-
-  friend class pfi::data::serialization::access;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(lof_table_) & MEMBER(lof_table_diff_);
-    ar & MEMBER(neighbor_num_) & MEMBER(reverse_nn_num_);
-
-    // TODO(kashihara): Make it more efficient
-    if (ar.is_read) {
-      std::string name;
-      ar & name;
-      nn_engine_->clear();
-
-      std::string impl;
-      ar & impl;
-      std::istringstream iss(impl);
-      nn_engine_->load(iss);
-    } else {
-      std::string name = nn_engine_->type();
-      ar & name;
-
-      std::ostringstream oss;
-      nn_engine_->save(oss);
-      std::string str = oss.str();
-      ar & str;
-    }
-  }
 
   float collect_lrds_from_neighbors(
       const std::vector<std::pair<std::string, float> >& neighbors,
       pfi::data::unordered_map<std::string, float>& neighbor_lrd) const;
-
-  void serialize_diff(
-      const lof_table_t& table,
-      const std::string& nn_diff,
-      std::ostream& out) const;
-  void deserialize_diff(
-      const std::string& diff,
-      lof_table_t& table,
-      std::string& nn_diff) const;
 
   void collect_neighbors(
       const std::string& row,
@@ -181,7 +142,10 @@ class lof_storage : public anomaly_storage_base {
   pfi::lang::scoped_ptr<core::recommender::recommender_base> nn_engine_;
 };
 
-}  // namespace storage
+typedef framework::linear_mixable_delegation<lof_storage, lof_table_t>
+  mixable_lof_storage;
+
+}  // namespace anomaly
 }  // namespace core
 }  // namespace jubatus
 

@@ -29,6 +29,8 @@ using std::pair;
 using std::string;
 using std::vector;
 using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::bit_index_storage;
+using jubatus::core::storage::mixable_bit_index_storage;
 
 namespace jubatus {
 namespace core {
@@ -37,11 +39,15 @@ namespace recommender {
 const uint64_t minhash::hash_prime = 0xc3a5c85c97cb3127ULL;
 
 minhash::minhash()
-    : hash_num_(64) {
+  : hash_num_(64)
+  , mixable_storage_(
+      mixable_bit_index_storage::model_ptr(new bit_index_storage)) {
 }
 
 minhash::minhash(const config& config)
-    : hash_num_(config.hash_num) {
+  : hash_num_(config.hash_num)
+  , mixable_storage_(
+      mixable_bit_index_storage::model_ptr(new bit_index_storage)) {
 }
 
 minhash::~minhash() {
@@ -58,7 +64,7 @@ void minhash::similar_row(
 
   bit_vector query_bv;
   calc_minhash_values(query, query_bv);
-  row2minhashvals_.similar_row(query_bv, ids, ret_num);
+  mixable_storage_.get_model()->similar_row(query_bv, ids, ret_num);
 }
 
 void minhash::neighbor_row(
@@ -73,12 +79,12 @@ void minhash::neighbor_row(
 
 void minhash::clear() {
   orig_.clear();
-  row2minhashvals_.clear();
+  mixable_storage_.get_model()->clear();
 }
 
 void minhash::clear_row(const string& id) {
   orig_.remove_row(id);
-  row2minhashvals_.remove_row(id);
+  mixable_storage_.get_model()->remove_row(id);
 }
 
 void minhash::calc_minhash_values(const common::sfv_t& sfv,
@@ -112,11 +118,11 @@ void minhash::update_row(const string& id, const sfv_diff_t& diff) {
   orig_.get_row(id, row);
   bit_vector bv;
   calc_minhash_values(row, bv);
-  row2minhashvals_.set_row(id, bv);
+  mixable_storage_.get_model()->set_row(id, bv);
 }
 
 void minhash::get_all_row_ids(std::vector<std::string>& ids) const {
-  row2minhashvals_.get_all_row_ids(ids);
+  mixable_storage_.get_model()->get_all_row_ids(ids);
 }
 
 // original by Hash64 http://burtleburtle.net/bob/hash/evahash.html
@@ -171,32 +177,20 @@ string minhash::type() const {
   return string("minhash");
 }
 
-bool minhash::save_impl(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << row2minhashvals_;
-  return true;
+void minhash::save_impl(framework::msgpack_writer& writer) const {
+  mixable_storage_.get_model()->save(writer);
 }
 
-bool minhash::load_impl(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> row2minhashvals_;
-  return true;
+void minhash::load_impl(msgpack::object& o) {
+  mixable_storage_.get_model()->load(o);
 }
 
-void minhash::save(framework::msgpack_writer& writer) const {
-  msgpack::pack(writer, row2minhashvals_);
+framework::linear_mixable* minhash::get_linear_mixable() {
+  return &mixable_storage_;
 }
 
-void minhash::load(msgpack::object& o) {
-  o.convert(&row2minhashvals_);
-}
-
-core::storage::recommender_storage_base* minhash::get_storage() {
-  return &row2minhashvals_;
-}
-const core::storage::recommender_storage_base*
-    minhash::get_const_storage() const {
-  return &row2minhashvals_;
+const framework::linear_mixable* minhash::get_const_linear_mixable() const {
+  return &mixable_storage_;
 }
 
 }  // namespace recommender

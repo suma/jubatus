@@ -25,11 +25,29 @@
 #include <pficommon/lang/shared_ptr.h>
 #include "../common/exception.hpp"
 #include "../common/byte_buffer.hpp"
+#include "model.hpp"
+#include "linear_mixable.hpp"
 
 namespace jubatus {
 namespace core {
 namespace framework {
 
+class mixable0 {
+ public:
+  virtual ~mixable0() {
+  }
+  virtual common::byte_buffer get_diff() const {}
+  virtual void put_diff(const common::byte_buffer&) {}
+  virtual void mix(const common::byte_buffer&,
+                   const common::byte_buffer&,
+                   common::byte_buffer&) const {}
+
+  virtual void save(std::ostream& ofs) {}
+  virtual void load(std::istream& ifs) {}
+  virtual void clear() {}
+};
+
+#if 0
 class mixable0 {
  public:
   mixable0() {
@@ -48,7 +66,83 @@ class mixable0 {
   virtual void load(std::istream& ifs) = 0;
   virtual void clear() = 0;
 };
+#endif
 
+// mixable_delegating doesnt inherit the `model`
+//  MUST NOT multiple inheritance `model`
+template <typename Model, typename Diff>
+class linear_mixable_delegation : public linear_mixable {
+ public:
+  typedef Model model_type;
+  typedef Diff diff_type;
+  typedef pfi::lang::shared_ptr<Model> model_ptr;
+
+  linear_mixable_delegation(model_ptr model) 
+    : model_(model) {
+    if (!model) {
+      throw JUBATUS_EXCEPTION(common::config_not_set());
+    }
+  }
+
+  virtual ~linear_mixable_delegation() {
+  }
+
+  model_ptr get_model() const {
+    return model_;
+  }
+
+  diff_object convert_diff_object(const msgpack::object& obj) const {
+    internal_diff_object* diff = new internal_diff_object;
+    diff_object diff_obj(diff);
+    obj.convert(&diff->diff_);
+    return diff_obj;
+  }
+
+  void mix(const msgpack::object& obj, diff_object ptr) const {
+    Diff diff;
+    internal_diff_object* diff_obj = dynamic_cast<internal_diff_object*>(ptr.get());
+    if (!diff_obj) {
+      throw JUBATUS_EXCEPTION(core::common::exception::runtime_error("bad diff_object"));
+    }
+    obj.convert(&diff);
+    model_->mix(diff, diff_obj->diff_);
+  }
+
+  void get_diff(msgpack_writer& writer) const {
+    Diff diff;
+    model_->get_diff(diff);
+    msgpack::pack(writer, diff);
+  }
+
+  void put_diff(const diff_object& ptr) {
+    internal_diff_object* diff_obj = dynamic_cast<internal_diff_object*>(ptr.get());
+    if (!diff_obj) {
+      throw JUBATUS_EXCEPTION(core::common::exception::runtime_error("bad diff_object"));
+    }
+    model_->put_diff(diff_obj->diff_);
+  }
+
+#if 0
+  void put_diff(const msgpack::object& obj) {
+    Diff diff;
+    obj.convert(&diff);
+    model_->put_diff(diff);
+  }
+#endif
+
+ private:
+  struct internal_diff_object : diff_object_raw {
+    void convert_binary(msgpack_writer& writer) const {
+      msgpack::pack(writer, diff_);
+    }
+
+    Diff diff_;
+  };
+
+  model_ptr model_;
+};
+
+#if 1
 template<typename Model, typename Diff>
 class mixable : public mixable0 {
  public:
@@ -127,6 +221,8 @@ class mixable : public mixable0 {
 
   model_ptr model_;
 };
+
+#endif
 
 }  // namespace framework
 }  // namespace core

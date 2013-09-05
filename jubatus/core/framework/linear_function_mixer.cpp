@@ -53,31 +53,62 @@ feature_val3_t mix_feature(
   return ret;
 }
 
+struct internal_diff_object : diff_object_raw {
+  void convert_binary(msgpack_writer& writer) const {
+    msgpack::pack(writer, diff_);
+  }
+
+  diffv diff_;
+};
+
 }  // namespace
 
-void linear_function_mixer::mix_impl(
-    const diffv& lhs,
-    const diffv& rhs,
-    diffv& mixed) const {
+void linear_function_mixer::mix(const diffv& lhs, diffv& mixed) const {
   features3_t l(lhs.v);
-  const features3_t& r(rhs.v);
-  storage::detail::binop(l, r, bind(mix_feature, lhs.count, rhs.count, _1, _2));
+  const features3_t& r(mixed.v);
+  storage::detail::binop(l, r, bind(mix_feature, lhs.count, mixed.count, _1, _2));
   mixed.v.swap(l);
-  mixed.count = lhs.count + rhs.count;
+  mixed.count += lhs.count;
 }
 
-diffv linear_function_mixer::get_diff_impl() const {
-  diffv ret;
-  ret.count = 1;  // TODO(kuenishi) mixer_->get_count();
-  get_model()->get_diff(ret.v);
-  return ret;
+void linear_function_mixer::get_diff(diffv& diff) const {
+  diff.count = 1;  // TODO(kuenishi) mixer_->get_count();
+  get_model()->get_diff(diff.v);
 }
 
-void linear_function_mixer::put_diff_impl(const diffv& v) {
-  get_model()->set_average_and_clear_diff(v.v);
+void linear_function_mixer::put_diff(const diffv& diff) {
+  get_model()->set_average_and_clear_diff(diff.v);
 }
 
-void linear_function_mixer::clear() {
+diff_object linear_function_mixer::convert_diff_object(const msgpack::object& obj) const {
+  internal_diff_object* diff = new internal_diff_object;
+  diff_object diff_obj(diff);
+  obj.convert(&diff->diff_);
+  return diff_obj;
+}
+
+void linear_function_mixer::mix(const msgpack::object& obj, diff_object ptr) const {
+  diffv diff;
+  internal_diff_object* diff_obj = dynamic_cast<internal_diff_object*>(ptr.get());
+  if (!diff_obj) {
+    throw JUBATUS_EXCEPTION(core::common::exception::runtime_error("bad diff_object"));
+  }
+  obj.convert(&diff);
+  mix(diff, diff_obj->diff_);
+}
+
+void linear_function_mixer::get_diff(msgpack_writer& writer) const {
+  diffv diff;
+  get_diff(diff);
+  msgpack::pack(writer, diff);
+}
+
+void linear_function_mixer::put_diff(const diff_object& ptr) {
+  internal_diff_object* diff_obj = dynamic_cast<internal_diff_object*>(ptr.get());
+  if (!diff_obj) {
+    throw JUBATUS_EXCEPTION(core::common::exception::runtime_error("bad diff_object"));
+  }
+  put_diff(diff_obj->diff_);
 }
 
 }  // namespace framework

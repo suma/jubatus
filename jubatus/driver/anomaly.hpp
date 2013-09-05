@@ -35,7 +35,7 @@ struct mixable_anomaly : public core::framework::mixable<
     std::string> {
   std::string get_diff_impl() const {
     std::string diff;
-    get_model()->get_const_storage()->get_diff(diff);
+    //get_model()->get_const_storage()->get_diff(diff);
     return diff;
   }
 
@@ -47,8 +47,8 @@ struct mixable_anomaly : public core::framework::mixable<
       const std::string& lhs,
       const std::string& rhs,
       std::string& mixed) const {
-    mixed = lhs;
-    get_model()->get_const_storage()->mix(rhs, mixed);
+    //mixed = lhs;
+    //get_model()->get_const_storage()->mix(rhs, mixed);
   }
 
   void clear() {

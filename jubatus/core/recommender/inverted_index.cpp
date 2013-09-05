@@ -27,12 +27,16 @@
 using std::pair;
 using std::string;
 using std::vector;
+using jubatus::core::storage::inverted_index_storage;
+using jubatus::core::storage::mixable_inverted_index_storage;
 
 namespace jubatus {
 namespace core {
 namespace recommender {
 
-inverted_index::inverted_index() {
+inverted_index::inverted_index()
+  : mixable_storage_(mixable_inverted_index_storage::model_ptr(
+        new inverted_index_storage)) {
 }
 
 inverted_index::~inverted_index() {
@@ -46,7 +50,7 @@ void inverted_index::similar_row(
   if (ret_num == 0) {
     return;
   }
-  inv_.calc_scores(query, ids, ret_num);
+  mixable_storage_.get_model()->calc_scores(query, ids, ret_num);
 }
 
 void inverted_index::neighbor_row(
@@ -61,14 +65,14 @@ void inverted_index::neighbor_row(
 
 void inverted_index::clear() {
   orig_.clear();
-  inv_.clear();
+  mixable_storage_.get_model()->clear();
 }
 
 void inverted_index::clear_row(const std::string& id) {
   vector<pair<string, float> > columns;
   orig_.get_row(id, columns);
   for (size_t i = 0; i < columns.size(); ++i) {
-    inv_.remove(columns[i].first, id);
+    mixable_storage_.get_model()->remove(columns[i].first, id);
   }
   orig_.remove_row(id);
 }
@@ -76,46 +80,33 @@ void inverted_index::clear_row(const std::string& id) {
 void inverted_index::update_row(const std::string& id, const sfv_diff_t& diff) {
   orig_.set_row(id, diff);
   for (size_t i = 0; i < diff.size(); ++i) {
-    inv_.set(diff[i].first, id, diff[i].second);
+    mixable_storage_.get_model()->set(diff[i].first, id, diff[i].second);
   }
 }
 
 void inverted_index::get_all_row_ids(std::vector<std::string>& ids) const {
-  inv_.get_all_column_ids(ids);  // inv_.column = row
+  mixable_storage_.get_model()->get_all_column_ids(ids);  // inv_.column = row
 }
 
 string inverted_index::type() const {
   return string("inverted_index");
 }
 
-bool inverted_index::save_impl(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << inv_;
-  return true;
+void inverted_index::save_impl(framework::msgpack_writer& writer) const {
+  msgpack::pack(writer, *mixable_storage_.get_model().get());
 }
 
-bool inverted_index::load_impl(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> inv_;
-  return true;
+void inverted_index::load_impl(msgpack::object& o) {
+  o.convert(mixable_storage_.get_model().get());
 }
 
-void inverted_index::save(framework::msgpack_writer& writer) const {
-  msgpack::pack(writer, inv_);
+framework::linear_mixable* inverted_index::get_linear_mixable() {
+  return &mixable_storage_;
 }
 
-void inverted_index::load(msgpack::object& o) {
-  o.convert(&inv_);
-}
-
-core::storage::recommender_storage_base* inverted_index::get_storage() {
-  return &inv_;
-}
-
-const core::storage::recommender_storage_base*
-    inverted_index::get_const_storage()
-     const {
-  return &inv_;
+const framework::linear_mixable* inverted_index::get_const_linear_mixable()
+  const {
+  return &mixable_storage_;
 }
 
 }  // namespace recommender

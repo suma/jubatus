@@ -24,8 +24,8 @@
 #include <pficommon/lang/shared_ptr.h>
 #include "../common/type.hpp"
 #include "../framework/model.hpp"
+#include "../framework/mixable.hpp"
 #include "../storage/sparse_matrix_storage.hpp"
-#include "../storage/recommender_storage_base.hpp"
 #include "recommender_type.hpp"
 
 namespace jubatus {
@@ -53,9 +53,10 @@ class recommender_base : public framework::model {
   virtual void get_all_row_ids(std::vector<std::string>& ids) const = 0;
 
   virtual std::string type() const = 0;
-  virtual core::storage::recommender_storage_base* get_storage() = 0;
-  virtual const core::storage::recommender_storage_base* get_const_storage()
-      const = 0;
+
+  // For MIX
+  virtual framework::linear_mixable* get_linear_mixable() = 0;
+  virtual const framework::linear_mixable* get_const_linear_mixable() const = 0;
 
   virtual void similar_row(
       const std::string& id,
@@ -69,17 +70,15 @@ class recommender_base : public framework::model {
   void complete_row(const common::sfv_t& query, common::sfv_t& ret) const;
   void decode_row(const std::string& id, common::sfv_t& ret) const;
 
-  void save(std::ostream&);
-  void load(std::istream&);
-  virtual void save(framework::msgpack_writer&) const = 0;
-  virtual void load(msgpack::object&) = 0;
+  void save(framework::msgpack_writer&) const;
+  void load(msgpack::object&);
 
   static float calc_similality(common::sfv_t& q1, common::sfv_t& q2);
   static float calc_l2norm(const common::sfv_t& query);
 
  protected:
-  virtual bool save_impl(std::ostream&) = 0;
-  virtual bool load_impl(std::istream&) = 0;
+  virtual void save_impl(framework::msgpack_writer&) const = 0;
+  virtual void load_impl(msgpack::object&) = 0;
 
   static const uint64_t complete_row_similar_num_;
   core::storage::sparse_matrix_storage orig_;

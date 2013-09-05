@@ -33,14 +33,6 @@ anomaly_base::anomaly_base() {
 anomaly_base::~anomaly_base() {
 }
 
-void anomaly_base::save(std::ostream& os) {
-  save_impl(os);
-}
-
-void anomaly_base::load(std::istream& is) {
-  load_impl(is);
-}
-
 }  // namespace anomaly
 }  // namespace core
 }  // namespace jubatus

@@ -95,12 +95,10 @@ class lof_impl : public lof {
     return string("lof_impl");
   }
 
-  bool save_impl(std::ostream&) {
-    return true;
+  void lof::save(framework::msgpack_writer& writer) const {
   }
 
-  bool load_impl(std::istream&) {
-    return true;
+  void lof::load(msgpack::object& o) {
   }
 
   storage::anomaly_storage_base* get_storage() {
@@ -108,6 +106,13 @@ class lof_impl : public lof {
   }
 
   const storage::anomaly_storage_base* get_const_storage() const {
+    return NULL;
+  }
+  framework::linear_mixable* get_linear_mixable() {
+    return NULL;
+  }
+
+  const framework::linear_mixable* get_const_linear_mixable() {
     return NULL;
   }
 };

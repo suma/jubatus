@@ -40,13 +40,18 @@ class weight_manager {
 
   void add_weight(const std::string& key, float weight);
 
-  const keyword_weights& get_diff() const {
-    return diff_weights_;
+  void get_diff(keyword_weights& diff) const {
+    diff = diff_weights_;
   }
 
   void put_diff(const keyword_weights& diff) {
     master_weights_.merge(diff);
     diff_weights_.clear();
+  }
+
+  void mix(const keyword_weights& lhs,
+      keyword_weights& acc) const {
+    acc.merge(lhs);
   }
 
   void clear() {

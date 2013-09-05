@@ -21,7 +21,6 @@
 #include <ostream>
 #include <utility>
 #include <vector>
-#include <pficommon/data/serialization.h>
 #include <pficommon/data/unordered_map.h>
 
 namespace jubatus {
@@ -55,12 +54,6 @@ class lsh_vector {
 
  private:
   friend class pfi::data::hash<lsh_vector>;
-  friend class pfi::data::serialization::access;
-
-  template <class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(values_);
-  }
 
   std::vector<int> values_;
 };

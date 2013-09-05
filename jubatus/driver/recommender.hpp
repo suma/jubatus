@@ -35,12 +35,12 @@ struct mixable_recommender : public core::framework::mixable<
     std::string> {
   std::string get_diff_impl() const {
     std::string ret;
-    get_model()->get_const_storage()->get_diff(ret);
+    //get_model()->get_const_storage()->get_diff(ret);
     return ret;
   }
 
   void put_diff_impl(const std::string& v) {
-    get_model()->get_storage()->set_mixed_and_clear_diff(v);
+    //get_model()->get_storage()->set_mixed_and_clear_diff(v);
   }
 
   void mix_impl(
@@ -48,7 +48,7 @@ struct mixable_recommender : public core::framework::mixable<
       const std::string& rhs,
       std::string& mixed) const {
     mixed = lhs;
-    get_model()->get_const_storage()->mix(rhs, mixed);
+    //get_model()->get_const_storage()->mix(rhs, mixed);
   }
 
   void clear() {

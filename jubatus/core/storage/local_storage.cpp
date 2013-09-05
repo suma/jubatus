@@ -20,8 +20,6 @@
 #include <string>
 #include <vector>
 #include <pficommon/data/intern.h>
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 
 using std::string;
 
@@ -173,18 +171,6 @@ void local_storage::clear() {
   // Clear and minimize
   id_features3_t().swap(tbl_);
   common::key_manager().swap(class2id_);
-}
-
-bool local_storage::save(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << *this;
-  return true;
-}
-
-bool local_storage::load(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> *this;
-  return true;
 }
 
 void local_storage::save(framework::msgpack_writer& writer) const {

@@ -85,29 +85,13 @@ class recommender_impl : public recommender_base {
   }
 
   string type() const {
-    return string("recommender_impl");
+    aveturn string("recommender_impl");
   }
 
   void save(framework::msgpack_writer&) const {
   }
 
   void load(msgpack::object&) {
-  }
-
-  bool save_impl(std::ostream&) {
-    return true;
-  }
-
-  bool load_impl(std::istream&) {
-    return true;
-  }
-
-  storage::recommender_storage_base* get_storage() {
-    return NULL;
-  }
-
-  const storage::recommender_storage_base* get_const_storage() const {
-    return NULL;
   }
 };
 

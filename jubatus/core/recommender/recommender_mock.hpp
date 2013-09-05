@@ -20,7 +20,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <pficommon/data/serialization.h>
 #include "recommender_base.hpp"
 #include "recommender_mock_storage.hpp"
 
@@ -63,23 +62,14 @@ class recommender_mock : public recommender_base {
   virtual void get_all_row_ids(std::vector<std::string>& ids) const;
 
   virtual std::string type() const;
-  virtual core::storage::recommender_storage_base* get_storage();
-  virtual const core::storage::recommender_storage_base*
-      get_const_storage() const;
 
-  void save(framework::msgpack_writer&) const;
-  void load(msgpack::object&);
+  framework::linear_mixable* get_linear_mixable();
+  const framework::linear_mixable* get_const_linear_mixable() const;
 
   MSGPACK_DEFINE(orig_, storage_);
  private:
-  virtual bool save_impl(std::ostream&);
-  virtual bool load_impl(std::istream&);
-
-  friend class pfi::data::serialization::access;
-  template<typename Ar>
-  void serialize(Ar& ar) {
-    ar & orig_ & storage_;
-  }
+  virtual void save_impl(framework::msgpack_writer&) const;
+  virtual void load_impl(msgpack::object&);
 
   recommender_mock_storage storage_;
 };

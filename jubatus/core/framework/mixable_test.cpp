@@ -19,49 +19,40 @@
 #include <sstream>
 #include <gtest/gtest.h>
 
-using std::stringstream;
-using jubatus::core::common::byte_buffer;
-
 namespace jubatus {
 namespace core {
 namespace framework {
 
-struct int_model {
+struct int_model : public model {
   int_model()
-      : value(0) {
+      : value(0), diff_(0) {
   }
 
   int value;
 
-  void save(std::ostream& ofs) {
-    ofs << value;
+  void save(msgpack_writer& writer) const {
+    msgpack::pack(writer, value);
   }
 
-  void load(std::istream& ifs) {
-    ifs >> value;
-  }
-};
-
-class mixable_int : public mixable<int_model, int> {
- public:
-  mixable_int()
-      : diff_() {
+  void load(msgpack::object& o) {
+    o.convert(&value);
   }
 
   void clear() {
   }
 
-  int get_diff_impl() const {
-    return diff_;
+  // for linear_mixable
+  void get_diff(int& diff) const {
+    diff = diff_;
   }
 
-  void put_diff_impl(const int& n) {
-    get_model()->value += n;
+  void put_diff(const int& n) {
+    value += n;
     diff_ = 0;
   }
 
-  void mix_impl(const int& lhs, const int& rhs, int& mixed) const {
-    mixed = lhs + rhs;
+  void mix(const int& lhs, int& mixed) const {
+    mixed += lhs;
   }
 
   void add(int n) {
@@ -72,37 +63,46 @@ class mixable_int : public mixable<int_model, int> {
   int diff_;
 };
 
+typedef linear_mixable_delegation<int_model, int> mixable_int;
+
 TEST(mixable, config_not_set) {
-  mixable_int m;
-  EXPECT_THROW(m.get_diff(), common::config_not_set);
-  EXPECT_THROW(m.put_diff(byte_buffer()), common::config_not_set);
+  //EXPECT_THROW(mixable_int(),common::config_not_set);
 }
 
 TEST(mixable, save_load) {
-  mixable_int m;
-  m.set_model(mixable_int::model_ptr(new int_model));
+  mixable_int m(mixable_int::model_ptr(new int_model));
   m.get_model()->value = 10;
 
-  stringstream ss;
-  m.save(ss);
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  m.get_model()->save(swriter);
+
   m.get_model()->value = 5;
-  m.load(ss);
+
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+  m.get_model()->load(msg.get());
+
   EXPECT_EQ(10, m.get_model()->value);
 }
 
 TEST(mixable, trivial) {
-  mixable_int m;
-  m.set_model(mixable_int::model_ptr(new int_model));
+  mixable_int m(mixable_int::model_ptr(new int_model));
 
-  m.add(10);
+  m.get_model()->add(10);
 
-  byte_buffer diff1 = m.get_diff();
-  byte_buffer diff2 = m.get_diff();
+  msgpack::sbuffer diff1, diff2;
+  stream_writer<msgpack::sbuffer> sw1(diff1), sw2(diff2);
+  m.get_diff(sw1);
+  m.get_diff(sw2);
 
-  byte_buffer mixed;
-  m.mix(diff1, diff2, mixed);
+  msgpack::unpacked m1, m2;
+  msgpack::unpack(&m1, diff1.data(), diff1.size());
+  msgpack::unpack(&m2, diff2.data(), diff2.size());
 
-  m.put_diff(mixed);
+  diff_object diff_obj_mixed = m.convert_diff_object(m1.get());
+  m.mix(m2.get(), diff_obj_mixed);
+  m.put_diff(diff_obj_mixed);
 
   EXPECT_EQ(20, m.get_model()->value);
 }

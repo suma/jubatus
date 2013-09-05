@@ -33,7 +33,6 @@ def build(bld):
       'storage_type.hpp',
       'bit_vector.hpp',
       'sparse_matrix_storage.hpp',
-      'recommender_storage_base.hpp',
       'local_storage.hpp',
       'local_storage_mixture.hpp',
       ]

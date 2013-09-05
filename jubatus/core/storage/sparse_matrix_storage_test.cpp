@@ -126,11 +126,15 @@ TEST(sparse_matrix_storage, calc_l2norm) {
 TEST(sparse_matrix_storage, save_load) {
   sparse_matrix_storage s;
   s.set("r1", "c1", 1.0);
-  stringstream ss;
-  s.save(ss);
+
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  s.save(swriter);
 
   sparse_matrix_storage s2;
-  s2.load(ss);
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+  s2.load(msg.get());
   EXPECT_FLOAT_EQ(1.0, s2.get("r1", "c1"));
 }
 

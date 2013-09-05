@@ -29,6 +29,7 @@ using std::pair;
 using std::string;
 using std::vector;
 using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::mixable_bit_index_storage;
 
 namespace jubatus {
 namespace core {
@@ -41,18 +42,21 @@ lsh::config::config()
 }
 
 lsh::lsh(uint64_t base_num)
-    : base_num_(base_num) {
+    : mixable_storage_(mixable_bit_index_storage::model_ptr(new storage::bit_index_storage))
+    , base_num_(base_num) {
   if (base_num == 0) {
     throw JUBATUS_EXCEPTION(common::exception::runtime_error("base_num == 0"));
   }
 }
 
 lsh::lsh(const config& config)
-    : base_num_(config.bit_num) {
+    : mixable_storage_(mixable_bit_index_storage::model_ptr(new storage::bit_index_storage))
+    , base_num_(config.bit_num) {
 }
 
 lsh::lsh()
-    : base_num_(DEFAULT_BASE_NUM) {
+    : mixable_storage_(mixable_bit_index_storage::model_ptr(new storage::bit_index_storage))
+    , base_num_(DEFAULT_BASE_NUM) {
 }
 
 lsh::~lsh() {
@@ -69,7 +73,7 @@ void lsh::similar_row(
 
   bit_vector query_bv;
   calc_lsh_values(query, query_bv);
-  row2lshvals_.similar_row(query_bv, ids, ret_num);
+  mixable_storage_.get_model()->similar_row(query_bv, ids, ret_num);
 }
 
 void lsh::neighbor_row(
@@ -86,12 +90,12 @@ void lsh::clear() {
   orig_.clear();
   pfi::data::unordered_map<std::string, std::vector<float> >()
     .swap(column2baseval_);
-  row2lshvals_.clear();
+  mixable_storage_.get_model()->clear();
 }
 
 void lsh::clear_row(const string& id) {
   orig_.remove_row(id);
-  row2lshvals_.remove_row(id);
+  mixable_storage_.get_model()->remove_row(id);
 }
 
 void lsh::calc_lsh_values(const common::sfv_t& sfv, bit_vector& bv) const {
@@ -123,45 +127,42 @@ void lsh::update_row(const string& id, const sfv_diff_t& diff) {
   orig_.get_row(id, row);
   bit_vector bv;
   calc_lsh_values(row, bv);
-  row2lshvals_.set_row(id, bv);
+  mixable_storage_.get_model()->set_row(id, bv);
 }
 
 void lsh::get_all_row_ids(std::vector<std::string>& ids) const {
-  row2lshvals_.get_all_row_ids(ids);
+  mixable_storage_.get_model()->get_all_row_ids(ids);
 }
 
 string lsh::type() const {
   return string("lsh");
 }
 
-bool lsh::save_impl(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << column2baseval_;
-  oa << row2lshvals_;
-  return true;
+void lsh::save_impl(framework::msgpack_writer& writer) const {
+  msgpack::packer<framework::msgpack_writer> pk(writer);
+
+  pk.pack_array(2);
+  pk.pack(column2baseval_);
+  pk.pack(*mixable_storage_.get_model().get());
 }
 
-bool lsh::load_impl(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> column2baseval_;
-  ia >> row2lshvals_;
-  return true;
+void lsh::load_impl(msgpack::object& o) {
+  //o.convert(this);
+  size_t size = o.via.array.size;
+  if (o.type != msgpack::type::ARRAY || size != 2) {
+    throw msgpack::type_error();
+  }
+
+  o.via.array.ptr[0].convert(&column2baseval_);
+  o.via.array.ptr[1].convert(mixable_storage_.get_model().get());
 }
 
-void lsh::save(framework::msgpack_writer& writer) const {
-  msgpack::pack(writer, *this);
+framework::linear_mixable* lsh::get_linear_mixable() {
+  return &mixable_storage_;
 }
 
-void lsh::load(msgpack::object& o) {
-  o.convert(this);
-}
-
-core::storage::recommender_storage_base* lsh::get_storage() {
-  return &row2lshvals_;
-}
-
-const core::storage::recommender_storage_base* lsh::get_const_storage() const {
-  return &row2lshvals_;
+const framework::linear_mixable* lsh::get_const_linear_mixable() const {
+  return &mixable_storage_;
 }
 
 }  // namespace recommender

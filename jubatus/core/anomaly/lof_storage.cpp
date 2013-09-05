@@ -28,7 +28,6 @@
 #include "../common/exception.hpp"
 #include "../recommender/euclid_lsh.hpp"
 
-using jubatus::core::storage::lof_storage;
 using pfi::data::serialization::binary_iarchive;
 using pfi::data::serialization::binary_oarchive;
 using pfi::data::unordered_map;
@@ -46,7 +45,17 @@ using std::vector;
 
 namespace jubatus {
 namespace core {
-namespace storage {
+namespace anomaly {
+
+namespace {
+void mark_removed(lof_entry& entry) {
+  entry.kdist = -1;
+}
+
+bool is_removed(const lof_entry& entry) {
+  return entry.kdist < 0;
+}
+}  // namespace
 
 const uint32_t lof_storage::DEFAULT_NEIGHBOR_NUM = 10;
 const uint32_t lof_storage::DEFAULT_REVERSE_NN_NUM = 30;
@@ -193,18 +202,6 @@ void lof_storage::update_all() {
   }
 }
 
-bool lof_storage::save(ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << *this;
-  return true;
-}
-
-bool lof_storage::load(istream& is) {
-  binary_iarchive ia(is);
-  ia >> *this;
-  return true;
-}
-
 void lof_storage::save(framework::msgpack_writer& writer) const {
   msgpack::packer<framework::msgpack_writer> pk(writer);
   pk.pack_array(4);
@@ -231,24 +228,13 @@ void lof_storage::set_nn_engine(recommender::recommender_base* nn_engine) {
   nn_engine_.reset(nn_engine);
 }
 
-void lof_storage::get_diff(string& diff) const {
-  string nn_diff;
-  nn_engine_->get_const_storage()->get_diff(nn_diff);
-
-  ostringstream oss;
-  serialize_diff(lof_table_diff_, nn_diff, oss);
-
-  diff = oss.str();
+void lof_storage::get_diff(lof_table_t& diff) const {
+  diff = lof_table_diff_;
 }
 
-void lof_storage::set_mixed_and_clear_diff(const string& mixed_diff) {
-  string nn_diff;
-  deserialize_diff(mixed_diff, lof_table_diff_, nn_diff);
-
-  nn_engine_->get_storage()->set_mixed_and_clear_diff(nn_diff);
-
-  for (lof_table_t::const_iterator it = lof_table_diff_.begin();
-       it != lof_table_diff_.end(); ++it) {
+void lof_storage::put_diff(const lof_table_t& mixed_diff) {
+  for (lof_table_t::const_iterator it = mixed_diff.begin();
+       it != mixed_diff.end(); ++it) {
     if (is_removed(it->second)) {
       lof_table_.erase(it->first);
     } else {
@@ -258,40 +244,17 @@ void lof_storage::set_mixed_and_clear_diff(const string& mixed_diff) {
   lof_table_diff_.clear();
 }
 
-void lof_storage::mix(const string& lhs, string& rhs) const {
-  lof_table_t diff, mixed;
-  string nn_diff, nn_mixed;
-
-  deserialize_diff(lhs, diff, nn_diff);
-  deserialize_diff(rhs, mixed, nn_mixed);
-
-  nn_engine_->get_const_storage()->mix(nn_diff, nn_mixed);
-
-  for (lof_table_t::const_iterator it = diff.begin(); it != diff.end(); ++it) {
+void lof_storage::mix(const lof_table_t& lhs, lof_table_t& mixed) const {
+  for (lof_table_t::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
     if (is_removed(it->second)) {
       mark_removed(mixed[it->first]);
     } else {
       mixed.insert(*it);
     }
   }
-
-  ostringstream oss;
-  serialize_diff(mixed, nn_mixed, oss);
-
-  rhs = oss.str();
 }
 
 // private
-
-// static
-void lof_storage::mark_removed(lof_entry& entry) {
-  entry.kdist = -1;
-}
-
-// static
-bool lof_storage::is_removed(const lof_entry& entry) {
-  return entry.kdist < 0;
-}
 
 float lof_storage::collect_lrds_from_neighbors(
     const vector<pair<string, float> >& neighbors,
@@ -317,38 +280,6 @@ float lof_storage::collect_lrds_from_neighbors(
   }
 
   return neighbors.size() / sum_reachability;
-}
-
-void lof_storage::serialize_diff(
-    const lof_table_t& table,
-    const string& nn_diff,
-    ostream& out) const {
-  binary_oarchive bo(out);
-  string name = nn_engine_->type();
-  bo << const_cast<lof_table_t&>(table) << name << const_cast<string&>(nn_diff);
-}
-
-void lof_storage::deserialize_diff(
-    const string& diff,
-    lof_table_t& table,
-    string& nn_diff) const {
-  string nn_engine_name;
-
-  istringstream iss(diff);
-  binary_iarchive bi(iss);
-  bi >> table >> nn_engine_name;
-
-  if (nn_engine_->type() != nn_engine_name) {
-    throw JUBATUS_EXCEPTION(
-      common::exception::runtime_error(
-        "inconsistent nearest neighbor engine type")
-      << common::exception::error_message(
-        "lof's NN engine type:  " + nn_engine_->type())
-      << common::exception::error_message(
-        "diff's NN engine type: " + nn_engine_name));
-  }
-
-  bi >> nn_diff;
 }
 
 void lof_storage::collect_neighbors(
@@ -425,6 +356,6 @@ void lof_storage::update_lrd_with_neighbors(
   lof_table_diff_[row].lrd = length / sum_reachability;
 }
 
-}  // namespace storage
+}  // namespace anomaly
 }  // namespace core
 }  // namespace jubatus

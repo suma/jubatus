@@ -67,13 +67,16 @@ float calculate_lof(
 
 }  // namespace
 
-lof::lof() {
+lof::lof()
+  : mixable_storage_(mixable_lof_storage::model_ptr(
+        new lof_storage())) {
 }
 
 lof::lof(
-    const storage::lof_storage::config& config,
+    const lof_storage::config& config,
     recommender::recommender_base* nn_engine)
-    : lof_index_(config, nn_engine) {
+  : mixable_storage_(mixable_lof_storage::model_ptr(
+        new lof_storage(config, nn_engine))) {
 }
 
 lof::~lof() {
@@ -81,56 +84,52 @@ lof::~lof() {
 
 float lof::calc_anomaly_score(const common::sfv_t& query) const {
   unordered_map<string, float> neighbor_lrd;
-  const float lrd = lof_index_.collect_lrds(query, neighbor_lrd);
+  const float lrd = mixable_storage_.get_model()->collect_lrds(query, neighbor_lrd);
 
   return calculate_lof(lrd, neighbor_lrd);
 }
 
 float lof::calc_anomaly_score(const string& id) const {
   unordered_map<string, float> neighbor_lrd;
-  const float lrd = lof_index_.collect_lrds(id, neighbor_lrd);
+  const float lrd = mixable_storage_.get_model()->collect_lrds(id, neighbor_lrd);
 
   return calculate_lof(lrd, neighbor_lrd);
 }
 
 void lof::clear() {
-  lof_index_.clear();
+  mixable_storage_.get_model()->clear();
 }
 
 void lof::clear_row(const string& id) {
-  lof_index_.remove_row(id);
+  mixable_storage_.get_model()->remove_row(id);
 }
 
 void lof::update_row(const string& id, const sfv_diff_t& diff) {
-  lof_index_.update_row(id, diff);
+  mixable_storage_.get_model()->update_row(id, diff);
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {
-  lof_index_.get_all_row_ids(ids);
+  mixable_storage_.get_model()->get_all_row_ids(ids);
 }
 
 string lof::type() const {
   return "lof";
 }
 
-storage::anomaly_storage_base* lof::get_storage() {
-  return &lof_index_;
+framework::linear_mixable* lof::get_linear_mixable() {
+  return &mixable_storage_;
 }
 
-const storage::anomaly_storage_base* lof::get_const_storage() const {
-  return &lof_index_;
+const framework::linear_mixable* lof::get_const_linear_mixable() const {
+  return &mixable_storage_;
 }
 
-bool lof::save_impl(ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << lof_index_;
-  return true;
+void lof::save(framework::msgpack_writer& writer) const {
+  mixable_storage_.get_model()->save(writer);
 }
 
-bool lof::load_impl(istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> lof_index_;
-  return true;
+void lof::load(msgpack::object& o) {
+  mixable_storage_.get_model()->load(o);
 }
 
 }  // namespace anomaly

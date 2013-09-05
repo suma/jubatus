@@ -22,7 +22,6 @@
 #include <vector>
 #include <iostream>
 #include <msgpack.hpp>
-#include <pficommon/data/serialization.h>
 
 namespace jubatus {
 namespace core {
@@ -70,12 +69,6 @@ class bit_vector {
 
   MSGPACK_DEFINE(bits_, bit_num_);
  private:
-  friend class pfi::data::serialization::access;
-  template <class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(bits_) & MEMBER(bit_num_);
-  }
-
   std::vector<uint64_t> bits_;
   uint64_t bit_num_;
 };

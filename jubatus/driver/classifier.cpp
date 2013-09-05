@@ -42,15 +42,16 @@ classifier::classifier(
     jubatus::core::storage::storage_base* model_storage,
     jubatus::core::classifier::multiclass_classifier* classifier_method,
     pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter)
-    : mixable_holder_(new mixable_holder),
-      converter_(converter),
-      classifier_(classifier_method) {
-  mixable_classifier_model_.set_model(
-      core::framework::linear_function_mixer::model_ptr(model_storage));
-  wm_.set_model(core::framework::mixable_weight_manager::model_ptr(new weight_manager));
+    : mixable_holder_(new mixable_holder)
+    , converter_(converter)
+    , classifier_(classifier_method)
+    , mixable_classifier_model_(
+          core::framework::linear_function_mixer::model_ptr(model_storage))
+    , wm_(core::framework::mixable_weight_manager::model_ptr(new weight_manager))
+  {
 
-  mixable_holder_->register_mixable(&mixable_classifier_model_);
-  mixable_holder_->register_mixable(&wm_);
+  //mixable_holder_->register_mixable(&mixable_classifier_model_);
+  //mixable_holder_->register_mixable(&wm_);
 
   (*converter_).set_weight_manager(wm_.get_model());
 }
@@ -77,7 +78,6 @@ jubatus::core::classifier::classify_result classifier::classify(
 
 void classifier::clear() {
   get_model()->clear();
-  wm_.clear();
 }
 
 }  // namespace driver

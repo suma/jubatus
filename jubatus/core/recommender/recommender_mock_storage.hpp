@@ -23,16 +23,23 @@
 #include <vector>
 #include <msgpack.hpp>
 #include <pficommon/data/serialization.h>
-#include "../storage/recommender_storage_base.hpp"
 #include "recommender_type.hpp"
+#include "../framework/model.hpp"
 
 namespace jubatus {
 namespace core {
 namespace recommender {
 
 class recommender_mock_storage
-    : public core::storage::recommender_storage_base {
+    : public framework::model {
  public:
+  typedef std::map<common::sfv_t, std::vector<std::pair<std::string, float> > >
+    relation_type;
+  struct diff_type {
+    relation_type similar_relation;
+    relation_type neighbor_relation;
+  };
+
   virtual ~recommender_mock_storage();
 
   void set_similar_items(
@@ -57,21 +64,15 @@ class recommender_mock_storage
 
   std::string name() const;
 
-  virtual void get_diff(std::string& diff) const;
-  virtual void set_mixed_and_clear_diff(const std::string& mixed_diff);
-  virtual void mix(const std::string& lhs, std::string& rhs) const;
+  virtual void get_diff(diff_type& diff) const;
+  virtual void set_mixed_and_clear_diff(const diff_type& mixed_diff);
+  virtual void mix(const diff_type& lhs, diff_type& rhs) const;
+
+  void save(framework::msgpack_writer&) const;
+  void load(msgpack::object&);
 
   MSGPACK_DEFINE(similar_relation_, neighbor_relation_);
  private:
-  typedef std::map<common::sfv_t, std::vector<std::pair<std::string, float> > >
-    relation_type;
-
-  friend class pfi::data::serialization::access;
-  template<typename Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(similar_relation_) & MEMBER(neighbor_relation_);
-  }
-
   static void get_relation(
       const common::sfv_t& query,
       const relation_type& relmap,

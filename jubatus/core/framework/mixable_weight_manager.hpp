@@ -19,43 +19,14 @@
 
 #include "model.hpp"
 #include "mixable.hpp"
-#include "linear_mixable.hpp"
 #include "../fv_converter/weight_manager.hpp"
 
 namespace jubatus {
 namespace core {
 namespace framework {
 
-class mixable_weight_manager : public core::framework::mixable<
-    fv_converter::weight_manager,
-    fv_converter::keyword_weights> {
- public:
-  fv_converter::keyword_weights get_diff_impl() const;
-
-  void put_diff_impl(const fv_converter::keyword_weights& diff);
-
-  void mix_impl(
-      const fv_converter::keyword_weights& lhs,
-      const fv_converter::keyword_weights& rhs,
-      fv_converter::keyword_weights& acc) const;
-  void clear();
-};
-
-class linear_mixable_weight_manager : public model, public linear_mixable {
- public:
-  linear_mixable_weight_manager(pfi::lang::shared_ptr<fv_converter::weight_manager> wm);
-
-  void save(msgpack_writer&) const;
-  void load(msgpack::object&);
-
-  diff_object convert_diff_object(const msgpack::object&) const;
-  void mix(const msgpack::object& obj, diff_object) const;
-  void get_diff(msgpack_writer&);
-  void put_diff(const msgpack::object& obj);
-
- private:
-  pfi::lang::shared_ptr<fv_converter::weight_manager> weight_manager_;
-};
+typedef linear_mixable_delegation<fv_converter::weight_manager,
+    fv_converter::keyword_weights> mixable_weight_manager;
 
 }  // namespace framework
 }  // namespace core

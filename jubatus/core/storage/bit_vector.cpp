@@ -16,7 +16,6 @@
 
 #include "bit_vector.hpp"
 #include <algorithm>
-#include <iostream>
 
 using std::equal;
 

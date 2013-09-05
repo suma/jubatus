@@ -31,37 +31,35 @@ class lof : public anomaly_base {
  public:
   lof();
   explicit lof(
-      const storage::lof_storage::config& config,
+      const lof_storage::config& config,
       core::recommender::recommender_base* nn_engine);
   ~lof();
 
   // return anomaly score of query
-  virtual float calc_anomaly_score(const common::sfv_t& query) const;
-  virtual float calc_anomaly_score(const std::string& id) const;
+  float calc_anomaly_score(const common::sfv_t& query) const;
+  float calc_anomaly_score(const std::string& id) const;
 
-  virtual void clear();
-  virtual void clear_row(const std::string& id);
-  virtual void update_row(const std::string& id, const sfv_diff_t& diff);
-  virtual void get_all_row_ids(std::vector<std::string>& ids) const;
+  void clear();
+  void clear_row(const std::string& id);
+  void update_row(const std::string& id, const sfv_diff_t& diff);
+  void get_all_row_ids(std::vector<std::string>& ids) const;
 
-  virtual std::string type() const;
-  virtual storage::anomaly_storage_base* get_storage();
-  virtual const storage::anomaly_storage_base* get_const_storage() const;
+  std::string type() const;
 
-  void save(std::ostream&);
-  void load(std::istream&);
+  framework::linear_mixable* get_linear_mixable() = 0;
+  const framework::linear_mixable* get_const_linear_mixable() const = 0;
+
+  void save(framework::msgpack_writer&) const;
+  void load(msgpack::object&);
 
   // static float calc_distance(common::sfv_t& q1, common::sfv_t& q2);
   // static float calc_l2norm(common::sfv_t& q1, common::sfv_t& q2);
- private:
-  virtual bool save_impl(std::ostream& os);
-  virtual bool load_impl(std::istream& is);
-
-  storage::lof_storage lof_index_;
+  //lof_storage lof_index_;
+  mixable_lof_storage mixable_storage_;
 };
 
 }  //  namespace anomaly
-}  // core
+}  //  namespace core
 }  //  namespace jubatus
 
 #endif  // JUBATUS_CORE_ANOMALY_LOF_HPP_
