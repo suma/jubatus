@@ -24,9 +24,9 @@
 using std::make_pair;
 using std::pair;
 using std::string;
-using std::stringstream;
 using std::sqrt;
 using std::vector;
+using jubatus::core::framework::stream_writer;
 
 namespace jubatus {
 namespace core {
@@ -62,10 +62,14 @@ TEST(inverted_index_storage, trivial) {
   EXPECT_FLOAT_EQ(1.0 / sqrt(2) / sqrt(3), scores[2].second);
   EXPECT_EQ("r2", scores[2].first);
 
-  stringstream ss;
-  s.save(ss);
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  s.save(swriter);
+
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
   inverted_index_storage s2;
-  s2.load(ss);
+  s2.load(msg.get());
   vector<pair<string, float> > scores2;
   s.calc_scores(v, scores2, 100);
   // expect to get same result
@@ -84,7 +88,7 @@ TEST(inverted_index_storage, diff) {
   s.set("c1", "r1", 1);
   s.set("c2", "r1", 1);
 
-  string diff;
+  inverted_index_storage::diff_type diff;
   s.get_diff(diff);
 
   inverted_index_storage t;
@@ -107,7 +111,7 @@ TEST(inverted_index_storage, mix) {
   // c1: (0, 2, 0)
   s2.set("c1", "r2", 2);
 
-  string d1, d2;
+  inverted_index_storage::diff_type d1, d2;
   s1.get_diff(d1);
   s2.get_diff(d2);
 

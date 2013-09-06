@@ -79,7 +79,6 @@ class minhash : public recommender_base {
 
   static const uint64_t hash_prime;
   uint64_t hash_num_;
-  //core::storage::bit_index_storage row2minhashvals_;
   storage::mixable_bit_index_storage mixable_storage_;
 };
 

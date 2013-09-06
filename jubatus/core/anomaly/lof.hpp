@@ -46,8 +46,8 @@ class lof : public anomaly_base {
 
   std::string type() const;
 
-  framework::linear_mixable* get_linear_mixable() = 0;
-  const framework::linear_mixable* get_const_linear_mixable() const = 0;
+  framework::linear_mixable* get_linear_mixable();
+  const framework::linear_mixable* get_const_linear_mixable() const;
 
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);

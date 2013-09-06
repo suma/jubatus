@@ -213,8 +213,7 @@ void lof_storage::save(framework::msgpack_writer& writer) const {
 }
 
 void lof_storage::load(msgpack::object& o) {
-  size_t size = o.via.array.size;
-  if (o.type != msgpack::type::ARRAY || size != 4) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 4) {
     throw msgpack::type_error();
   }
 

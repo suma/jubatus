@@ -55,6 +55,7 @@ class lof_storage : public framework::model {
  public:
   static const uint32_t DEFAULT_NEIGHBOR_NUM;
   static const uint32_t DEFAULT_REVERSE_NN_NUM;
+  typedef lof_table_t diff_type;
 
   struct config {
     config();

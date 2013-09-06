@@ -35,7 +35,6 @@
 
 using jubatus::core::recommender::make_sfv;
 using jubatus::core::recommender::make_ids;
-using jubatus::core::storage::lof_storage;
 using pfi::data::unordered_map;
 using pfi::lang::lexical_cast;
 using std::istringstream;
@@ -44,7 +43,7 @@ using std::vector;
 
 namespace jubatus {
 namespace core {
-namespace storage {
+namespace anomaly {
 
 namespace {
 
@@ -199,9 +198,9 @@ class lof_storage_mix_test : public ::testing::TestWithParam<
   void mix() {
     portable_mixer_.mix();
 
-    string diff;
+    lof_table_t diff;
     single_storage_->get_diff(diff);
-    single_storage_->set_mixed_and_clear_diff(diff);
+    single_storage_->put_diff(diff);
   }
 
   virtual void SetUp() {

@@ -228,11 +228,25 @@ vector<float> euclid_lsh::get_projection(uint32_t seed) {
 }
 
 void euclid_lsh::save_impl(framework::msgpack_writer& writer) const {
+  msgpack::packer<framework::msgpack_writer> pk(writer);
+  pk.pack_array(5);
   mixable_storage_.get_model()->save(writer);
+  pk.pack(bin_width_);
+  pk.pack(num_probe_);
+  pk.pack(projection_);
+  pk.pack(retain_projection_);
 }
 
 void euclid_lsh::load_impl(msgpack::object& o) {
-  mixable_storage_.get_model()->load(o);
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 5) {
+    throw msgpack::type_error();
+  }
+
+  mixable_storage_.get_model()->load(o.via.array.ptr[0]);
+  o.via.array.ptr[1].convert(&bin_width_);
+  o.via.array.ptr[2].convert(&num_probe_);
+  o.via.array.ptr[3].convert(&projection_);
+  o.via.array.ptr[4].convert(&retain_projection_);
 }
 
 }  // namespace recommender

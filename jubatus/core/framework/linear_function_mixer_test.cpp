@@ -106,10 +106,11 @@ class storage_mock_1 : public storage_mock_base {
 namespace framework {
 
 TEST(linear_function_mixer, diff) {
-  linear_function_mixer m;
-  m.set_model(linear_function_mixer::model_ptr(new storage::storage_mock_1));
+  linear_function_mixer m(
+      linear_function_mixer::model_ptr(new storage::storage_mock_1));
 
-  diffv d = m.get_diff_impl();
+  diffv d;
+  m.get_diff(d);
   EXPECT_EQ(1, d.count);
   ASSERT_EQ(1u, d.v.size());
   EXPECT_EQ("f1", d.v[0].first);
@@ -130,12 +131,12 @@ diffv make_diff(float v1, float v2, float v3, size_t count) {
 }
 
 TEST(linear_function_mixer, mix) {
-  linear_function_mixer m;
+  linear_function_mixer m(
+      linear_function_mixer::model_ptr(new storage::storage_mock_1));
 
   diffv d1 = make_diff(1, 2, 3, 5);
-  diffv d2 = make_diff(2, 3, 4, 3);
-  diffv d;
-  m.mix_impl(d1, d2, d);
+  diffv d = make_diff(2, 3, 4, 3);
+  m.mix(d1, d);
   EXPECT_EQ(8, d.count);
   ASSERT_EQ(1u, d.v.size());
   EXPECT_EQ("f1", d.v[0].first);

@@ -23,9 +23,9 @@
 #include "bit_index_storage.hpp"
 
 using std::pair;
-using std::stringstream;
 using std::string;
 using std::vector;
+using jubatus::core::framework::stream_writer;
 
 namespace jubatus {
 namespace core {
@@ -60,10 +60,15 @@ TEST(bit_index_storage, trivial) {
   EXPECT_EQ("r3", ids[1].first);
   EXPECT_FLOAT_EQ(0.75, ids[1].second);
 
-  stringstream ss;
-  s.save(ss);
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  s.save(swriter);
+
+  sparse_matrix_storage s2;
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
   bit_index_storage t;
-  t.load(ss);
+  t.load(msg.get());
   ids.clear();
   t.similar_row(make_vector("1100"), ids, 2);
   ASSERT_EQ(2u, ids.size());
@@ -84,7 +89,7 @@ TEST(bit_index_storage, diff) {
   bit_index_storage s1, s2;
   s1.set_row("r1", make_vector("0101"));
   s1.set_row("r2", make_vector("1010"));
-  string d1;
+  bit_table_t d1;
   s1.get_diff(d1);
 
   s2.put_diff(d1);
@@ -101,12 +106,12 @@ TEST(bit_index_storage, mix) {
   bit_index_storage s1, s2, s3;
   s1.set_row("r1", make_vector("0101"));
   s1.set_row("r2", make_vector("1010"));
-  string d1;
+  bit_table_t d1;
   s1.get_diff(d1);
 
   s2.set_row("r1", make_vector("1110"));
   s2.set_row("r3", make_vector("1100"));
-  string d2;
+  bit_table_t d2;
   s2.get_diff(d2);
 
   s1.mix(d1, d2);

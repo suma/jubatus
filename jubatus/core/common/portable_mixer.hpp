@@ -29,6 +29,7 @@ namespace common {
 
 template <typename Storage>
 class portable_mixer {
+  typedef typename Storage::diff_type diff_type;
  public:
   portable_mixer() {
   }
@@ -58,17 +59,17 @@ class portable_mixer {
       return;
     }
 
-    std::string mixed;
+    diff_type mixed;
     storages_[0]->get_diff(mixed);
 
     for (size_t i = 1; i < storages_.size(); ++i) {
-      std::string diff;
+      diff_type diff;
       storages_[i]->get_diff(diff);
       storages_[0]->mix(diff, mixed);
     }
 
     for (size_t i = 0; i < storages_.size(); ++i) {
-      storages_[i]->set_mixed_and_clear_diff(mixed);
+      storages_[i]->put_diff(mixed);
     }
   }
 

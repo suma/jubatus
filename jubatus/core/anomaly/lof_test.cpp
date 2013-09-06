@@ -25,7 +25,6 @@
 #include "../recommender/recommender.hpp"
 #include "lof_storage.hpp"
 
-using jubatus::core::storage::lof_storage;
 using pfi::data::unordered_map;
 using std::pair;
 using std::string;
@@ -93,27 +92,6 @@ class lof_impl : public lof {
 
   string type() const {
     return string("lof_impl");
-  }
-
-  void lof::save(framework::msgpack_writer& writer) const {
-  }
-
-  void lof::load(msgpack::object& o) {
-  }
-
-  storage::anomaly_storage_base* get_storage() {
-    return NULL;
-  }
-
-  const storage::anomaly_storage_base* get_const_storage() const {
-    return NULL;
-  }
-  framework::linear_mixable* get_linear_mixable() {
-    return NULL;
-  }
-
-  const framework::linear_mixable* get_const_linear_mixable() {
-    return NULL;
   }
 };
 

@@ -85,13 +85,21 @@ class recommender_impl : public recommender_base {
   }
 
   string type() const {
-    aveturn string("recommender_impl");
+    return string("recommender_impl");
   }
 
-  void save(framework::msgpack_writer&) const {
+  framework::linear_mixable* get_linear_mixable() {
+    return NULL;
   }
 
-  void load(msgpack::object&) {
+  const framework::linear_mixable* get_const_linear_mixable() const {
+    return NULL;
+  }
+
+  void save_impl(framework::msgpack_writer&) const {
+  }
+
+  void load_impl(msgpack::object&) {
   }
 };
 

@@ -33,6 +33,8 @@ using std::string;
 using std::stringstream;
 using std::vector;
 using pfi::lang::lexical_cast;
+using jubatus::core::framework::stream_writer;
+using jubatus::core::framework::diff_object;
 
 namespace jubatus {
 namespace core {
@@ -111,11 +113,14 @@ TYPED_TEST_P(recommender_random_test, random) {
   EXPECT_GT(correct, 5u);
 
   // save the recommender
-  stringstream oss;
- // r.save(oss);
-  static_cast<recommender_base*>(&r)->save(oss);
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  r.save(swriter);
+
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
   TypeParam r2;
-  static_cast<recommender_base*>(&r2)->load(oss);
+  r2.load(msg.get());
 
   // Run the same test
   ids.clear();
@@ -176,10 +181,14 @@ TYPED_TEST_P(recommender_random_test, save_load) {
   update_random(r);
 
   // save and load
-  stringstream ss;
-  static_cast<recommender_base*>(&r)->save(ss);
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  r.save(swriter);
+
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
   TypeParam r2;
-  static_cast<recommender_base*>(&r2)->load(ss);
+  r2.load(msg.get());
 
   vector<string> row_ids;
   r2.get_all_row_ids(row_ids);
@@ -227,11 +236,15 @@ TYPED_TEST_P(recommender_random_test, diff) {
   TypeParam r;
   update_random(r);
 
-  string diff;
-  r.get_storage()->get_diff(diff);
+  msgpack::sbuffer diff;
+  stream_writer<msgpack::sbuffer> writer(diff);
+  r.get_linear_mixable()->get_diff(writer);
 
   TypeParam r2;
-  r2.get_storage()->set_mixed_and_clear_diff(diff);
+  msgpack::unpacked m;
+  msgpack::unpack(&m, diff.data(), diff.size());
+  diff_object diff_obj = r2.get_linear_mixable()->convert_diff_object(m.get());
+  r2.get_linear_mixable()->put_diff(diff_obj);
 
   compare_recommenders(r, r2, false);
 }
@@ -250,14 +263,19 @@ TYPED_TEST_P(recommender_random_test, mix) {
     expect.update_row(row, vec);
   }
 
-  string diff1, diff2;
-  r1.get_storage()->get_diff(diff1);
-  r2.get_storage()->get_diff(diff2);
+  msgpack::sbuffer diff1, diff2;
+  stream_writer<msgpack::sbuffer> sw1(diff1), sw2(diff2);
+  r1.get_linear_mixable()->get_diff(sw1);
+  r2.get_linear_mixable()->get_diff(sw2);
 
-  r1.get_storage()->mix(diff1, diff2);
+  msgpack::unpacked m1, m2;
+  msgpack::unpack(&m1, diff1.data(), diff1.size());
+  msgpack::unpack(&m2, diff2.data(), diff2.size());
+  diff_object diff_obj_mixed = r1.get_linear_mixable()->convert_diff_object(m1.get());
+  r1.get_linear_mixable()->mix(m2.get(), diff_obj_mixed);
 
   TypeParam mixed;
-  mixed.get_storage()->set_mixed_and_clear_diff(diff2);
+  mixed.get_linear_mixable()->put_diff(diff_obj_mixed);
 
   compare_recommenders(expect, mixed, false);
 }

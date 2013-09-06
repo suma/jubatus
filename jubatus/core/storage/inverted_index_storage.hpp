@@ -65,7 +65,8 @@ class inverted_index_storage : public framework::model {
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
-  MSGPACK_DEFINE(inv_, column2norm_, column2id_);
+  MSGPACK_DEFINE(inv_, inv_diff_, column2norm_,
+      column2id_, column2norm_diff_, column2id_);
  private:
   static float calc_l2norm(const common::sfv_t& sfv);
   float calc_columnl2norm(uint64_t column_id) const;

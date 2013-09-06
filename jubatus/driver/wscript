@@ -9,15 +9,15 @@ def configure(conf):
 def build(bld):
   source = [
       'classifier.cpp',
-      'regression.cpp',
-      'recommender.cpp',
+      #'regression.cpp',
+      #'recommender.cpp',
       'stat.cpp',
-      'anomaly.cpp',
+      #'anomaly.cpp',
       'graph.cpp',
-      'anomaly_factory.cpp',
+      #'anomaly_factory.cpp',
       'classifier_factory.cpp',
-      'recommender_factory.cpp',
-      'regression_factory.cpp',
+      #'recommender_factory.cpp',
+      #'regression_factory.cpp',
       'graph_factory.cpp',
       'storage_factory.cpp',
       ]

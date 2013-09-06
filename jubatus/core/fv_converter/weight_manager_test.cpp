@@ -48,7 +48,8 @@ TEST(weight_manager, trivial) {
     EXPECT_FLOAT_EQ(1.5, fv[3].second);
   }
 
-  keyword_weights w = m.get_diff();
+  keyword_weights w;
+  m.get_diff(w);
   EXPECT_EQ(2u, w.get_document_count());
   EXPECT_EQ(1u, w.get_document_frequency("/title$this@space#bin/idf"));
   EXPECT_EQ(1.5, w.get_user_weight("/address$tokyo@str"));
@@ -63,7 +64,9 @@ TEST(weight_manager, trivial) {
 
     m.put_diff(w);
 
-    EXPECT_EQ(0u, m.get_diff().get_document_count());
+    keyword_weights ww;
+    m.get_diff(ww);
+    EXPECT_EQ(0u, ww.get_document_count());
 
     // df = 3, |D| = 4
     m.update_weight(fv);

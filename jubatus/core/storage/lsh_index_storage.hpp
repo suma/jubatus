@@ -48,6 +48,7 @@ typedef pfi::data::unordered_map<uint64_t, std::vector<uint64_t> > lsh_table_t;
 
 class lsh_index_storage : public framework::model {
  public:
+  typedef lsh_master_table_t diff_type;
   lsh_index_storage();
   lsh_index_storage(size_t lsh_num, size_t table_num, uint32_t seed);
   lsh_index_storage(size_t table_num, const std::vector<float>& shift);
@@ -89,7 +90,8 @@ class lsh_index_storage : public framework::model {
   void put_diff(const lsh_master_table_t& mixed_diff);
   void mix(const lsh_master_table_t& lhs, lsh_master_table_t& rhs) const;
 
-  MSGPACK_DEFINE(master_table_, lsh_table_, shift_, table_num_, key_manager_);
+  MSGPACK_DEFINE(master_table_, master_table_diff_,
+      lsh_table_, lsh_table_diff_, shift_, table_num_, key_manager_);
  private:
   typedef pfi::data::unordered_map<uint64_t, std::vector<uint64_t> >lsh_table_t;
 

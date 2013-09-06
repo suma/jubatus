@@ -75,7 +75,7 @@ class local_storage_mixture : public storage_base {
   void load(msgpack::object&);
   std::string type() const;
 
-  MSGPACK_DEFINE(tbl_, class2id_);  // without diff
+  MSGPACK_DEFINE(tbl_, class2id_, tbl_diff_);
  private:
   bool get_internal(const std::string& feature, id_feature_val3_t& ret) const;
 

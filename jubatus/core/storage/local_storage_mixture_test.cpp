@@ -24,8 +24,8 @@
 #include "local_storage_mixture.hpp"
 
 using std::make_pair;
-using std::stringstream;
 using std::sort;
+using jubatus::core::framework::stream_writer;
 
 // common tests for storages are written in storage_test.cpp
 
@@ -42,8 +42,10 @@ TEST(local_storage_mixture, save_load) {
     st.set3("b", "x", val3_t(12, 1212, 121212));
     st.set3("b", "z", val3_t(45, 4545, 454545));
   }
-  stringstream ss;
-  st.save(ss);
+
+  msgpack::sbuffer sbuf;
+  stream_writer<msgpack::sbuffer> swriter(sbuf);
+  st.save(swriter);
 }
 
 TEST(local_storage_mixture, get_diff) {

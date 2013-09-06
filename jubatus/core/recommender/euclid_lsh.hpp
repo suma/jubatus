@@ -92,9 +92,6 @@ class euclid_lsh : public recommender_base {
   framework::linear_mixable* get_linear_mixable();
   const framework::linear_mixable* get_const_linear_mixable() const;
 
-  //MSGPACK_DEFINE(lsh_index_, projection_);
-  // without bin_width_, num_probe_, retain_projection_
-  //
  protected:
   void save_impl(framework::msgpack_writer&) const;
   void load_impl(msgpack::object&);
@@ -104,7 +101,6 @@ class euclid_lsh : public recommender_base {
   std::vector<float> calculate_lsh(const common::sfv_t& query);
   std::vector<float> get_projection(uint32_t seed);
 
-  //core::storage::lsh_index_storage lsh_index_;
   storage::mixable_lsh_index_storage mixable_storage_;
   float bin_width_;
   uint32_t num_probe_;

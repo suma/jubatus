@@ -273,7 +273,7 @@ TYPED_TEST_P(storage_test, val3d) {
 TYPED_TEST_P(storage_test, serialize) {
   // const char* tmp_file_name = "./tmp_local_storage";
 
-  stringstream ss;
+  msgpack::sbuffer sbuf;
   {
     TypeParam s;
     s.set3("a", "x", val3_t(1, 11, 111));
@@ -283,16 +283,16 @@ TYPED_TEST_P(storage_test, serialize) {
     s.set3("b", "z", val3_t(45, 4545, 454545));
 
     // ofstream ofs(tmp_file_name);
-    binary_oarchive oa(ss);
-    oa << s;
+    //binary_oarchive oa(ss);
+    //oa << s;
+    msgpack::pack(&sbuf, s);
   }
 
   {
     TypeParam s;
-    // ifstream ifs(tmp_file_name);
-    binary_iarchive ia(ss);
-    ia >> s;
-    // unlink(tmp_file_name);
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+    msg.get().convert(&s);
 
     {
       feature_val3_t mm;

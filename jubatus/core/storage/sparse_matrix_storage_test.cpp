@@ -26,9 +26,9 @@
 using std::make_pair;
 using std::pair;
 using std::string;
-using std::stringstream;
 using std::sort;
 using std::vector;
+using jubatus::core::framework::stream_writer;
 
 namespace jubatus {
 namespace core {

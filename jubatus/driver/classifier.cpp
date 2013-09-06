@@ -50,6 +50,8 @@ classifier::classifier(
     , wm_(core::framework::mixable_weight_manager::model_ptr(new weight_manager))
   {
 
+  // TODO: set models
+  //       set mixables
   //mixable_holder_->register_mixable(&mixable_classifier_model_);
   //mixable_holder_->register_mixable(&wm_);
 
