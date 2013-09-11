@@ -219,17 +219,23 @@ TEST_P(classifier_test, save_load) {
     classifier_->train(data[i]);
   }
 
-  std::string save_data;
+  msgpack::sbuffer sbuf;
+  core::framework::stream_writer<msgpack::sbuffer> swriter(sbuf);
+  classifier_->save(swriter);
 
-  save_model(classifier_->get_mixable_holder(), save_data);
   classifier_->get_model()->clear();
-  load_model(classifier_->get_mixable_holder(), save_data);
+
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+  classifier_->load(msg.get());
 
   my_test();
 }
 
 TEST_P(classifier_test, save_load_2) {
-  std::string save_empty, save_test;
+  msgpack::sbuffer save_empty, save_test;
+  core::framework::stream_writer<msgpack::sbuffer>
+    empty_writer(save_empty), test_writer(save_test);
 
   // Test data
   datum pos;
@@ -238,7 +244,7 @@ TEST_P(classifier_test, save_load_2) {
   neg.num_values_.push_back(make_pair("value", -10.0));
 
   // Save empty state
-  save_model(classifier_->get_mixable_holder(), save_empty);
+  classifier_->save(empty_writer);
 
   // Train
   vector<pair<string, datum> > data;
@@ -250,10 +256,14 @@ TEST_P(classifier_test, save_load_2) {
   ASSERT_EQ("neg", get_max_label(classifier_->classify(neg)));
 
   // Save current state
-  save_model(classifier_->get_mixable_holder(), save_test);
+  classifier_->save(test_writer);
 
   // Load empty
-  load_model(classifier_->get_mixable_holder(), save_empty);
+  {
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, save_empty.data(), save_empty.size());
+    classifier_->load(msg.get());
+  }
 
   // And the classifier classify data improperly, but cannot expect results
   string pos_max = get_max_label(classifier_->classify(pos));
@@ -261,7 +271,11 @@ TEST_P(classifier_test, save_load_2) {
   ASSERT_EQ(0, pos_max.compare(neg_max));
 
   // Reload server
-  load_model(classifier_->get_mixable_holder(), save_test);
+  {
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, save_test.data(), save_test.size());
+    classifier_->load(msg.get());
+  }
 
   // The classifier works well
   ASSERT_EQ("pos", get_max_label(classifier_->classify(pos)));

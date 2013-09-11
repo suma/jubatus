@@ -34,7 +34,7 @@ namespace driver {
 class anomaly_test : public ::testing::Test {
  protected:
   void SetUp() {
-    core::storage::lof_storage::config lof_config;
+    core::anomaly::lof_storage::config lof_config;
     lof_config.nearest_neighbor_num = 100;
     lof_config.reverse_nearest_neighbor_num = 30;
     core::recommender::euclid_lsh::config lsh_config;
@@ -73,8 +73,9 @@ TEST_F(anomaly_test, small) {
   }
 
   // save
-  std::string data;
-  save_model(anomaly_->get_mixable_holder(), data);
+  msgpack::sbuffer sbuf;
+  core::framework::stream_writer<msgpack::sbuffer> swriter(sbuf);
+  anomaly_->save(swriter);
 
   // clear
   anomaly_->clear();
@@ -85,7 +86,10 @@ TEST_F(anomaly_test, small) {
 
 
   { // load
-    load_model(anomaly_->get_mixable_holder(), data);
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+    anomaly_->load(msg.get());
+
     std::vector<std::string> rows = anomaly_->get_all_rows();
     ASSERT_EQ(2u, rows.size());
   }

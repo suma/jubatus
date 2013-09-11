@@ -20,11 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "jubatus/core/classifier/classifier_factory.hpp"
 #include "jubatus/core/common/vector_util.hpp"
 #include "jubatus/core/fv_converter/datum.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
-#include "jubatus/core/storage/storage_factory.hpp"
 #include "jubatus/driver/fv_converter/converter_config.hpp"
 #include "mixable_holder.hpp"
 
@@ -50,11 +48,8 @@ classifier::classifier(
     , wm_(core::framework::mixable_weight_manager::model_ptr(new weight_manager))
   {
 
-  // TODO: set models
-  //       set mixables
-  //mixable_holder_->register_mixable(&mixable_classifier_model_);
-  //mixable_holder_->register_mixable(&wm_);
-
+  mixable_holder_->register_mixable(&mixable_classifier_model_);
+  mixable_holder_->register_mixable(&wm_);
   (*converter_).set_weight_manager(wm_.get_model());
 }
 
@@ -80,6 +75,22 @@ jubatus::core::classifier::classify_result classifier::classify(
 
 void classifier::clear() {
   get_model()->clear();
+}
+
+void classifier::save(core::framework::msgpack_writer& writer) const {
+  msgpack::packer<core::framework::msgpack_writer> pk(writer);
+  pk.pack_array(2);
+  mixable_classifier_model_.get_model()->save(writer);
+  wm_.get_model()->save(writer);
+}
+
+void classifier::load(msgpack::object& o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  mixable_classifier_model_.get_model()->load(o.via.array.ptr[0]);
+  wm_.get_model()->load(o.via.array.ptr[1]);
 }
 
 }  // namespace driver

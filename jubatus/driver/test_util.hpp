@@ -50,28 +50,4 @@ pfi::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>
   return converter;
 }
 
-void save_model(pfi::lang::shared_ptr<
-  jubatus::driver::mixable_holder>
-  holder, std::string& data) {
-  std::stringstream os;
-  std::vector<jubatus::core::framework::mixable0*> mixables =
-    holder->get_mixables();
-  for (size_t i = 0; i < mixables.size(); ++i) {
-    mixables[i]->save(os);
-  }
-  data = os.str();
-}
-
-void load_model(pfi::lang::shared_ptr<
-  jubatus::driver::mixable_holder> holder,
-  const std::string& data) {
-  std::stringstream is(data);
-  std::vector<jubatus::core::framework::mixable0*> mixables =
-    holder->get_mixables();
-  for (size_t i = 0; i < mixables.size(); ++i) {
-    mixables[i]->clear();
-    mixables[i]->load(is);
-  }
-}
-
 #endif  // JUBATUS_DRIVER_DRIVER_TEST_UTIL_HPP_

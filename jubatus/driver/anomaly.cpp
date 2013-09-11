@@ -26,12 +26,12 @@
 #include "jubatus/core/fv_converter/datum.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
 #include "jubatus/core/fv_converter/revert.hpp"
-#include "jubatus/core/storage/storage_factory.hpp"
 #include "../driver/fv_converter/converter_config.hpp"
 
 using std::string;
 using std::vector;
 using std::pair;
+using jubatus::core::anomaly::anomaly_base;
 using jubatus::core::common::sfv_t;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::fv_converter::weight_manager;
@@ -44,13 +44,13 @@ anomaly::anomaly(
     jubatus::core::anomaly::anomaly_base* anomaly_method,
     pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter)
     : mixable_holder_(new mixable_holder),
-      converter_(converter) {
-  pfi::lang::shared_ptr<jubatus::core::anomaly::anomaly_base>
-      anomaly_method_p(anomaly_method);
-  anomaly_.set_model(anomaly_method_p);
-  wm_.set_model(core::framework::mixable_weight_manager::model_ptr(new weight_manager));
+      converter_(converter),
+      anomaly_(anomaly_method),
+      wm_(core::framework::mixable_weight_manager::model_ptr(new weight_manager))
+  {
 
-  mixable_holder_->register_mixable(&anomaly_);
+   // TODO: fix
+  mixable_holder_->register_mixable(anomaly_->get_linear_mixable());
   mixable_holder_->register_mixable(&wm_);
 
   (*converter_).set_weight_manager(wm_.get_model());
@@ -60,7 +60,7 @@ anomaly::~anomaly() {
 }
 
 void anomaly::clear_row(const std::string& id) {
-  anomaly_.get_model()->clear_row(id);
+  anomaly_->clear_row(id);
 }
 
 pair<string, float> anomaly::add(
@@ -74,25 +74,40 @@ float anomaly::update(const string& id, const datum& d) {
   sfv_t v;
   converter_->convert_and_update_weight(d, v);
 
-  anomaly_.get_model()->update_row(id, v);
-  return anomaly_.get_model()->calc_anomaly_score(id);
+  anomaly_->update_row(id, v);
+  return anomaly_->calc_anomaly_score(id);
 }
 
 void anomaly::clear() {
-  anomaly_.get_model()->clear();
-  wm_.clear();
+  anomaly_->clear();
 }
 
 float anomaly::calc_score(const datum& d) const {
   sfv_t v;
   converter_->convert(d, v);
-  return anomaly_.get_model()->calc_anomaly_score(v);
+  return anomaly_->calc_anomaly_score(v);
 }
 
 vector<string> anomaly::get_all_rows() const {
   vector<string> ids;
-  anomaly_.get_model()->get_all_row_ids(ids);
+  anomaly_->get_all_row_ids(ids);
   return ids;
+}
+
+void anomaly::save(core::framework::msgpack_writer& writer) const {
+  msgpack::packer<core::framework::msgpack_writer> pk(writer);
+  pk.pack_array(2);
+  anomaly_->save(writer);
+  wm_.get_model()->save(writer);
+}
+
+void anomaly::load(msgpack::object& o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  anomaly_->load(o.via.array.ptr[0]);
+  wm_.get_model()->load(o.via.array.ptr[1]);
 }
 
 }  // namespace driver

@@ -50,6 +50,9 @@ class regression {
   void train(const std::pair<float, core::fv_converter::datum>& data);
   float estimate(const core::fv_converter::datum& data) const;
 
+  void save(core::framework::msgpack_writer& writer) const;
+  void load(msgpack::object& o);
+
  private:
   pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 

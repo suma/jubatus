@@ -23,6 +23,7 @@
 #include <msgpack.hpp>
 #include <pficommon/data/unordered_map.h>
 #include "../common/type.hpp"
+#include "../framework/model.hpp"
 #include "counter.hpp"
 #include "datum.hpp"
 #include "keyword_weights.hpp"
@@ -31,7 +32,7 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
-class weight_manager {
+class weight_manager : framework::model {
  public:
   weight_manager();
 
@@ -68,6 +69,14 @@ class weight_manager {
     pfi::data::serialization::binary_iarchive ia(is);
     ia >> diff_weights_;
     ia >> master_weights_;
+  }
+
+  void save(framework::msgpack_writer& writer) const {
+    msgpack::pack(writer, *this);
+  }
+
+  void load(msgpack::object& o) {
+    o.convert(this);
   }
 
   template<class Archiver>

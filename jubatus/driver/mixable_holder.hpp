@@ -27,7 +27,7 @@ namespace driver {
 
 class mixable_holder {
  public:
-  typedef std::vector<core::framework::mixable0*> mixable_list;
+  typedef std::vector<core::framework::linear_mixable*> mixable_list;
 
   mixable_holder() {
   }
@@ -35,7 +35,7 @@ class mixable_holder {
   virtual ~mixable_holder() {
   }
 
-  void register_mixable(core::framework::mixable0* m) {
+  void register_mixable(core::framework::linear_mixable* m) {
     mixables_.push_back(m);
   }
 
@@ -49,7 +49,8 @@ class mixable_holder {
 
  protected:
   pfi::concurrent::rw_mutex rw_mutex_;
-  std::vector<core::framework::mixable0*> mixables_;
+  //std::vector<core::framework::linear_mixable*> mixables_;
+  std::vector<core::framework::linear_mixable*> mixables_;
 };
 
 }  // namespace driver

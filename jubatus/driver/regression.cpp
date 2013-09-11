@@ -21,7 +21,7 @@
 
 #include "jubatus/core/fv_converter/datum.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
-#include "jubatus/core/storage/storage_factory.hpp"
+#include "jubatus/core/storage/storage_base.hpp"
 #include "../driver/fv_converter/converter_config.hpp"
 
 using std::string;
@@ -40,10 +40,11 @@ regression::regression(
     pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter)
     : mixable_holder_(new mixable_holder),
       converter_(converter),
-      regression_(regression_method) {
-  mixable_regression_model_.set_model(
-      core::framework::linear_function_mixer::model_ptr(model_storage));
-  wm_.set_model(core::framework::mixable_weight_manager::model_ptr(new weight_manager));
+      regression_(regression_method),
+      mixable_regression_model_(
+          core::framework::linear_function_mixer::model_ptr(model_storage)),
+      wm_(core::framework::mixable_weight_manager::model_ptr(
+            new weight_manager)) {
 
   mixable_holder_->register_mixable(&mixable_regression_model_);
   mixable_holder_->register_mixable(&wm_);
@@ -65,6 +66,22 @@ float regression::estimate(const datum& data) const {
   converter_->convert(data, v);
   float value = regression_->estimate(v);
   return value;
+}
+
+void regression::save(core::framework::msgpack_writer& writer) const {
+  msgpack::packer<core::framework::msgpack_writer> pk(writer);
+  pk.pack_array(2);
+  mixable_regression_model_.get_model()->save(writer);
+  wm_.get_model()->save(writer);
+}
+
+void regression::load(msgpack::object& o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  mixable_regression_model_.get_model()->load(o.via.array.ptr[0]);
+  wm_.get_model()->load(o.via.array.ptr[1]);
 }
 
 }  // namespace driver
