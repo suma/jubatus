@@ -20,7 +20,6 @@
 #include <msgpack.hpp>
 #include <pficommon/lang/shared_ptr.h>
 #include "../common/exception.hpp"
-#include "../common/byte_buffer.hpp"
 
 namespace jubatus {
 namespace core {

@@ -17,7 +17,6 @@ def build(bld):
       'jsonconfig/exception.cpp',
       ]
   headers = [
-      'byte_buffer.hpp',
       'exception.hpp',
       'exception_info.hpp',
       'hash.hpp',
@@ -38,7 +37,6 @@ def build(bld):
 
   test_src = [
       'exception_test.cpp',
-      'byte_buffer_test.cpp',
       'key_manager_test.cpp',
       'vector_util_test.cpp',
       'jsonconfig_test.cpp',

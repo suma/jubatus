@@ -24,7 +24,6 @@
 #include <msgpack.hpp>
 #include <pficommon/lang/shared_ptr.h>
 #include "../common/exception.hpp"
-#include "../common/byte_buffer.hpp"
 #include "model.hpp"
 #include "linear_mixable.hpp"
 
