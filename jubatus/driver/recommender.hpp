@@ -30,31 +30,6 @@
 namespace jubatus {
 namespace driver {
 
-struct mixable_recommender : public core::framework::mixable<
-    jubatus::core::recommender::recommender_base,
-    std::string> {
-  std::string get_diff_impl() const {
-    std::string ret;
-    //get_model()->get_const_storage()->get_diff(ret);
-    return ret;
-  }
-
-  void put_diff_impl(const std::string& v) {
-    //get_model()->get_storage()->set_mixed_and_clear_diff(v);
-  }
-
-  void mix_impl(
-      const std::string& lhs,
-      const std::string& rhs,
-      std::string& mixed) const {
-    mixed = lhs;
-    //get_model()->get_const_storage()->mix(rhs, mixed);
-  }
-
-  void clear() {
-  }
-};
-
 class recommender {
  public:
   recommender(
@@ -87,11 +62,14 @@ class recommender {
   core::fv_converter::datum decode_row(const std::string& id);
   std::vector<std::string> get_all_rows();
 
+  void save(core::framework::msgpack_writer&) const;
+  void load(msgpack::object&);
+
  private:
   pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
-  mixable_recommender recommender_;
+  pfi::lang::shared_ptr<core::recommender::recommender_base> recommender_;
   core::framework::mixable_weight_manager wm_;
 };
 
