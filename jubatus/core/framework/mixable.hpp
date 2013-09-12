@@ -32,42 +32,6 @@ namespace jubatus {
 namespace core {
 namespace framework {
 
-class mixable0 {
- public:
-  virtual ~mixable0() {
-  }
-  virtual common::byte_buffer get_diff() const {}
-  virtual void put_diff(const common::byte_buffer&) {}
-  virtual void mix(const common::byte_buffer&,
-                   const common::byte_buffer&,
-                   common::byte_buffer&) const {}
-
-  virtual void save(std::ostream& ofs) {}
-  virtual void load(std::istream& ifs) {}
-  virtual void clear() {}
-};
-
-#if 0
-class mixable0 {
- public:
-  mixable0() {
-  }
-
-  virtual ~mixable0() {
-  }
-
-  virtual common::byte_buffer get_diff() const = 0;
-  virtual void put_diff(const common::byte_buffer&) = 0;
-  virtual void mix(const common::byte_buffer&,
-                   const common::byte_buffer&,
-                   common::byte_buffer&) const = 0;
-
-  virtual void save(std::ostream& ofs) = 0;
-  virtual void load(std::istream& ifs) = 0;
-  virtual void clear() = 0;
-};
-#endif
-
 // linear_mixable CRTP
 template <typename Model, typename Diff>
 class linear_mixable_base : public linear_mixable {
@@ -171,14 +135,6 @@ class linear_mixable_delegation : public linear_mixable {
     model_->put_diff(diff_obj->diff_);
   }
 
-#if 0
-  void put_diff(const msgpack::object& obj) {
-    Diff diff;
-    obj.convert(&diff);
-    model_->put_diff(diff);
-  }
-#endif
-
  private:
   struct internal_diff_object : diff_object_raw {
     void convert_binary(msgpack_writer& writer) const {
@@ -190,88 +146,6 @@ class linear_mixable_delegation : public linear_mixable {
 
   model_ptr model_;
 };
-
-#if 1
-template<typename Model, typename Diff>
-class mixable : public mixable0 {
- public:
-  typedef Model model_type;
-  typedef Diff diff_type;
-  typedef pfi::lang::shared_ptr<Model> model_ptr;
-
-  virtual ~mixable() {
-  }
-
-  virtual void clear() = 0;
-
-  virtual Diff get_diff_impl() const = 0;
-  virtual void put_diff_impl(const Diff&) = 0;
-  virtual void mix_impl(const Diff&, const Diff&, Diff&) const = 0;
-
-  void set_model(model_ptr m) {
-    model_ = m;
-  }
-
-  common::byte_buffer get_diff() const {
-    if (model_) {
-      common::byte_buffer buf;
-      pack_(get_diff_impl(), buf);
-      return buf;
-    } else {
-      throw JUBATUS_EXCEPTION(common::config_not_set());
-    }
-  }
-
-  void put_diff(const common::byte_buffer& d) {
-    if (model_) {
-      Diff diff;
-      unpack_(d, diff);
-      put_diff_impl(diff);
-    } else {
-      throw JUBATUS_EXCEPTION(common::config_not_set());
-    }
-  }
-
-  void mix(
-      const common::byte_buffer& lhs,
-      const common::byte_buffer& rhs,
-      common::byte_buffer& mixed_buf) const {
-    Diff left, right, mixed;
-    unpack_(lhs, left);
-    unpack_(rhs, right);
-    mix_impl(left, right, mixed);
-    pack_(mixed, mixed_buf);
-  }
-
-  void save(std::ostream& os) {
-    model_->save(os);
-  }
-
-  void load(std::istream& is) {
-    model_->load(is);
-  }
-
-  model_ptr get_model() const {
-    return model_;
-  }
-
- private:
-  void unpack_(const common::byte_buffer& buf, Diff& d) const {
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, buf.ptr(), buf.size());
-    msg.get().convert(&d);
-  }
-
-  void pack_(const Diff& d, common::byte_buffer& buf) const {
-    msgpack::sbuffer sbuf;
-    msgpack::pack(sbuf, d);
-    buf.assign(sbuf.data(), sbuf.size());
-  }
-
-  model_ptr model_;
-};
-
-#endif
 
 }  // namespace framework
 }  // namespace core
