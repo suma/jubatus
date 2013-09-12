@@ -22,9 +22,7 @@
 
 #include <pficommon/lang/shared_ptr.h>
 
-#include "jubatus/core/graph/graph_factory.hpp"
 #include "jubatus/core/common/vector_util.hpp"
-#include "jubatus/core/storage/storage_factory.hpp"
 
 using std::string;
 using std::vector;
@@ -33,17 +31,16 @@ using jubatus::core::graph::node_id_t;
 using jubatus::core::graph::edge_id_t;
 using jubatus::core::graph::preset_query;
 using jubatus::core::graph::property;
+using jubatus::core::graph::mixable_graph_wo_index;
 using pfi::lang::shared_ptr;
 
 namespace jubatus {
 namespace driver {
 
-graph::graph(jubatus::core::graph::graph_base* graph_method)
-    : mixable_holder_(new mixable_holder) {
-  pfi::lang::shared_ptr<jubatus::core::graph::graph_base>
-      graph_method_p(graph_method);
-  graph_.set_model(graph_method_p);
-
+graph::graph(jubatus::core::graph::graph_wo_index* graph_method)
+    : mixable_holder_(new mixable_holder)
+    , graph_(mixable_graph_wo_index::model_ptr(graph_method))
+{
   mixable_holder_->register_mixable(&graph_);
 }
 
@@ -127,9 +124,10 @@ jubatus::core::graph::edge_info graph::get_edge(edge_id_t eid) const {
 
 void graph::update_index() {
   graph_.get_model()->update_index();
-  std::string diff;
+
+  core::graph::graph_wo_index::diff_type diff;
   graph_.get_model()->get_diff(diff);
-  graph_.get_model()->set_mixed_and_clear_diff(diff);
+  graph_.get_model()->put_diff(diff);
 }
 
 void graph::clear() {
@@ -168,6 +166,14 @@ void graph::create_edge_here(
   } catch (const jubatus::core::graph::graph_exception& e) {
     throw;
   }
+}
+
+void graph::save(core::framework::msgpack_writer& writer) const {
+  graph_.get_model()->save(writer);
+}
+
+void graph::load(msgpack::object& o) {
+  graph_.get_model()->load(o);
 }
 
 }  // namespace driver

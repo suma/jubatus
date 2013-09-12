@@ -70,10 +70,15 @@ TEST_F(graph_test, simple) {
     graph_->create_edge(eid, nid, nid0, p);
   }
   {
-    string save_data;
-    save_model(graph_->get_mixable_holder(), save_data);
-    graph_->clear();
-    load_model(graph_->get_mixable_holder(), save_data);
+    msgpack::sbuffer sbuf;
+    core::framework::stream_writer<msgpack::sbuffer> swriter(sbuf);
+    graph_->save(swriter);
+
+    graph_->get_model()->clear();
+
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+    graph_->load(msg.get());
   }
   {
     node_info info = graph_->get_node(nid);

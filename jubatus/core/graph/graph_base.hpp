@@ -70,17 +70,8 @@ class graph_base : public framework::model {
   virtual void get_status(std::map<std::string, std::string>& status) const = 0;
   virtual void update_index() = 0;
 
-  virtual void get_diff(std::string& diff) const = 0;
-  virtual void set_mixed_and_clear_diff(const std::string& mixed) = 0;
-
-  void save(std::ostream&);
-  void load(std::istream&);
   virtual void save(framework::msgpack_writer&) const = 0;
   virtual void load(msgpack::object&) = 0;
-
- private:
-  virtual bool save_imp(std::ostream& os) = 0;
-  virtual bool load_imp(std::istream& is) = 0;
 };
 
 }  // namespace graph

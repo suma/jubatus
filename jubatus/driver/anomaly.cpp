@@ -49,7 +49,6 @@ anomaly::anomaly(
       wm_(core::framework::mixable_weight_manager::model_ptr(new weight_manager))
   {
 
-   // TODO: fix
   mixable_holder_->register_mixable(anomaly_->get_linear_mixable());
   mixable_holder_->register_mixable(&wm_);
 

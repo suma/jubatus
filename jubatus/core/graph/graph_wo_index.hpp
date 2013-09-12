@@ -27,6 +27,7 @@
 
 #include "graph_base.hpp"
 #include "../common/unordered_map.hpp"
+#include "../framework/mixable.hpp"
 
 namespace jubatus {
 namespace core {
@@ -34,6 +35,13 @@ namespace graph {
 
 class graph_wo_index : public graph_base {
  public:
+  struct diff_type {
+    eigen_vector_query_diff eigen_vector_query;
+    spt_query_diff spt_query;
+
+    MSGPACK_DEFINE(eigen_vector_query, spt_query);
+  };
+
   struct config {
     config()
         : alpha(0.9),
@@ -86,20 +94,19 @@ class graph_wo_index : public graph_base {
   void get_node(node_id_t id, node_info& ret) const;
   void get_edge(edge_id_t eid, edge_info& ret) const;
 
-  void get_diff(std::string& diff) const;
-  void set_mixed_and_clear_diff(const std::string& mixed);
+  void get_diff(diff_type& diff) const;
+  void put_diff(const diff_type& mixed);
 
   std::string type() const;
 
   void get_status(std::map<std::string, std::string>& status) const;
   void update_index();
 
-  void mix(const std::string& diff, std::string& mixed);
+  void mix(const diff_type& diff, diff_type& mixed);
 
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
-  //MSGPACK_DEFINE(local_nodes_);
   MSGPACK_DEFINE(local_nodes_, local_edges_, global_nodes_, eigen_scores_,
       spts_);
  private:
@@ -120,12 +127,13 @@ class graph_wo_index : public graph_base {
   // centeralities
   static void mix(
       const eigen_vector_query_diff& diff,
-      eigen_vector_query_mixed& mixed);
+      eigen_vector_query_diff& mixed);
 
   void get_diff_eigen_score(eigen_vector_query_diff& diff) const;
-  void set_mixed_and_clear_diff_eigen_score(eigen_vector_query_mixed& mixed);
+  void set_mixed_and_clear_diff_eigen_score(
+      const eigen_vector_query_diff& mixed);
 
-  eigen_vector_query_mixed eigen_scores_;
+  eigen_vector_query_diff eigen_scores_;
 
   // shortest pathes
   static void mix_spt(
@@ -163,6 +171,11 @@ class graph_wo_index : public graph_base {
 
   config config_;
 };
+
+typedef framework::linear_mixable_delegation<
+  graph_wo_index, graph_wo_index::diff_type>
+  mixable_graph_wo_index;
+
 
 }  // namespace graph
 }  // namespace core

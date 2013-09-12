@@ -58,8 +58,6 @@ struct eigen_vector_info {
 
 typedef pfi::data::unordered_map<node_id_t, eigen_vector_info>
   eigen_vector_diff;
-typedef pfi::data::unordered_map<node_id_t, eigen_vector_info>
-  eigen_vector_mixed;
 
 struct node_info {
   std::map<std::string, std::string> property;
@@ -131,8 +129,6 @@ struct shortest_path_tree {
 typedef std::vector<shortest_path_tree> spt_mixed;
 typedef std::vector<shortest_path_tree> spt_diff;
 
-typedef pfi::data::unordered_map<preset_query, eigen_vector_mixed>
-  eigen_vector_query_mixed;
 typedef pfi::data::unordered_map<preset_query, eigen_vector_diff>
   eigen_vector_query_diff;
 

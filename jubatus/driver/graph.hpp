@@ -30,38 +30,9 @@
 namespace jubatus {
 namespace driver {
 
-struct mixable_graph : public core::framework::mixable<
-    jubatus::core::graph::graph_base,
-    std::string> {
-  void clear() {
-  }
-
-  std::string get_diff_impl() const {
-    std::string diff;
-    get_model()->get_diff(diff);
-    return diff;
-  }
-
-  void mix_impl(
-      const std::string& lhs,
-      const std::string& rhs,
-      std::string& mixed) const {
-    mixed = lhs;
-    jubatus::core::graph::graph_wo_index* graph =
-        dynamic_cast<jubatus::core::graph::graph_wo_index*>(get_model().get());
-    if (graph) {
-      graph->mix(rhs, mixed);
-    }
-  }
-
-  void put_diff_impl(const std::string& v) {
-    get_model()->set_mixed_and_clear_diff(v);
-  }
-};
-
 class graph {
  public:
-  explicit graph(jubatus::core::graph::graph_base* graph_method);
+  explicit graph(jubatus::core::graph::graph_wo_index* graph_method);
   virtual ~graph();
 
   pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
@@ -115,10 +86,13 @@ class graph {
       jubatus::core::graph::node_id_t target,
       const jubatus::core::graph::property& p);
 
+  void save(core::framework::msgpack_writer&) const;
+  void load(msgpack::object&);
+
  private:
   pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
 
-  mixable_graph graph_;
+  core::graph::mixable_graph_wo_index graph_;
 };
 
 }  // namespace driver
