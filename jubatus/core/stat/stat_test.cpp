@@ -33,9 +33,9 @@ TYPED_TEST_P(stat_test, trivial) {
   p.push("test", 5.0);
   p.push("test", 3.0);
 
-  EXPECT_TRUE(p.sum("test") == 9.0);
-  EXPECT_TRUE(p.max("test") == 5.0);
-  EXPECT_TRUE(p.min("test") == 1.0);
+  EXPECT_DOUBLE_EQ(9.0, p.sum("test"));
+  EXPECT_DOUBLE_EQ(5.0, p.max("test"));
+  EXPECT_DOUBLE_EQ(1.0, p.min("test"));
   EXPECT_NEAR(p.moment("test", 0 , 0.0) , 1.0, 0.1);
   EXPECT_NEAR(p.moment("test", 1 , 0.0) , 3.0, 0.1);
   EXPECT_NEAR(p.moment("test", 2 , 0.0) , 11.67, 0.1);
@@ -45,9 +45,9 @@ TYPED_TEST_P(stat_test, trivial) {
 
   p.push("test", 2.0);
   p.push("test", 4.0);
-  EXPECT_TRUE(p.sum("test") == 9.0);
-  EXPECT_TRUE(p.max("test") == 4.0);
-  EXPECT_TRUE(p.min("test") == 2.0);
+  EXPECT_DOUBLE_EQ(9.0, p.sum("test"));
+  EXPECT_DOUBLE_EQ(4.0, p.max("test"));
+  EXPECT_DOUBLE_EQ(2.0, p.min("test"));
   EXPECT_NEAR(p.moment("test", 0 , 0.0) , 1.0, 0.1);
   EXPECT_NEAR(p.moment("test", 1 , 0.0) , 3.0, 0.1);
   EXPECT_NEAR(p.moment("test", 2 , 0.0) , 9.67, 0.1);
@@ -58,9 +58,9 @@ TYPED_TEST_P(stat_test, trivial) {
   p.clear();
 
   p.push("test", 1.0);
-  EXPECT_TRUE(p.sum("test") == 1.0);
-  EXPECT_TRUE(p.max("test") == 1.0);
-  EXPECT_TRUE(p.min("test") == 1.0);
+  EXPECT_DOUBLE_EQ(1.0, p.sum("test"));
+  EXPECT_DOUBLE_EQ(1.0, p.max("test"));
+  EXPECT_DOUBLE_EQ(1.0, p.min("test"));
   EXPECT_NEAR(p.moment("test", 0 , 0.0) , 1.0, 0.1);
   EXPECT_NEAR(p.moment("test", 1 , 0.0) , 1.0, 0.1);
   EXPECT_NEAR(p.moment("test", 2 , 0.0) , 1.0, 0.1);
@@ -75,7 +75,7 @@ TEST(stat_test, entropy) {
   p.push("test", 1.0);
   p.push("test", 2.0);
   p.push("test", 3.0);
-  EXPECT_TRUE(p.entropy() == 0.0);
+  EXPECT_DOUBLE_EQ(0.0, p.entropy());
 
   p.push("test1", 1.0);
   p.push("test2", 2.0);

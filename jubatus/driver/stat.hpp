@@ -29,41 +29,17 @@
 namespace jubatus {
 namespace driver {
 
-struct mixable_stat : public core::framework::mixable<
-    jubatus::core::stat::stat,
-    std::pair<double, size_t> > {
- public:
-  void clear() {
-  }
-
-  std::pair<double, size_t> get_diff_impl() const {
-    return get_model()->get_diff();
-  }
-
-  void mix_impl(
-      const std::pair<double, size_t>& lhs,
-      const std::pair<double, size_t>& rhs,
-      std::pair<double, size_t>& mixed) const {
-    mixed = lhs;
-    jubatus::core::stat::mixable_stat::reduce(rhs, mixed);
-  }
-
-  void put_diff_impl(const std::pair<double, size_t>& v) {
-    get_model()->put_diff(v);
-  }
-};
-
 class stat {
  public:
-  explicit stat(jubatus::core::stat::stat* stat_method);
+  stat(jubatus::core::stat::stat_base* stat_method);
   virtual ~stat();
 
   pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
     return mixable_holder_;
   }
 
-  jubatus::core::stat::stat* get_model() const {
-    return mixable_stat_model_.get_model().get();
+  jubatus::core::stat::stat_base* get_model() const {
+    return stat_.get();
   }
 
   void push(const std::string& key, double value);
@@ -74,11 +50,14 @@ class stat {
   double entropy() const;
   double moment(const std::string&, int, double) const;
 
+  void clear();
+
+  void save(core::framework::msgpack_writer&) const;
+  void load(msgpack::object&);
+
  private:
   pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
-
-  pfi::lang::shared_ptr<jubatus::core::stat::stat> stat_;
-  mixable_stat mixable_stat_model_;
+  pfi::lang::shared_ptr<jubatus::core::stat::stat_base> stat_;
 };
 
 }  // namespace driver

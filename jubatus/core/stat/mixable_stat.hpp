@@ -24,15 +24,43 @@
 #include <pficommon/data/serialization.h>
 
 #include "stat.hpp"
+#include "../framework/mixable.hpp"
 
 namespace jubatus {
 namespace core {
 namespace stat {
 
-class mixable_stat : public stat {
+class mixable_stat : public stat_base,
+  public framework::linear_mixable_base<
+                     mixable_stat, std::pair<double, size_t> > {
  public:
   explicit mixable_stat(size_t);
   virtual ~mixable_stat();
+
+  void push(const std::string& key, double val) {
+    stat_.push(key, val);
+  }
+
+  double sum(const std::string& key) const {
+    return stat_.sum(key);
+  }
+
+  double stddev(const std::string& key) const {
+    return stat_.stddev(key);
+  }
+
+  double max(const std::string& key) const {
+    return stat_.max(key);
+  }
+
+  double min(const std::string& key) const {
+    return stat_.min(key);
+  }
+
+  double moment(const std::string& key, int n, double c) const {
+    return stat_.moment(key, n, c);
+  }
+
   // entropy = - \sum_{for all keys in this stat} p(key) log p(key)
 
   // - mixed entropy -
@@ -43,26 +71,23 @@ class mixable_stat : public stat {
   // put_diff : pair( \sum n(key) log n(key), partial N ) -> ()
   // mix : pair(e1, n1) -> pair(e2, n2) -> pair( e1+e2, n1+n2 )
   // entropy : e -> n -> e/n - log n
-  std::pair<double, size_t> get_diff() const;
+
+  void get_diff(std::pair<double, size_t>& diff) const;
   void put_diff(const std::pair<double, size_t>&);
-  static void reduce(
-      const std::pair<double, size_t>&,
-      std::pair<double, size_t>&);
+  void mix(const std::pair<double, size_t>&, std::pair<double, size_t>&) const;
+
   double entropy() const;
 
-  bool save(std::ostream&);
-  bool load(std::istream&);
+  void clear();
 
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
 
-  MSGPACK_DEFINE(e_, n_, window_size_, window_, stats_);
+  std::string type() const;
+
+  MSGPACK_DEFINE(e_, n_, stat_);
  private:
-  friend class pfi::data::serialization::access;
-  template<class Archive>
-  void serialize(Archive& ar) {
-    ar & e_ & n_;
-  }
+  stat stat_;
   double e_;
   double n_;
 };

@@ -26,7 +26,7 @@ namespace core {
 namespace stat {
 
 mixable_stat::mixable_stat(size_t window_size)
-    : stat(window_size),
+    : stat_(window_size),
       e_(0),
       n_(0) {
 }
@@ -34,18 +34,16 @@ mixable_stat::mixable_stat(size_t window_size)
 mixable_stat::~mixable_stat() {
 }
 
-std::pair<double, size_t> mixable_stat::get_diff() const {
-  std::pair<double, size_t> ret;
+void mixable_stat::get_diff(std::pair<double, size_t>& ret) const {
   ret.first = 0;
   ret.second = 0;
 
-  for (pfi::data::unordered_map<std::string, stat_val>::const_iterator p =
-      stats_.begin(); p != stats_.end(); ++p) {
+  for (pfi::data::unordered_map<std::string, stat::stat_val>::const_iterator
+      p = stat_.stats_.begin(); p != stat_.stats_.end(); ++p) {
     double pr = p->second.n_;
     ret.first += pr * log(pr);
     ret.second += pr;
   }
-  return ret;
 }
 
 void mixable_stat::put_diff(const pair<double, size_t>& e) {
@@ -53,9 +51,9 @@ void mixable_stat::put_diff(const pair<double, size_t>& e) {
   n_ = e.second;
 }
 
-void mixable_stat::reduce(
+void mixable_stat::mix(
     const pair<double, size_t>& lhs,
-    pair<double, size_t>& ret) {
+    pair<double, size_t>& ret) const {
   ret.first += lhs.first;
   ret.second += lhs.second;
 }
@@ -68,27 +66,21 @@ double mixable_stat::entropy() const {
   return log(n) - e_ / n_;
 }
 
-bool mixable_stat::save(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  stat::save(os);
-  oa << *this;
-  return true;
-}
-bool mixable_stat::load(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  stat::load(is);
-  ia >> *this;
-  return true;
+void mixable_stat::clear() {
+  e_ = n_ = 0;
+  stat_.clear();
 }
 
 void mixable_stat::save(framework::msgpack_writer& writer) const {
-  stat::save(writer);
   msgpack::pack(writer, *this);
 }
 
 void mixable_stat::load(msgpack::object& obj) {
-  stat::load(obj);
   obj.convert(this);
+}
+
+std::string mixable_stat::type() const {
+  return "mixable_stat";
 }
 
 }  // namespace stat

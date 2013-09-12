@@ -32,7 +32,8 @@ TEST(mixable_stat_test, mixed_entropy) {
   double e_d = 3 * log(3);
   double e_e = - e_d / 3 + log(3);
 
-  std::pair<double, size_t> d = p.get_diff();
+  std::pair<double, size_t> d;
+  p.get_diff(d);
   ASSERT_DOUBLE_EQ(e_d, d.first);
   ASSERT_EQ(3u, d.second);
 

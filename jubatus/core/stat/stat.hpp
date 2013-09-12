@@ -52,16 +52,31 @@ class stat_error : public common::exception::jubaexception<stat_error> {
   std::string msg_;
 };
 
-class stat : public framework::model {
+class stat_base : public framework::model {
+ public:
+  virtual ~stat_base();
+
+  virtual void push(const std::string& key, double val) = 0;
+  virtual double sum(const std::string& key) const = 0;
+  virtual double stddev(const std::string& key) const = 0;
+  virtual double max(const std::string& key) const = 0;
+  virtual double min(const std::string& key) const = 0;
+
+  virtual double entropy() const = 0;
+  virtual double moment(const std::string& key, int n, double c) const = 0;
+
+  virtual std::string type() const = 0;
+
+  virtual void save(framework::msgpack_writer&) const = 0;
+  virtual void load(msgpack::object&) = 0;
+
+  virtual void clear() = 0;
+};
+
+class stat : public stat_base {
  public:
   explicit stat(size_t window_size);
   virtual ~stat();
-
-  virtual std::pair<double, size_t> get_diff() const {
-    std::pair<double, size_t> ret;
-    return ret;
-  }
-  virtual void put_diff(const std::pair<double, size_t>&) {}
 
   void push(const std::string& key, double val);
 
@@ -70,15 +85,13 @@ class stat : public framework::model {
   double max(const std::string& key) const;
   double min(const std::string& key) const;
 
-  virtual double entropy() const;
+  double entropy() const;
   double moment(const std::string& key, int n, double c) const;
 
-  virtual void clear();
+  void clear();
 
-  virtual bool save(std::ostream&);
-  virtual bool load(std::istream&);
-  virtual void save(framework::msgpack_writer&) const;
-  virtual void load(msgpack::object&);
+  void save(framework::msgpack_writer&) const;
+  void load(msgpack::object&);
   std::string type() const;
 
   MSGPACK_DEFINE(window_size_, window_, stats_);
@@ -173,12 +186,7 @@ class stat : public framework::model {
   pfi::data::unordered_map<std::string, stat_val> stats_;
   size_t window_size_;
 
- private:
-  friend class pfi::data::serialization::access;
-  template<class Archive>
-  void serialize(Archive& ar) {
-    ar & window_size_ & window_ & stats_;
-  }
+  friend class mixable_stat;
 };
 }  // namespace stat
 }  // namespace core

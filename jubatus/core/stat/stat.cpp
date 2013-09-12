@@ -35,6 +35,9 @@ inline double sq(double d) {
 }
 }  // namespace
 
+stat_base::~stat_base() {
+}
+
 stat::stat(size_t window_size)
     : window_size_(window_size) {
 }
@@ -153,17 +156,6 @@ void stat::clear() {
   stats_.clear();
 }
 
-bool stat::save(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << *this;
-  return true;
-}
-bool stat::load(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> *this;
-  return true;
-}
-
 void stat::save(framework::msgpack_writer& writer) const {
   msgpack::pack(writer, *this);
 }
@@ -175,6 +167,7 @@ void stat::load(msgpack::object& obj) {
 std::string stat::type() const {
   return "stat";
 }
+
 }  // namespame stat
 }  // namespace core
 }  // namespace jubatus

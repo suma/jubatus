@@ -68,6 +68,55 @@ class mixable0 {
 };
 #endif
 
+// linear_mixable CRTP
+template <typename Model, typename Diff>
+class linear_mixable_base : public linear_mixable {
+ public:
+  typedef Model model_type;
+  typedef Diff diff_type;
+  typedef pfi::lang::shared_ptr<Model> model_ptr;
+
+  diff_object convert_diff_object(const msgpack::object& obj) const {
+    internal_diff_object* diff = new internal_diff_object;
+    diff_object diff_obj(diff);
+    obj.convert(&diff->diff_);
+    return diff_obj;
+  }
+
+  void mix(const msgpack::object& obj, diff_object ptr) const {
+    Diff diff;
+    internal_diff_object* diff_obj = dynamic_cast<internal_diff_object*>(ptr.get());
+    if (!diff_obj) {
+      throw JUBATUS_EXCEPTION(core::common::exception::runtime_error("bad diff_object"));
+    }
+    obj.convert(&diff);
+    static_cast<const Model&>(*this).mix(diff, diff_obj->diff_);
+  }
+
+  void get_diff(msgpack_writer& writer) const {
+    Diff diff;
+    static_cast<const Model&>(*this).get_diff(diff);
+    msgpack::pack(writer, diff);
+  }
+
+  void put_diff(const diff_object& ptr) {
+    internal_diff_object* diff_obj = dynamic_cast<internal_diff_object*>(ptr.get());
+    if (!diff_obj) {
+      throw JUBATUS_EXCEPTION(core::common::exception::runtime_error("bad diff_object"));
+    }
+    static_cast<Model&>(*this).put_diff(diff_obj->diff_);
+  }
+
+ private:
+  struct internal_diff_object : diff_object_raw {
+    void convert_binary(msgpack_writer& writer) const {
+      msgpack::pack(writer, diff_);
+    }
+
+    Diff diff_;
+  };
+};
+
 // mixable_delegating doesnt inherit the `model`
 //  MUST NOT multiple inheritance `model`
 template <typename Model, typename Diff>

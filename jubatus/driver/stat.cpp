@@ -24,11 +24,13 @@
 namespace jubatus {
 namespace driver {
 
-stat::stat(jubatus::core::stat::stat* stat_method)
+stat::stat(jubatus::core::stat::stat_base* stat_method)
     : mixable_holder_(new mixable_holder),
       stat_(stat_method) {
-  mixable_stat_model_.set_model(stat_);
-  mixable_holder_->register_mixable(&mixable_stat_model_);
+  if (core::stat::mixable_stat* m =
+      dynamic_cast<core::stat::mixable_stat*>(stat_method)) {
+    mixable_holder_->register_mixable(m);
+  }
 }
 
 stat::~stat() {
@@ -60,6 +62,18 @@ double stat::entropy() const {
 
 double stat::moment(const std::string& key, int n, double c) const {
   return stat_->moment(key, n, c);
+}
+
+void stat::clear() {
+  stat_->clear();
+}
+
+void stat::save(core::framework::msgpack_writer& writer) const {
+  stat_->save(writer);
+}
+
+void stat::load(msgpack::object& o) {
+  stat_->load(o);
 }
 
 }  // namespace driver
