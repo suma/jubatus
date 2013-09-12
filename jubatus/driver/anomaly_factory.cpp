@@ -26,7 +26,7 @@
 
 using jubatus::core::anomaly::anomaly_base;
 using jubatus::core::anomaly::lof;
-using jubatus::core::storage::lof_storage;
+using jubatus::core::anomaly::lof_storage;
 using jubatus::core::common::jsonconfig::config;
 using jubatus::core::common::jsonconfig::config_cast_check;
 using pfi::text::json::json;
