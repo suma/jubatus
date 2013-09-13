@@ -25,7 +25,6 @@
 #include <vector>
 #include <msgpack.hpp>
 #include <pficommon/data/unordered_map.h>
-#include <pficommon/data/serialization.h>
 #include "bit_vector.hpp"
 
 // to msgpack
@@ -114,13 +113,6 @@ struct val2_t {
   }
 
   MSGPACK_DEFINE(v1, v2);
-
- private:
-  friend class pfi::data::serialization::access;
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(v1) & MEMBER(v2);
-  }
 };
 
 struct val3_t {
@@ -208,13 +200,6 @@ struct val3_t {
   }
 
   MSGPACK_DEFINE(v1, v2, v3);
-
- private:
-  friend class pfi::data::serialization::access;
-  template <class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(v1) & MEMBER(v2) & MEMBER(v3);
-  }
 };
 
 typedef std::vector<std::pair<std::string, val1_t> > feature_val1_t;

@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 #include <pficommon/data/unordered_map.h>
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include "unordered_map.hpp"
 
 namespace jubatus {
@@ -61,11 +59,6 @@ class key_manager {
   MSGPACK_DEFINE(key2id_, id2key_);
 
  private:
-  friend class pfi::data::serialization::access;
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(key2id_) & MEMBER(id2key_);
-  }
 
   pfi::data::unordered_map<std::string, uint64_t> key2id_;
   std::vector<std::string> id2key_;

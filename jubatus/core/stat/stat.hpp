@@ -25,8 +25,6 @@
 #include <utility>
 #include <msgpack.hpp>
 #include <pficommon/concurrent/rwmutex.h>
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
 #include "../common/exception.hpp"
 #include "../common/unordered_map.hpp"
@@ -168,12 +166,6 @@ class stat : public stat_base {
     }
 
     MSGPACK_DEFINE(n_, sum_, sum2_, max_, min_);
-
-    friend class pfi::data::serialization::access;
-    template<class Archive>
-    void serialize(Archive& ar) {
-      ar & n_ & sum_ & sum2_ & max_ & min_;
-    }
 
     size_t n_;
 

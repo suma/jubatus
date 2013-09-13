@@ -21,8 +21,6 @@
 #include <string>
 #include <utility>
 
-#include <pficommon/data/serialization.h>
-
 #include "stat.hpp"
 #include "../framework/mixable.hpp"
 

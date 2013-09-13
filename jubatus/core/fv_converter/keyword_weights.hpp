@@ -51,11 +51,6 @@ class keyword_weights {
   void clear();
 
   MSGPACK_DEFINE(document_count_, document_frequencies_, weights_);
-  template<class Archiver>
-  void serialize(Archiver& ar) {
-    ar & MEMBER(document_count_) & MEMBER(document_frequencies_)
-        & MEMBER(weights_);
-  }
 
  private:
   double get_global_weight(const std::string& key) const;

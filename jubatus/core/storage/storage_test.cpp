@@ -18,8 +18,6 @@
 #include <map>
 #include <string>
 #include <gtest/gtest.h>
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include "local_storage.hpp"
 #include "local_storage_mixture.hpp"
 
@@ -41,8 +39,6 @@ using jubatus::core::storage::val2_t;
 using jubatus::core::storage::val3_t;
 using jubatus::core::storage::local_storage;
 using jubatus::core::storage::local_storage_mixture;
-using pfi::data::serialization::binary_iarchive;
-using pfi::data::serialization::binary_oarchive;
 
 namespace jubatus {
 namespace core {
@@ -51,12 +47,6 @@ namespace storage {
 class stub_storage : public storage_base {
  private:
   map<string, map<string, val3_t> > data_;
-
-  friend class pfi::data::serialization::access;
-  template <class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(data_);
-  }
 
  public:
   MSGPACK_DEFINE(data_);
@@ -109,18 +99,6 @@ class stub_storage : public storage_base {
     data_[feature][klass] = w;
   }
 
-  bool save(std::ostream& os) {
-    pfi::data::serialization::binary_oarchive oa(os);
-    oa << *this;
-    return true;
-  }
-
-  bool load(std::istream& is) {
-    pfi::data::serialization::binary_iarchive ia(is);
-    ia >> *this;
-    return true;
-  }
-
   void save(framework::msgpack_writer& writer) const {
     msgpack::pack(writer, *this);
   }
@@ -147,10 +125,9 @@ TEST(key_manager, trivial) {
   ASSERT_EQ(0u, km.get_id("x"));
   ASSERT_EQ(1u, km.get_id("y"));
   ASSERT_EQ(2u, km.get_id("z"));
-  const char* tmp_file_name = "./tmp_key_manager";
-  ofstream ofs(tmp_file_name);
-  binary_oarchive oa(ofs);
-  oa << km;
+
+  msgpack::sbuffer sbuf;
+  msgpack::pack(sbuf, km);
 }
 
 template <typename T>
@@ -282,9 +259,6 @@ TYPED_TEST_P(storage_test, serialize) {
     s.set3("b", "x", val3_t(12, 1212, 121212));
     s.set3("b", "z", val3_t(45, 4545, 454545));
 
-    // ofstream ofs(tmp_file_name);
-    //binary_oarchive oa(ss);
-    //oa << s;
     msgpack::pack(&sbuf, s);
   }
 

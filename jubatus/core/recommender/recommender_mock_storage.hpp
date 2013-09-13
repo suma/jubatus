@@ -22,7 +22,6 @@
 #include <utility>
 #include <vector>
 #include <msgpack.hpp>
-#include <pficommon/data/serialization.h>
 #include "recommender_type.hpp"
 #include "../framework/model.hpp"
 #include "../framework/mixable.hpp"

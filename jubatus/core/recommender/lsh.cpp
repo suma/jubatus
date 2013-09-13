@@ -147,9 +147,7 @@ void lsh::save_impl(framework::msgpack_writer& writer) const {
 }
 
 void lsh::load_impl(msgpack::object& o) {
-  //o.convert(this);
-  size_t size = o.via.array.size;
-  if (o.type != msgpack::type::ARRAY || size != 2) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
     throw msgpack::type_error();
   }
 

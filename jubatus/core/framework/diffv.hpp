@@ -44,11 +44,6 @@ struct diffv {
   }
 
   MSGPACK_DEFINE(count, v);
-
-  template<class Archiver>
-  void serialize(Archiver& ar) {
-    ar & MEMBER(count) & MEMBER(v);
-  }
 };
 
 }  // namespace framework

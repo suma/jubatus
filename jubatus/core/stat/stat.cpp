@@ -19,7 +19,6 @@
 #include <cmath>
 #include <string>
 #include <pficommon/system/time_util.h>
-#include <pficommon/data/serialization.h>
 
 using std::string;
 using pfi::system::time::clock_time;

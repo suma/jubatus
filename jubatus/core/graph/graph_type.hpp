@@ -23,7 +23,6 @@
 #include <vector>
 
 #include <msgpack.hpp>
-#include <pficommon/data/serialization.h>
 #include <pficommon/data/unordered_map.h>
 
 #include "../common/exception.hpp"
@@ -47,13 +46,7 @@ struct eigen_vector_info {
   double score;
   uint64_t out_degree_num;
 
-  friend class pfi::data::serialization::access;
-
   MSGPACK_DEFINE(score, out_degree_num);
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(score) & MEMBER(out_degree_num);
-  }
 };
 
 typedef pfi::data::unordered_map<node_id_t, eigen_vector_info>
@@ -65,13 +58,6 @@ struct node_info {
   std::vector<edge_id_t> out_edges;
 
   MSGPACK_DEFINE(property, in_edges, out_edges);
-
-  friend class pfi::data::serialization::access;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(property) & MEMBER(in_edges) & MEMBER(out_edges);
-  }
 };
 
 struct edge_info {
@@ -80,13 +66,6 @@ struct edge_info {
   node_id_t tgt;
 
   MSGPACK_DEFINE(p, src, tgt);
-
-  friend class pfi::data::serialization::access;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(p) & MEMBER(src) & MEMBER(tgt);
-  }
 };
 
 struct preset_query {
@@ -99,13 +78,6 @@ struct preset_query {
   }
 
   MSGPACK_DEFINE(edge_query, node_query);
-
-  friend class pfi::data::serialization::access;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(edge_query) & MEMBER(node_query);
-  }
 };
 
 typedef pfi::data::unordered_map<node_id_t, std::pair<uint64_t, node_id_t> >
@@ -117,13 +89,6 @@ struct shortest_path_tree {
   spt_edges to_root;
 
   MSGPACK_DEFINE(landmark, from_root, to_root);
-
-  friend class pfi::data::serialization::access;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(landmark) & MEMBER(from_root) & MEMBER(to_root);
-  }
 };
 
 typedef std::vector<shortest_path_tree> spt_mixed;

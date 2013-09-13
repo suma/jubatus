@@ -21,8 +21,6 @@
 #include <utility>
 #include <vector>
 
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_set.h>
 #include <pficommon/lang/cast.h>
 
@@ -368,18 +366,6 @@ void graph_wo_index::get_edge(edge_id_t eid, edge_info& ret) const {
 
 string graph_wo_index::type() const {
   return string("graph_wo_index");
-}
-
-bool graph_wo_index::save_imp(std::ostream& os) {
-  pfi::data::serialization::binary_oarchive oa(os);
-  oa << local_nodes_ << local_edges_ << global_nodes_ << eigen_scores_ << spts_;
-  return true;
-}
-
-bool graph_wo_index::load_imp(std::istream& is) {
-  pfi::data::serialization::binary_iarchive ia(is);
-  ia >> local_nodes_ >> local_edges_ >> global_nodes_ >> eigen_scores_ >> spts_;
-  return true;
 }
 
 void graph_wo_index::save(framework::msgpack_writer& writer) const {

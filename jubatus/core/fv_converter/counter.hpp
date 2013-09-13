@@ -17,8 +17,6 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_COUNTER_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_COUNTER_HPP_
 
-#include <pficommon/data/serialization.h>
-#include <pficommon/data/serialization/unordered_map.h>
 #include <pficommon/data/unordered_map.h>
 #include "../common/unordered_map.hpp"
 
@@ -81,11 +79,6 @@ class counter {
   }
 
   MSGPACK_DEFINE(data_);
-
-  template<class Archiver>
-  void serialize(Archiver& ar) {
-    ar & MEMBER(data_);
-  }
 
  private:
   pfi::data::unordered_map<T, unsigned> data_;
