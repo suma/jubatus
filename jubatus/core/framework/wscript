@@ -16,6 +16,7 @@ def build(bld):
       'linear_mixable.hpp',
       'mixable.hpp',
       'model.hpp',
+      'diffv.hpp',
       'linear_function_mixer.hpp',
       'mixable_weight_manager.hpp',
       ]

@@ -28,8 +28,7 @@ def build(bld):
       'stat.hpp',
       'anomaly.hpp',
       'graph.hpp',
-      'diffv.hpp',
-      'plugin.hpp'
+      'plugin.hpp',
       'anomaly_factory.hpp',
       'classifier_factory.hpp',
       'recommender_factory.hpp',
