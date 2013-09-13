@@ -28,7 +28,7 @@
 #include <pficommon/math/random.h>
 #include "../common/exception.hpp"
 #include "../common/hash.hpp"
-#include "../common/portable_mixer.hpp"  // TODO(kashihara): use linear_mixer
+#include "../test/portable_mixer.hpp"
 #include "../recommender/recommender_mock.hpp"
 #include "../recommender/recommender_mock_util.hpp"
 #include "lof_storage.hpp"
@@ -184,14 +184,15 @@ class lof_storage_mix_test : public ::testing::TestWithParam<
 
   void update(const string& name, const common::sfv_t& mean, float deviation) {
     const common::sfv_t x = generate_gaussian(name, mean, deviation);
-    lof_storage* storage = portable_mixer_.get_hash(name);
+    lof_storage* storage = storages_[portable_mixer_.get_hash(name)];
     storage->update_row(name, x);
 
     single_storage_->update_row(name, x);
   }
 
   void remove(const string& name) {
-    portable_mixer_.get_hash(name)->remove_row(name);
+    lof_storage* storage = storages_[portable_mixer_.get_hash(name)];
+    storage->remove_row(name);
     single_storage_->remove_row(name);
   }
 
@@ -209,16 +210,18 @@ class lof_storage_mix_test : public ::testing::TestWithParam<
     const lof_storage::config& config = param.second;
 
     storages_.resize(num_models);
+    mixable_storages_.resize(num_models);
     for (int i = 0; i < num_models; ++i) {
-      storages_[i].reset(
-        new lof_storage(config, new recommender::recommender_mock));
+      lof_storage* lof =
+        new lof_storage(config, new recommender::recommender_mock);
+      storages_[i] = lof;
+      mixable_lof_storage* m = new mixable_lof_storage(
+          mixable_lof_storage::model_ptr(lof));
+      mixable_storages_[i].reset(m);
+      portable_mixer_.add(m);
     }
     single_storage_.reset(
       new lof_storage(config, new recommender::recommender_mock));
-
-    for (size_t i = 0; i < storages_.size(); ++i) {
-      portable_mixer_.add(storages_[i].get());
-    }
   }
 
   virtual void TearDown() {
@@ -226,9 +229,10 @@ class lof_storage_mix_test : public ::testing::TestWithParam<
     single_storage_.reset();
   }
 
-  vector<pfi::lang::shared_ptr<lof_storage> > storages_;
+  vector<lof_storage*> storages_;
+  vector<pfi::lang::shared_ptr<mixable_lof_storage> > mixable_storages_;
   pfi::lang::shared_ptr<lof_storage> single_storage_;
-  common::portable_mixer<lof_storage> portable_mixer_;
+  test::portable_mixer portable_mixer_;
 };
 
 TEST_P(lof_storage_mix_test, consistency) {

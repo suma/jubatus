@@ -43,10 +43,6 @@ struct lof_entry {
   float lrd;
 
   MSGPACK_DEFINE(kdist, lrd);
-  template<typename Ar>
-  void serialize(Ar& ar) {
-    ar & MEMBER(kdist) & MEMBER(lrd);
-  }
 };
 
 typedef pfi::data::unordered_map<std::string, lof_entry> lof_table_t;

@@ -25,6 +25,7 @@
 #include <pficommon/data/serialization.h>
 #include "recommender_type.hpp"
 #include "../framework/model.hpp"
+#include "../framework/mixable.hpp"
 
 namespace jubatus {
 namespace core {
@@ -38,6 +39,7 @@ class recommender_mock_storage
   struct diff_type {
     relation_type similar_relation;
     relation_type neighbor_relation;
+    MSGPACK_DEFINE(similar_relation, neighbor_relation);
   };
 
   virtual ~recommender_mock_storage();
@@ -64,9 +66,9 @@ class recommender_mock_storage
 
   std::string name() const;
 
-  virtual void get_diff(diff_type& diff) const;
-  virtual void set_mixed_and_clear_diff(const diff_type& mixed_diff);
-  virtual void mix(const diff_type& lhs, diff_type& rhs) const;
+  void get_diff(diff_type& diff) const;
+  void put_diff(const diff_type& mixed_diff);
+  void mix(const diff_type& lhs, diff_type& rhs) const;
 
   void save(framework::msgpack_writer&) const;
   void load(msgpack::object&);
@@ -89,6 +91,9 @@ class recommender_mock_storage
   relation_type similar_relation_;
   relation_type neighbor_relation_;
 };
+
+typedef framework::linear_mixable_delegation<recommender_mock_storage,
+    recommender_mock_storage::diff_type> mixable_recommender_mock_storage;
 
 }  // namespace recommender
 }  // namespace core

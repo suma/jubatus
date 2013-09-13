@@ -30,7 +30,9 @@ namespace jubatus {
 namespace core {
 namespace recommender {
 
-recommender_mock::recommender_mock() {
+recommender_mock::recommender_mock()
+  : storage_(mixable_recommender_mock_storage::model_ptr(
+        new recommender_mock_storage)) {
 }
 
 recommender_mock::~recommender_mock() {
@@ -39,7 +41,7 @@ recommender_mock::~recommender_mock() {
 void recommender_mock::set_similar_relation(
     const common::sfv_t& query,
     const vector<pair<string, float> >& ids) {
-  storage_.set_similar_items(query, ids);
+  storage_.get_model()->set_similar_items(query, ids);
 }
 
 void recommender_mock::set_similar_relation(
@@ -53,7 +55,7 @@ void recommender_mock::set_similar_relation(
 void recommender_mock::set_neighbor_relation(
     const common::sfv_t& query,
     const vector<pair<string, float> >& ids) {
-  storage_.set_neighbor_items(query, ids);
+  storage_.get_model()->set_neighbor_items(query, ids);
 }
 
 void recommender_mock::set_neighbor_relation(
@@ -68,25 +70,25 @@ void recommender_mock::similar_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     size_t ret_num) const {
-  storage_.similar_items_similarity(query, ids, ret_num);
+  storage_.get_model()->similar_items_similarity(query, ids, ret_num);
 }
 
 void recommender_mock::neighbor_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     size_t ret_num) const {
-  storage_.neighbor_items_distance(query, ids, ret_num);
+  storage_.get_model()->neighbor_items_distance(query, ids, ret_num);
 }
 
 void recommender_mock::clear() {
-  storage_.clear();
+  storage_.get_model()->clear();
   orig_.clear();
 }
 
 void recommender_mock::clear_row(const string& id) {
   common::sfv_t sfv;
   decode_row(id, sfv);
-  storage_.remove(sfv);
+  storage_.get_model()->remove(sfv);
 
   orig_.remove_row(id);
 }
@@ -99,7 +101,7 @@ void recommender_mock::update_row(const string& id, const sfv_diff_t& diff) {
   common::sfv_t new_sfv;
   orig_.get_row(id, new_sfv);
 
-  storage_.update(old_sfv, new_sfv);
+  storage_.get_model()->update(old_sfv, new_sfv);
 }
 
 void recommender_mock::get_all_row_ids(vector<string>& ids) const {
@@ -111,20 +113,29 @@ string recommender_mock::type() const {
 }
 
 framework::linear_mixable* recommender_mock::get_linear_mixable() {
-  return NULL;
+  return &storage_;
 }
 
 const framework::linear_mixable* recommender_mock::get_const_linear_mixable()
   const {
-  return NULL;
+  return &storage_;
 }
 
 void recommender_mock::save_impl(framework::msgpack_writer& writer) const {
-  msgpack::pack(writer, *this);
+  msgpack::packer<framework::msgpack_writer> pk(writer);
+
+  pk.pack_array(2);
+  pk.pack(orig_);
+  storage_.get_model()->save(writer);
 }
 
-void recommender_mock::load_impl(msgpack::object& obj) {
-  obj.convert(this);
+void recommender_mock::load_impl(msgpack::object& o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  o.via.array.ptr[0].convert(&orig_);
+  storage_.get_model()->load(o.via.array.ptr[1]);
 }
 
 }  // namespace recommender

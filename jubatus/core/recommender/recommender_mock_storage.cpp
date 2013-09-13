@@ -84,7 +84,7 @@ void recommender_mock_storage::get_diff(diff_type& diff) const {
   diff.neighbor_relation = neighbor_relation_;
 }
 
-void recommender_mock_storage::set_mixed_and_clear_diff(
+void recommender_mock_storage::put_diff(
     const diff_type& diff) {
   similar_relation_ = diff.similar_relation;
   neighbor_relation_ = diff.neighbor_relation;

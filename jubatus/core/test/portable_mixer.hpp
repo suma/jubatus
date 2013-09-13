@@ -22,6 +22,7 @@
 #include <vector>
 #include <pficommon/math/random.h>
 #include "../common/hash.hpp"
+#include "../framework/model.hpp"
 #include "../framework/linear_mixable.hpp"
 
 namespace jubatus {
@@ -49,8 +50,8 @@ class portable_mixer {
     return mixable_[rand_(mixable_.size())];
   }
 
-  framework::linear_mixable* get_hash(const std::string& id) const {
-    return mixable_[common::hash_util::calc_string_hash(id) % mixable_.size()];
+  size_t get_hash(const std::string& id) const {
+    return common::hash_util::calc_string_hash(id) % mixable_.size();
   }
 
   void mix() {

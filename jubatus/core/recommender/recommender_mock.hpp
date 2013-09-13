@@ -66,12 +66,12 @@ class recommender_mock : public recommender_base {
   framework::linear_mixable* get_linear_mixable();
   const framework::linear_mixable* get_const_linear_mixable() const;
 
-  MSGPACK_DEFINE(orig_, storage_);
+  MSGPACK_DEFINE(orig_);
  private:
   virtual void save_impl(framework::msgpack_writer&) const;
   virtual void load_impl(msgpack::object&);
 
-  recommender_mock_storage storage_;
+  mixable_recommender_mock_storage storage_;
 };
 
 }  // namespace recommender
