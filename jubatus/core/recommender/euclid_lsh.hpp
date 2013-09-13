@@ -87,8 +87,6 @@ class euclid_lsh : public recommender_base {
   virtual void get_all_row_ids(std::vector<std::string>& ids) const;
 
   virtual std::string type() const;
-  //virtual core::storage::lsh_index_storage* get_storage();
-  //virtual const core::storage::lsh_index_storage* get_const_storage() const;
   framework::linear_mixable* get_linear_mixable();
   const framework::linear_mixable* get_const_linear_mixable() const;
 

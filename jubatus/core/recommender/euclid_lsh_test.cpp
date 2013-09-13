@@ -25,8 +25,8 @@
 
 #include "euclid_lsh.hpp"
 #include "../common/hash.hpp"
-#include "../common/portable_mixer.hpp"  // TODO(suma): use linear_mixer
 #include "../storage/lsh_index_storage.hpp"
+#include "../test/portable_mixer.hpp"
 
 using std::istringstream;
 using std::make_pair;
@@ -57,11 +57,6 @@ common::sfv_t make_dense_sfv(const string& s) {
 }
 
 }  // namespace
-
-
-// TODO(suma): 2013-09-06 Disabled this test
-// because portable_mixer is not porable
-#if 0
 
 class euclid_lsh_mix_test
     : public ::testing::TestWithParam<pair<int, euclid_lsh::config> > {
@@ -103,13 +98,13 @@ class euclid_lsh_mix_test
     single_recom_.reset(new euclid_lsh(config));
 
     for (int i = 0; i < num_models; ++i) {
-      portable_mixer_.add(recoms_[i]);
+      portable_mixer_.add(recoms_[i]->get_linear_mixable());
     }
   }
 
   vector<pfi::lang::shared_ptr<euclid_lsh> > recoms_;
   pfi::lang::shared_ptr<euclid_lsh> single_recom_;
-  common::portable_mixer<lsh_index_storage> portable_mixer_;
+  test::portable_mixer portable_mixer_;
 
   mtrand rand_;
 };
@@ -158,7 +153,6 @@ INSTANTIATE_TEST_CASE_P(
     euclid_lsh_mix_test_instance,
     euclid_lsh_mix_test,
     ::testing::Values(make_pair(2, make_euclid_lsh_config())));
-#endif
 
 }  // namespace recommender
 }  // namespace core
