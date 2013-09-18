@@ -35,6 +35,7 @@ def build(bld):
       'regression_factory.hpp',
       'graph_factory.hpp',
       'storage_factory.hpp',
+      'mixable_holder.hpp',
       ]
   use = ['PFICOMMON', 'MSGPACK', 'jubatus_core', 'core_headers']
 
