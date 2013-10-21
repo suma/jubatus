@@ -89,8 +89,8 @@ def build(bld):
   bld.recurse(subdirs)
 
   if not bld.is_defined('JUBATUS_DISABLE_ASSERTIONS'):
-    bld.core_use = 'LIBGLOG'
-    bld.driver_use = 'LIBGLOG'
+    bld.core_use = ['LIBGLOG']
+    bld.driver_use = ['LIBGLOG']
 
   # core
   bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = bld.env['JUBATUS_VERSION'])
