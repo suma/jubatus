@@ -25,10 +25,10 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class normal_herd : public linear_classifier {
+class normal_herd : public multiclass_classifier {
  public:
-  explicit normal_herd(storage::storage_base* storage);
-  normal_herd(const classifier_config& config, storage::storage_base* storage);
+  explicit normal_herd(const classifier_storage_ptr& storage);
+  normal_herd(const classifier_config& config, const classifier_storage_ptr& storage);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:

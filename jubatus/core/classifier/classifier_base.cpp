@@ -35,18 +35,19 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-multiclass_classifier::~multiclass_classifier() {
+multiclass_classifier_base::~multiclass_classifier_base() {
 }
 
-linear_classifier::linear_classifier(storage::storage_base* storage)
+multiclass_classifier::multiclass_classifier(
+    const classifier_storage_ptr& storage)
     : storage_(storage),
       use_covars_(false) {
 }
 
-linear_classifier::~linear_classifier() {
+multiclass_classifier::~multiclass_classifier() {
 }
 
-void linear_classifier::classify_with_scores(
+void multiclass_classifier::classify_with_scores(
     const common::sfv_t& sfv,
     classify_result& scores) const {
   scores.clear();
@@ -59,7 +60,7 @@ void linear_classifier::classify_with_scores(
   }
 }
 
-string linear_classifier::classify(const common::sfv_t& fv) const {
+string multiclass_classifier::classify(const common::sfv_t& fv) const {
   classify_result result;
   classify_with_scores(fv, result);
   float max_score = -FLT_MAX;
@@ -74,11 +75,15 @@ string linear_classifier::classify(const common::sfv_t& fv) const {
   return max_class;
 }
 
-void linear_classifier::clear() {
+void multiclass_classifier::clear() {
   storage_->clear();
 }
 
-void linear_classifier::update_weight(
+classifier_storage_ptr multiclass_classifier::storage() {
+  return storage_;
+}
+
+void multiclass_classifier::update_weight(
     const common::sfv_t& sfv,
     float step_width,
     const string& pos_label,
@@ -86,7 +91,7 @@ void linear_classifier::update_weight(
   storage_->bulk_update(sfv, step_width, pos_label, neg_label);
 }
 
-string linear_classifier::get_largest_incorrect_label(
+string multiclass_classifier::get_largest_incorrect_label(
     const common::sfv_t& fv,
     const string& label,
     classify_result& scores) const {
@@ -106,7 +111,7 @@ string linear_classifier::get_largest_incorrect_label(
   return max_class;
 }
 
-float linear_classifier::calc_margin(
+float multiclass_classifier::calc_margin(
     const common::sfv_t& fv,
     const string& label,
     string& incorrect_label) const {
@@ -125,7 +130,7 @@ float linear_classifier::calc_margin(
   return incorrect_score - correct_score;
 }
 
-float linear_classifier::calc_margin_and_variance(
+float multiclass_classifier::calc_margin_and_variance(
     const common::sfv_t& sfv,
     const string& label,
     string& incorrect_label,
@@ -152,7 +157,7 @@ float linear_classifier::calc_margin_and_variance(
   return margin;
 }
 
-float linear_classifier::squared_norm(const common::sfv_t& fv) {
+float multiclass_classifier::squared_norm(const common::sfv_t& fv) {
   float ret = 0.f;
   for (size_t i = 0; i < fv.size(); ++i) {
     ret += fv[i].second * fv[i].second;

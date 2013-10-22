@@ -25,9 +25,9 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class perceptron : public linear_classifier {
+class perceptron : public multiclass_classifier {
  public:
-  explicit perceptron(storage::storage_base* storage);
+  explicit perceptron(const classifier_storage_ptr& storage);
   void train(const common::sfv_t& sfv, const std::string& label);
   std::string name() const;
 };

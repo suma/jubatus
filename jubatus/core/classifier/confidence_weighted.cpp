@@ -28,17 +28,17 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-confidence_weighted::confidence_weighted(storage::storage_base* storage)
-    : linear_classifier(storage) {
-  linear_classifier::use_covars_ = true;
+confidence_weighted::confidence_weighted(const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage) {
+  multiclass_classifier::use_covars_ = true;
 }
 
 confidence_weighted::confidence_weighted(
     const classifier_config& config,
-    storage::storage_base* storage)
-    : linear_classifier(storage),
+    const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage),
       config_(config) {
-  linear_classifier::use_covars_ = true;
+  multiclass_classifier::use_covars_ = true;
 }
 
 void confidence_weighted::train(const common::sfv_t& sfv, const string& label) {

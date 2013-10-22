@@ -36,6 +36,7 @@ using std::vector;
 using pfi::text::json::to_json;
 using pfi::lang::lexical_cast;
 using jubatus::core::storage::local_storage;
+using jubatus::core::classifier::classifier_storage_ptr;
 
 namespace jubatus {
 namespace core {
@@ -48,8 +49,8 @@ class classifier_test : public testing::Test {
 TYPED_TEST_CASE_P(classifier_test);
 
 TYPED_TEST_P(classifier_test, trivial) {
-  local_storage s;
-  TypeParam p(&s);
+  classifier_storage_ptr s(new local_storage);
+  TypeParam p(s);
   ASSERT_NE(p.name(), "");
   common::sfv_t fv;
   fv.push_back(make_pair(string("f1"), 1.0));
@@ -67,8 +68,8 @@ TYPED_TEST_P(classifier_test, trivial) {
 }
 
 TYPED_TEST_P(classifier_test, sfv_err) {
-  local_storage s;
-  TypeParam p(&s);
+  classifier_storage_ptr s(new local_storage);
+  TypeParam p(s);
   common::sfv_t fv;
   fv.push_back(make_pair(string("f1"), 0.0));
   p.train(fv, string("label1"));
@@ -92,8 +93,8 @@ common::sfv_t convert(vector<double>& v) {
 
 TYPED_TEST_P(classifier_test, random) {
   pfi::math::random::mtrand rand(0);
-  local_storage s;
-  TypeParam p(&s);
+  classifier_storage_ptr s(new local_storage);
+  TypeParam p(s);
 
   srand(0);
   for (size_t i = 0; i < 1000; ++i) {
@@ -113,8 +114,8 @@ TYPED_TEST_P(classifier_test, random) {
 
 TYPED_TEST_P(classifier_test, random3) {
   pfi::math::random::mtrand rand(0);
-  local_storage s;
-  TypeParam p(&s);
+  classifier_storage_ptr s(new local_storage);
+  TypeParam p(s);
 
   srand(0);
   for (size_t i = 0; i < 1000; ++i) {

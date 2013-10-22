@@ -25,10 +25,10 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class arow : public linear_classifier {
+class arow : public multiclass_classifier {
  public:
-  explicit arow(storage::storage_base* stroage);
-  arow(const classifier_config& config, storage::storage_base* stroage);
+  explicit arow(const classifier_storage_ptr& stroage);
+  arow(const classifier_config& config, const classifier_storage_ptr& stroage);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:

@@ -36,20 +36,15 @@ class classifier {
  public:
   // TODO(suma): where is the owner of model, mixer, and converter?
   classifier(
-      jubatus::core::storage::storage_base* model_storage,
-      jubatus::core::classifier::multiclass_classifier* classifier_method,
-      pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter);
+      const pfi::lang::shared_ptr<core::classifier::multiclass_classifier>& classifier_method,
+      const pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter>& converter);
   virtual ~classifier();
 
-  pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
-    return mixable_holder_;
-  }
+  // TODO(suma) add register_to_mixable_holder function
 
-  core::storage::storage_base* get_model() const {
-    return mixable_classifier_model_.get_model().get();
-  }
+  pfi::lang::shared_ptr<core::storage::storage_base> get_model() const;
 
-  void train(const std::pair<std::string, core::fv_converter::datum>& data);
+  void train(const std::string, const core::fv_converter::datum& data);
   jubatus::core::classifier::classify_result classify(
       const core::fv_converter::datum& data) const;
 
@@ -58,10 +53,8 @@ class classifier {
   void load(msgpack::object& o);
 
  private:
-  pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
-
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
-  pfi::lang::shared_ptr<jubatus::core::classifier::multiclass_classifier>
+  pfi::lang::shared_ptr<core::classifier::multiclass_classifier>
     classifier_;
   core::framework::linear_function_mixer mixable_classifier_model_;
   core::framework::mixable_weight_manager wm_;

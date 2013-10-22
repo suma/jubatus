@@ -27,7 +27,7 @@
 #include <pficommon/text/json.h>
 
 #include "jubatus/core/storage/storage_type.hpp"
-#include "jubatus/core/storage/local_storage.hpp"
+#include "jubatus/core/storage/local_storage_mixture.hpp"
 #include "jubatus/core/classifier/classifier_test_util.hpp"
 #include "jubatus/core/classifier/classifier.hpp"
 #include "jubatus/core/fv_converter/datum.hpp"
@@ -48,6 +48,9 @@ using pfi::lang::lexical_cast;
 using pfi::data::optional;
 using jubatus::core::classifier::classify_result;
 using jubatus::core::fv_converter::datum;
+
+using jubatus::core::classifier::multiclass_classifier;
+using jubatus::core::classifier::classifier_storage_ptr;
 
 namespace jubatus {
 namespace driver {
@@ -85,15 +88,11 @@ string get_max_label(const classify_result& result) {
 }
 }  // namespace
 
-typedef pair<core::storage::storage_base*,
-        core::classifier::multiclass_classifier*> storage_pair;
-
-class classifier_test : public ::testing::TestWithParam<storage_pair> {
+class classifier_test : public ::testing::TestWithParam<multiclass_classifier*> {
  protected:
   void SetUp() {
     classifier_.reset(new driver::classifier(
-          GetParam().first,
-          GetParam().second,
+          pfi::lang::shared_ptr<core::classifier::multiclass_classifier>(GetParam()),
           make_fv_converter()));
   }
 
@@ -108,7 +107,7 @@ class classifier_test : public ::testing::TestWithParam<storage_pair> {
 
 TEST_P(classifier_test, simple) {
   datum d;
-  classifier_->train(make_pair(string("hoge"), d));
+  classifier_->train(string("hoge"), d);
   classifier_->classify(d);
 }
 
@@ -119,7 +118,7 @@ TEST_P(classifier_test, api_train) {
   vector<pair<string, datum> > data;
   make_random_data(rand, data, example_size);
   for (size_t i = 0; i < example_size; i++) {
-    classifier_->train(data[i]);
+    classifier_->train(data[i].first, data[i].second);
   }
 }
 
@@ -130,7 +129,7 @@ void classifier_test::my_test() {
   vector<pair<string, datum> > data;
   make_random_data(rand, data, example_size);
   for (size_t i = 0; i < example_size; i++) {
-    classifier_->train(data[i]);
+    classifier_->train(data[i].first, data[i].second);
   }
 
   vector<string> labels;
@@ -191,10 +190,10 @@ TEST_P(classifier_test, duplicated_keys) {
     for (size_t j = 0; j < 100; ++j)
     d.num_values_.push_back(feature);
   }
-  pair<string, datum> data("", d);
+
   for (size_t i = 0; i < 100; ++i) {
-    data.first = i % 2 == 0 ? "P" : "N";
-    classifier_->train(data);
+    string label = i % 2 == 0 ? "P" : "N";
+    classifier_->train(label, d);
   }
 
   {
@@ -216,14 +215,14 @@ TEST_P(classifier_test, save_load) {
   vector<pair<string, datum> > data;
   make_random_data(rand, data, example_size);
   for (size_t i = 0; i < example_size; i++) {
-    classifier_->train(data[i]);
+    classifier_->train(data[i].first, data[i].second);
   }
 
   msgpack::sbuffer sbuf;
   core::framework::stream_writer<msgpack::sbuffer> swriter(sbuf);
   classifier_->save(swriter);
 
-  classifier_->get_model()->clear();
+  classifier_->clear();
 
   msgpack::unpacked msg;
   msgpack::unpack(&msg, sbuf.data(), sbuf.size());
@@ -248,8 +247,8 @@ TEST_P(classifier_test, save_load_2) {
 
   // Train
   vector<pair<string, datum> > data;
-  classifier_->train(make_pair("pos", pos));
-  classifier_->train(make_pair("neg", neg));
+  classifier_->train(string("pos"), pos);
+  classifier_->train(string("neg"), neg);
 
   // Now, the classifier can classify properly
   ASSERT_EQ("pos", get_max_label(classifier_->classify(pos)));
@@ -286,7 +285,7 @@ TEST_P(classifier_test, nan) {
   datum d;
   d.num_values_.push_back(
       make_pair("value", numeric_limits<float>::quiet_NaN()));
-  classifier_->train(make_pair(string("l1"), d));
+  classifier_->train(string("l1"), d);
 
 
   classify_result result = classifier_->classify(d);
@@ -294,30 +293,29 @@ TEST_P(classifier_test, nan) {
   EXPECT_FALSE(isfinite(result[0].score));
 }
 
-vector<storage_pair> create_classifiers() {
-  vector<storage_pair> method;
-
-  core::storage::storage_base* storage;
+vector<multiclass_classifier*> create_classifiers() {
+  vector<multiclass_classifier*> method;
+  classifier_storage_ptr storage;
   core::classifier::classifier_config config;
 
   // TODO(unknown): testing with perceptron?
 
-  storage = new core::storage::local_storage;
-  method.push_back(make_pair(storage,
-        new core::classifier::passive_aggressive(storage)));
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(
+        new core::classifier::passive_aggressive(storage));
 
-  storage = new core::storage::local_storage;
-  method.push_back(make_pair(storage,
-        new core::classifier::passive_aggressive_1(config, storage)));
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(
+        new core::classifier::passive_aggressive_1(config, storage));
 
-  storage = new core::storage::local_storage;
-  method.push_back(make_pair(storage,
-        new core::classifier::passive_aggressive_2(config, storage)));
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(
+        new core::classifier::passive_aggressive_2(config, storage));
 
-  storage = new core::storage::local_storage;
+  storage.reset(new core::storage::local_storage_mixture);
   config.C = 0.1f;
-  method.push_back(make_pair(storage,
-        new core::classifier::normal_herd(config, storage)));
+  method.push_back(
+        new core::classifier::normal_herd(config, storage));
 
   return method;
 }

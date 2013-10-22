@@ -25,12 +25,12 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class confidence_weighted : public linear_classifier {
+class confidence_weighted : public multiclass_classifier {
  public:
-  explicit confidence_weighted(storage::storage_base* storage);
+  explicit confidence_weighted(const classifier_storage_ptr& storage);
   confidence_weighted(
       const classifier_config& config,
-      storage::storage_base* storage);
+      const classifier_storage_ptr& storage);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:

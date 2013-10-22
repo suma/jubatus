@@ -25,9 +25,9 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class passive_aggressive : public linear_classifier {
+class passive_aggressive : public multiclass_classifier {
  public:
-  explicit passive_aggressive(storage::storage_base* storage);
+  explicit passive_aggressive(const classifier_storage_ptr& storage);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
 };

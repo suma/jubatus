@@ -25,14 +25,14 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-passive_aggressive_2::passive_aggressive_2(storage::storage_base* storage)
-    : linear_classifier(storage) {
+passive_aggressive_2::passive_aggressive_2(const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage) {
 }
 
 passive_aggressive_2::passive_aggressive_2(
     const classifier_config& config,
-    storage::storage_base* storage)
-    : linear_classifier(storage),
+    const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage),
       config_(config) {
 }
 

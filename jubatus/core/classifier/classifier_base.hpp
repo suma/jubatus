@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include <pficommon/lang/shared_ptr.h>
 #include "../common/type.hpp"
 #include "../storage/storage_base.hpp"
 #include "classifier_type.hpp"
@@ -32,9 +33,12 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-class multiclass_classifier {
+typedef pfi::lang::shared_ptr<core::storage::storage_base>
+  classifier_storage_ptr;
+
+class multiclass_classifier_base {
  public:
-  virtual ~multiclass_classifier();
+  virtual ~multiclass_classifier_base();
   virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
   virtual std::string classify(const common::sfv_t& fv) const = 0;
   virtual void classify_with_scores(const common::sfv_t& fv,
@@ -43,10 +47,10 @@ class multiclass_classifier {
 };
 
 // abstract class
-class linear_classifier : public multiclass_classifier {
+class multiclass_classifier : public multiclass_classifier_base {
  public:
-  explicit linear_classifier(jubatus::core::storage::storage_base* base);
-  virtual ~linear_classifier();
+  explicit multiclass_classifier(const classifier_storage_ptr&);
+  virtual ~multiclass_classifier();
   virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
 
   std::string classify(const common::sfv_t& fv) const;
@@ -54,6 +58,8 @@ class linear_classifier : public multiclass_classifier {
                             classify_result& scores) const;
 
   void clear();
+
+  classifier_storage_ptr storage();
 
   virtual std::string name() const = 0;
 
@@ -79,7 +85,7 @@ class linear_classifier : public multiclass_classifier {
 
   static float squared_norm(const common::sfv_t& sfv);
 
-  jubatus::core::storage::storage_base* storage_;
+  classifier_storage_ptr storage_;
   bool use_covars_;
 };
 

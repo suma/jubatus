@@ -28,18 +28,18 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-normal_herd::normal_herd(storage::storage_base* storage)
-    : linear_classifier(storage) {
-  linear_classifier::use_covars_ = true;
+normal_herd::normal_herd(const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage) {
+  multiclass_classifier::use_covars_ = true;
   config_.C = 0.1f;
 }
 
 normal_herd::normal_herd(
     const classifier_config& config,
-    storage::storage_base* storage)
-    : linear_classifier(storage),
+    const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage),
       config_(config) {
-  linear_classifier::use_covars_ = true;
+  multiclass_classifier::use_covars_ = true;
 }
 
 void normal_herd::train(const common::sfv_t& sfv, const string& label) {

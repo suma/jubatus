@@ -28,15 +28,15 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-arow::arow(storage::storage_base* storage)
-    : linear_classifier(storage) {
-  linear_classifier::use_covars_ = true;
+arow::arow(const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage) {
+  multiclass_classifier::use_covars_ = true;
 }
 
-arow::arow(const classifier_config& config, storage::storage_base* storage)
-    : linear_classifier(storage),
+arow::arow(const classifier_config& config, const classifier_storage_ptr& storage)
+    : multiclass_classifier(storage),
       config_(config) {
-  linear_classifier::use_covars_ = true;
+  multiclass_classifier::use_covars_ = true;
 }
 
 void arow::train(const common::sfv_t& sfv, const string& label) {

@@ -22,6 +22,7 @@
 #include "jubatus/core/common/exception.hpp"
 #include "jubatus/core/common/jsonconfig.hpp"
 #include "jubatus/core/storage/storage_base.hpp"
+#include "jubatus/core/storage/local_storage_mixture.hpp"
 
 using jubatus::core::common::jsonconfig::config_cast_check;
 using jubatus::core::classifier::multiclass_classifier;
@@ -41,7 +42,10 @@ namespace driver {
 multiclass_classifier* classifier_factory::create_classifier(
     const std::string& name,
     const core::common::jsonconfig::config& param,
-    storage_base* storage) {
+    storage_base* s) {
+
+  core::classifier::classifier_storage_ptr storage(
+      new core::storage::local_storage_mixture);
   if (name == "perceptron") {
     // perceptron doesn't have parameter
     return new perceptron(storage);

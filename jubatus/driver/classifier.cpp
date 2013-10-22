@@ -37,50 +37,49 @@ namespace jubatus {
 namespace driver {
 
 classifier::classifier(
-    jubatus::core::storage::storage_base* model_storage,
-    jubatus::core::classifier::multiclass_classifier* classifier_method,
-    pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter)
-    : mixable_holder_(new mixable_holder)
-    , converter_(converter)
+    const pfi::lang::shared_ptr<core::classifier::multiclass_classifier>& classifier_method,
+    const pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter>& converter)
+    : converter_(converter)
     , classifier_(classifier_method)
-    , mixable_classifier_model_(
-          core::framework::linear_function_mixer::model_ptr(model_storage))
+    , mixable_classifier_model_(classifier_method->storage())
     , wm_(core::framework::mixable_weight_manager::model_ptr(new weight_manager))
   {
 
-  mixable_holder_->register_mixable(&mixable_classifier_model_);
-  mixable_holder_->register_mixable(&wm_);
-  (*converter_).set_weight_manager(wm_.get_model());
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 classifier::~classifier() {
 }
 
-void classifier::train(const pair<string, datum>& data) {
-  sfv_t v;
-  converter_->convert_and_update_weight(data.second, v);
-  core::common::sort_and_merge(v);
-  classifier_->train(v, data.first);
+pfi::lang::shared_ptr<core::storage::storage_base> classifier::get_model() const {
+  return classifier_->storage();
 }
 
-jubatus::core::classifier::classify_result classifier::classify(
+void classifier::train(const string label, const datum& data) {
+  sfv_t v;
+  converter_->convert_and_update_weight(data, v);
+  core::common::sort_and_merge(v);
+  classifier_->train(v, label);
+}
+
+core::classifier::classify_result classifier::classify(
     const datum& data) const {
   sfv_t v;
   converter_->convert(data, v);
 
-  jubatus::core::classifier::classify_result scores;
+  core::classifier::classify_result scores;
   classifier_->classify_with_scores(v, scores);
   return scores;
 }
 
 void classifier::clear() {
-  get_model()->clear();
+  classifier_->storage()->clear();
 }
 
 void classifier::save(core::framework::msgpack_writer& writer) const {
   msgpack::packer<core::framework::msgpack_writer> pk(writer);
   pk.pack_array(2);
-  mixable_classifier_model_.get_model()->save(writer);
+  classifier_->storage()->save(writer);
   wm_.get_model()->save(writer);
 }
 
@@ -89,7 +88,7 @@ void classifier::load(msgpack::object& o) {
     throw msgpack::type_error();
   }
 
-  mixable_classifier_model_.get_model()->load(o.via.array.ptr[0]);
+  classifier_->storage()->load(o.via.array.ptr[0]);
   wm_.get_model()->load(o.via.array.ptr[1]);
 }
 
