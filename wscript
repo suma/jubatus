@@ -5,7 +5,6 @@ import os
 import sys
 
 VERSION = '0.4.5'
-APPNAME = 'jubatus'
 
 top = '.'
 out = 'build'
@@ -33,12 +32,33 @@ def configure(conf):
   conf.load('unittest_gtest')
   conf.load('gnu_dirs')
 
-  # Generate config.hpp
+  major, minor, patch = map(lambda x: int(x), VERSION.split('.'))
   conf.env.JUBATUS_PLUGIN_DIR = conf.env['LIBDIR'] + '/jubatus/plugin'
   conf.define('JUBATUS_VERSION', VERSION)
-  conf.define('JUBATUS_APPNAME', APPNAME)
+  conf.define('JUBATUS_VERSION_MAJOR', major)
+  conf.define('JUBATUS_VERSION_MINOR', minor)
+  conf.define('JUBATUS_VERSION_PATCH', patch)
+
   conf.define('JUBATUS_PLUGIN_DIR', conf.env.JUBATUS_PLUGIN_DIR)
-  conf.write_config_header('jubatus/config.hpp', guard="JUBATUS_CONFIG_HPP_", remove=False)
+
+  git_repo_version = None
+  try:
+    p = os.popen('git describe')
+    git_repo_version = p.read().strip()
+    p.close()
+  except:
+    pass
+
+  git_repo_branch = 'undefined'
+  try:
+    p = os.popen('git name-rev --name-only HEAD')
+    git_repo_branch = p.read().strip()
+    p.close()
+  except:
+    pass
+
+  conf.define('JUBATUS_REPOSITORY_VERSION', git_repo_version)
+  conf.define('JUBATUS_REPOSITORY_BRANCH', git_repo_branch)
 
   conf.check_cxx(lib = 'msgpack')
 
