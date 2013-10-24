@@ -25,7 +25,6 @@
 #include "jubatus/core/framework/mixable.hpp"
 #include "jubatus/core/framework/mixable_weight_manager.hpp"
 #include "jubatus/core/fv_converter/datum_to_fv_converter.hpp"
-#include "mixable_holder.hpp"
 
 namespace jubatus {
 namespace driver {
@@ -33,13 +32,11 @@ namespace driver {
 class recommender {
  public:
   recommender(
-      jubatus::core::recommender::recommender_base* recommender_method,
-      pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter);
+      const pfi::lang::shared_ptr<core::recommender::recommender_base>& method,
+      const pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter>& converter);
   virtual ~recommender();
 
-  pfi::lang::shared_ptr<mixable_holder> get_mixable_holder() const {
-    return mixable_holder_;
-  }
+  // TODO(suma) add register_to_mixable_holder function
 
   void clear_row(const std::string& id);
   void update_row(const std::string& id, const core::fv_converter::datum& dat);
@@ -66,8 +63,6 @@ class recommender {
   void load(msgpack::object&);
 
  private:
-  pfi::lang::shared_ptr<mixable_holder> mixable_holder_;
-
   pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter_;
   pfi::lang::shared_ptr<core::recommender::recommender_base> recommender_;
   core::framework::mixable_weight_manager wm_;

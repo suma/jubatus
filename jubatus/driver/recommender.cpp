@@ -40,18 +40,13 @@ namespace jubatus {
 namespace driver {
 
 recommender::recommender(
-    jubatus::core::recommender::recommender_base* recommender_method,
-    pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter> converter)
-    : mixable_holder_(new mixable_holder),
-      converter_(converter),
-      recommender_(recommender_method),
+    const pfi::lang::shared_ptr<core::recommender::recommender_base>& method,
+    const pfi::lang::shared_ptr<core::fv_converter::datum_to_fv_converter>& converter)
+    : converter_(converter),
+      recommender_(method),
       wm_(core::framework::mixable_weight_manager::model_ptr(
             new weight_manager)) {
-
-  mixable_holder_->register_mixable(recommender_method->get_linear_mixable());
-  mixable_holder_->register_mixable(&wm_);
-
-  (*converter_).set_weight_manager(wm_.get_model());
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 recommender::~recommender() {
