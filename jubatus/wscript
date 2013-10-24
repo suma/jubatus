@@ -1,5 +1,3 @@
-import Options
-
 subdirs = "core driver"
 
 def options(opt):

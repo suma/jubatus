@@ -1,4 +1,4 @@
-import Options
+from waflib import Options
 
 def options(opt):
   opt.add_option('--enable-mecab',
@@ -25,6 +25,7 @@ int main() {
 ''',
                    define_name = 'HAVE_MECAB',
                    errmsg = 'mecab 0.99 or later is required (remove "--enable-mecab" option if not necessary)')
+    conf.env.HAVE_MECAB = True
     
 
   if Options.options.enable_ux:
@@ -32,6 +33,7 @@ int main() {
                    args = '--cflags --libs',
                    define_name = 'HAVE_UX',
                    errmsg = 'not found (remove "--enable-ux" option if not necessary)')
+    conf.env.HAVE_UX = False
 
 def make_test(bld, use, src):
   bld.program(

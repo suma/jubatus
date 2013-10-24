@@ -8,7 +8,7 @@ def configure(conf):
   conf.recurse(subdirs)
 
 def build(bld):
-  import Options
+  from waflib import Options
   source = [
       'exception.cpp',
       'key_manager.cpp',

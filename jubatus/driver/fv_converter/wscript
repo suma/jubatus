@@ -1,4 +1,4 @@
-import Options
+from waflib import Options
 
 def options(opt):
   opt.add_option('--disable-re2',
@@ -11,6 +11,7 @@ def configure(conf):
   if not Options.options.disable_re2:
     conf.check_cxx(lib = 're2', define_name = 'HAVE_RE2',
                    errmsg = 'not found (add "--disable-re2" option if not necessary)')
+    conf.env.HAVE_RE2 = True
 
   libpat = conf.env.cxxshlib_PATTERN
   conf.define('LIBSPLITTER_SAMPLE', libpat % 'splitter_sample')

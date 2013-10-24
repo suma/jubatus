@@ -1,8 +1,9 @@
-import Options
+from waflib import Options
 from functools import partial
 from waflib.Errors import TaskNotReady
 import os
 import sys
+#import waflib
 
 VERSION = '0.4.5'
 
