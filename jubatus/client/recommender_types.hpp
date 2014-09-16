@@ -1,4 +1,4 @@
-// This file is auto-generated from recommender.idl
+// This file is auto-generated from recommender.idl(0.5.2-68-g68e898d) with jenerator version 0.5.2-45-gc4cfc98/feature/unlearning
 // *** DO NOT EDIT ***
 
 #ifndef JUBATUS_CLIENT_RECOMMENDER_TYPES_HPP_
@@ -11,18 +11,22 @@
 #include <vector>
 #include <utility>
 
+#include <jubatus/client/common/datum.hpp>
 #include <msgpack.hpp>
 
 namespace jubatus {
 namespace recommender {
 
-typedef std::vector<std::pair<std::string, float> > similar_result;
-
-struct datum {
+struct id_with_score {
  public:
-  MSGPACK_DEFINE(string_values, num_values);
-  std::vector<std::pair<std::string, std::string> > string_values;
-  std::vector<std::pair<std::string, double> > num_values;
+  MSGPACK_DEFINE(id, score);
+  std::string id;
+  float score;
+  id_with_score() {
+  }
+  id_with_score(const std::string& id, float score)
+    : id(id), score(score) {
+  }
 };
 
 }  // namespace recommender

@@ -21,10 +21,31 @@
 open Jdl_parser
 
 exception Illegal_character of (Lexing.position * char)
+
+let buffer = Buffer.create 256
+
+let reset_buffer () =
+  Buffer.clear buffer
+
+let push_char c =
+  Buffer.add_char buffer c
+
+let get_buffer () =
+  Buffer.contents buffer
+
+let convert_backslash_char = function
+  | '\\' -> '\\'
+  | '\'' -> '\''
+  | '\"' -> '\"'
+  | 'n' -> '\n'
+  | 'r' -> '\r'
+  | 'b' -> '\b'
+  | 't' -> '\t'
+  | c -> c
 }
 
 let digit = ['0'-'9']*
-let literal = ['a'-'z'] ['A'-'Z' 'a'-'z' '_' '0'-'9']*
+let literal = (['a'-'z']['a'-'z' '0'-'9']*) ('_' ['a'-'z' '0'-'9']+)*
 let decorator = "#@" literal
 let comment   = "#" [^'@'] [^'\n']* '\n'
 (* let include_sth = "#include" *)
@@ -32,9 +53,9 @@ let newline = "\n"
 let space = [' ' '\t']
 
 rule token = parse
+  | "%include" { INCLUDE }
   | "exception" { EXCEPTION }
   | "message" { MESSAGE }
-  | "type" { TYPEDEF }
   | "enum" { ENUM }
   | "service" { SERVICE }
   | literal as s { LITERAL(s) }
@@ -47,9 +68,14 @@ rule token = parse
   | ')'       { RPAREN }
   | '?'       { QUESTION }
   | '='       { DEFINE }
+  | "::"      { COLON_COLON }
   | ':'       { COLON }
   | decorator as d { DECORATOR(d) }
   | digit as s { INT( int_of_string s ) }
+  | '"' {
+    reset_buffer ();
+    string lexbuf;
+    STRING(get_buffer ()) }
 
 (*  | include_sth as i { INCLUDE(i) } *)
 
@@ -60,3 +86,13 @@ rule token = parse
   | _         {
     let ch = Lexing.lexeme_char lexbuf 0 in
     raise (Illegal_character(Lexing.lexeme_start_p lexbuf, ch)) }
+
+and string = parse
+    | '"' 
+        { () }
+    | '\\' ( ['\\' '\'' '"' 'n' 't' 'b' 'r'] as c )
+        { push_char (convert_backslash_char c);
+          string lexbuf}
+    | _ as c
+        { push_char c;
+          string lexbuf }

@@ -31,12 +31,12 @@ let parse_error s = print ("parse_error->"^s);;
 
 %}
 
-%token TYPEDEF
 %token MESSAGE
 %token EXCEPTION
 %token SERVICE
 
-%token RPAREN LPAREN COMMA COLON
+%token INCLUDE
+%token RPAREN LPAREN COMMA COLON COLON_COLON
 %token RBRACE LBRACE RBRACE2 LBRACE2
 %token QUESTION
 %token ENUM
@@ -45,8 +45,8 @@ let parse_error s = print ("parse_error->"^s);;
 %token <int>    INT
 /* TODO: %token <double> DOUBLE <float> FLOAT <bool> true, false, <string> "..." */
 %token <string> LITERAL
-%token <string> INCLUDE
 %token <string> DECORATOR
+%token <string> STRING
 
 %start input
 %type <Syntax.idl> input
@@ -59,15 +59,15 @@ input:
 ;
 
 exp0:
- | typedef { $1 }
+ | include_file { $1 }
  | enum    { $1 }
  | msg     { $1 }
  | ex      { $1 }
  | service { $1 }
+;
 
-typedef:
- | TYPEDEF LITERAL DEFINE a_type {
-   Typedef($2, $4) }
+include_file:
+ | INCLUDE STRING { Include($2) }
 ;
 
 a_type:
@@ -90,6 +90,7 @@ a_type:
    | "double" -> Float true
    | "raw"    -> Raw
    | "string" -> String
+   | "datum"  -> Datum
    | s -> Struct(s)
  }
  | LITERAL LBRACE types RBRACE {
@@ -99,8 +100,6 @@ a_type:
      let left = List.hd $3 in
      let right = List.hd (List.tl $3) in
      Map(left, right);
-   | "tuple" -> Tuple($3);
-   (* user defined types?   hoge<hage, int> *)
    | s ->
      print ("unknown container: " ^ s);
      raise (Syntax.Unknown_type s)
@@ -137,7 +136,19 @@ numbers:
 msg:
  | MESSAGE LITERAL LBRACE2 fields RBRACE2 {
    Message { message_name = $2;
-             message_fields = $4; }
+             message_fields = $4;
+             message_raw = None; }
+ }
+ | MESSAGE LITERAL LPAREN cpp_type RPAREN LBRACE2 fields RBRACE2 {
+   Message { message_name = $2;
+             message_fields = $7;
+             message_raw = Some $4; }
+ }
+;
+
+cpp_type:
+ | STRING {
+   $1
  }
 ;
 

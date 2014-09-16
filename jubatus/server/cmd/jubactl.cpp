@@ -19,14 +19,14 @@
 #include <iostream>
 #include <cstring>
 
-#include <glog/logging.h>
 #include <jubatus/msgpack/rpc/client.h>
-#include <pficommon/lang/function.h>
+#include "jubatus/util/lang/function.h"
 
 #include "jubatus/core/common/exception.hpp"
 #include "../third_party/cmdline/cmdline.h"
 #include "../common/zk.hpp"
 #include "../common/membership.hpp"
+#include "../common/logger/logger.hpp"
 #include "../framework/server_util.hpp"
 
 static const std::string PROGNAME(JUBATUS_APPNAME "ctl");
@@ -54,6 +54,11 @@ void status(const string& type, const string& name, const string& zkhosts);
 
 int main(int argc, char** argv)
 try {
+  // Configures the logger.
+  // We don't provide logging configuration feature for command line tools;
+  // just print logs to standard output.
+  jubatus::server::common::logger::configure();
+
   cmdline::parser p;
 
   p.add<std::string>("cmd", 'c',
@@ -80,22 +85,20 @@ try {
       "[start] directory to load and save models", false, "/tmp");
   p.add<std::string>("logdir", 'L',
       "[start] directory to output logs (instead of stderr)", false, "");
-  p.add<int, cmdline::range_reader<int> >("loglevel", 'E',
-      "[start] verbosity of log messages", false, google::INFO,
-      cmdline::range(google::INFO, google::FATAL));
-  p.add("join", 'J', "[start] join to the existing cluster");
+  p.add<std::string>("log_config", 'G',
+      "[start] log4cxx XML configuration file", false, "");
+  p.add<std::string>("mixer", 'X', "[start] mixer strategy", false, "");
   p.add<int>("interval_sec", 'S', "[start] mix interval by seconds", false, 16);
   p.add<int>("interval_count", 'I',
       "[start] mix interval by update count", false, 512);
+  p.add<int>("zookeeper_timeout", 'Z',
+      "[start] zookeeper time out (sec)", false, 10);
+  p.add<int>("interconnect_timeout", 'R',
+      "[start] interconnect time out between servers (sec)", false, 10);
 
-  p.add("debug", 'd', "debug mode");
+  p.add("debug", 'd', "debug mode (obsolete)");
 
   p.parse_check(argc, argv);
-
-  google::InitGoogleLogging(argv[0]);
-  if (p.exist("debug")) {
-    google::LogToStderr();  // only when debug
-  }
 
   string cmd = p.get<std::string>("cmd");
   string name = p.get<std::string>("server") + "/" + p.get<std::string>("name");
@@ -177,7 +180,7 @@ void send2supervisor(
     const string& name,
     const string& zkhosts,
     const cmdline::parser& argv) {
-  pfi::lang::shared_ptr<jubatus::server::common::lock_service> ls_(
+  jubatus::util::lang::shared_ptr<jubatus::server::common::lock_service> ls_(
       jubatus::server::common::create_lock_service(
           "zk", zkhosts, 10, "/dev/null"));
 
@@ -201,11 +204,13 @@ void send2supervisor(
     server_option.name = name;
     server_option.datadir = argv.get<std::string>("datadir");
     server_option.logdir = argv.get<std::string>("logdir");
-    server_option.loglevel = argv.get<int>("loglevel");
-    server_option.join = argv.exist("join");
+    server_option.log_config = argv.get<std::string>("log_config");
+    server_option.mixer = argv.get<std::string>("mixer");
 
     server_option.interval_sec = argv.get<int>("interval_sec");
     server_option.interval_count = argv.get<int>("interval_count");
+    server_option.zookeeper_timeout = argv.get<int>("zookeeper_timeout");
+    server_option.interconnect_timeout = argv.get<int>("interconnect_timeout");
   }
 
   ls_->list(jubatus::server::common::JUBAVISOR_BASE_PATH, list);
@@ -238,7 +243,7 @@ void send2server(
     const string& name,
     const string& id,
     const string& zkhosts) {
-  pfi::lang::shared_ptr<jubatus::server::common::lock_service> ls_(
+  jubatus::util::lang::shared_ptr<jubatus::server::common::lock_service> ls_(
       jubatus::server::common::create_lock_service(
           "zk", zkhosts, 10, "/dev/null"));
   std::string path;
@@ -286,13 +291,13 @@ void show(
 }
 
 void status(const string& type, const string& name, const string& zkhosts) {
-  pfi::lang::shared_ptr<jubatus::server::common::lock_service> ls_(
+  jubatus::util::lang::shared_ptr<jubatus::server::common::lock_service> ls_(
       jubatus::server::common::create_lock_service(
           "zk", zkhosts, 10, "/dev/null"));
   show(
       *ls_,
-      jubatus::server::common::JUBAKEEPER_BASE_PATH + "/" + type,
-      "jubakeeper");
+      jubatus::server::common::JUBAPROXY_BASE_PATH + "/" + type,
+      "jubaproxy");
   show(*ls_, jubatus::server::common::JUBAVISOR_BASE_PATH, "jubavisor");
   std::string path;
   jubatus::server::common::build_actor_path(path, type, name);

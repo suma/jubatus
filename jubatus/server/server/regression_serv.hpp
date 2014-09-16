@@ -21,9 +21,10 @@
 #include <utility>
 #include <vector>
 
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/core/driver/regression.hpp"
 #include "../framework/server_base.hpp"
+#include "../fv_converter/so_factory.hpp"
 #include "regression_types.hpp"
 
 namespace jubatus {
@@ -33,33 +34,36 @@ class regression_serv : public framework::server_base {
  public:
   regression_serv(
       const framework::server_argv& a,
-      const pfi::lang::shared_ptr<common::lock_service>& zk);
+      const jubatus::util::lang::shared_ptr<common::lock_service>& zk);
   virtual ~regression_serv();
 
   framework::mixer::mixer* get_mixer() const {
     return mixer_.get();
   }
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder>
-    get_mixable_holder() const {
-    return regression_->get_mixable_holder();
+  core::driver::driver_base* get_driver() const {
+    return regression_.get();
   }
 
   void get_status(status_t& status) const;
+  uint64_t user_data_version() const;
 
-  bool set_config(const std::string& config);
-  std::string get_config();
-  int train(const std::vector<std::pair<float, datum> >& data);
-  std::vector<float> estimate(const std::vector<datum>& data) const;
+  void set_config(const std::string& config);
+  std::string get_config() const;
+  int train(const std::vector<scored_datum>& data);
+
+  std::vector<float> estimate(
+      const std::vector<core::fv_converter::datum>& data) const;
 
   bool clear();
 
   void check_set_config() const;
 
  private:
-  pfi::lang::shared_ptr<framework::mixer::mixer> mixer_;
-  pfi::lang::shared_ptr<core::driver::regression> regression_;
+  jubatus::util::lang::shared_ptr<framework::mixer::mixer> mixer_;
+  jubatus::util::lang::shared_ptr<core::driver::regression> regression_;
   std::string config_;
+  fv_converter::so_factory so_loader_;
 };
 
 }  // namespace server

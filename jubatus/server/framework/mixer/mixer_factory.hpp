@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2011,2012 Preferred Infrastructure and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2011-2013 Preferred Infrastructure and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,8 @@
 #ifndef JUBATUS_SERVER_FRAMEWORK_MIXER_MIXER_FACTORY_HPP_
 #define JUBATUS_SERVER_FRAMEWORK_MIXER_MIXER_FACTORY_HPP_
 
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 
 #include "../../common/lock_service.hpp"
 #include "../server_util.hpp"
@@ -28,8 +29,10 @@ namespace server {
 namespace framework {
 namespace mixer {
 
-mixer* create_mixer(const server_argv& a,
-                    const pfi::lang::shared_ptr<common::lock_service>& zk);
+mixer* create_mixer(
+    const server_argv& a,
+    const jubatus::util::lang::shared_ptr<common::lock_service>& zk,
+    jubatus::util::concurrent::rw_mutex& model_mutex);
 
 }  // namespace mixer
 }  // namespace framework

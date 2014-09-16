@@ -22,16 +22,16 @@
 #include <string>
 #include <sstream>
 
-#include <glog/logging.h>
 #include <msgpack.hpp>
-#include <pficommon/lang/noncopyable.h>
-#include <pficommon/concurrent/lock.h>
-#include <pficommon/concurrent/rwmutex.h>
-#include <pficommon/lang/function.h>
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/noncopyable.h"
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/rwmutex.h"
+#include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/shared_ptr.h"
 
 #include "jubatus/core/common/exception.hpp"
-#include "../common/util.hpp"
+#include "../common/logger/logger.hpp"
+#include "../common/system.hpp"
 #include "../common/lock_service.hpp"
 
 namespace cmdline {
@@ -66,11 +66,12 @@ struct server_argv {
   server_argv(int args, char** argv, const std::string& type);
   server_argv();
 
-  bool join;
   int port;
   std::string bind_address;
   std::string bind_if;
   int timeout;
+  int zookeeper_timeout;
+  int interconnect_timeout;
   int threadnum;
   std::string program_name;
   std::string type;
@@ -78,15 +79,19 @@ struct server_argv {
   std::string name;
   std::string datadir;
   std::string logdir;
-  int loglevel;
+  std::string log_config;
   std::string configpath;
+  std::string modelpath;
   std::string eth;
   int interval_sec;
   int interval_count;
+  std::string mixer;
+  bool daemon;
 
-  MSGPACK_DEFINE(join, port, bind_address, bind_if, timeout, threadnum,
-      program_name, type, z, name, datadir, logdir, loglevel, eth,
-      interval_sec, interval_count);
+  MSGPACK_DEFINE(port, bind_address, bind_if, timeout,
+      zookeeper_timeout, interconnect_timeout, threadnum,
+      program_name, type, z, name, datadir, logdir, log_config, eth,
+      interval_sec, interval_count, mixer, daemon);
 
   bool is_standalone() const {
     return (z == "");
@@ -95,56 +100,55 @@ struct server_argv {
   void set_log_destination(const std::string& progname) const;
 };
 
+void daemonize_process(const std::string& logdir);
 std::string get_server_identifier(const server_argv& a);
 
-struct keeper_argv {
-  keeper_argv(int args, char** argv, const std::string& t);
-  keeper_argv();
+struct proxy_argv {
+  proxy_argv(int args, char** argv, const std::string& t);
+  proxy_argv();
 
   int port;
   std::string bind_address;
   std::string bind_if;
   int timeout;
+  int zookeeper_timeout;
+  int interconnect_timeout;
   int threadnum;
   std::string program_name;
   std::string z;
   std::string logdir;
-  int loglevel;
+  std::string log_config;
   std::string eth;
   const std::string type;
   int session_pool_expire;
   int session_pool_size;
+  bool daemon;
 
   void boot_message(const std::string& progname) const;
   void set_log_destination(const std::string& progname) const;
 };
 
-template<typename From, typename To>
-void convert(const From& from, To& to) {
-  msgpack::sbuffer sbuf;
-  msgpack::pack(sbuf, from);
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-  msg.get().convert(&to);
-}
+std::string get_proxy_identifier(const proxy_argv& a);
 
-extern pfi::lang::shared_ptr<
-    jubatus::server::common::lock_service> ls;
-void atexit();
+void register_lock_service(
+    jubatus::util::lang::shared_ptr<common::lock_service> ls);
+void close_lock_service();
 
 template<class ImplServerClass>
 int run_server(int args, char** argv, const std::string& type) {
   try {
-    ImplServerClass impl_server(server_argv(args, argv, type));
-
-    impl_server.get_p()->get_mixer()->register_api(impl_server);
-    ::atexit(jubatus::server::framework::atexit);
-
-    common::util::set_exit_on_term();
-    common::util::ignore_sigpipe();
+    server_argv parsed_argv(args, argv, type);
+    ImplServerClass impl_server(parsed_argv);
+    if (!parsed_argv.is_standalone()) {
+      impl_server.get_p()->get_mixer()->register_api(impl_server);
+    }
     return impl_server.run();
   } catch (const jubatus::core::common::exception::jubatus_exception& e) {
-    LOG(FATAL) << e.diagnostic_information(true);
+    LOG(FATAL) << "exception in main thread: "
+               << e.diagnostic_information(true);
+    return -1;
+  } catch (const std::exception& e) {
+    LOG(FATAL) << "error in main thread: " << e.what();
     return -1;
   }
 }

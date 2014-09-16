@@ -16,18 +16,21 @@
 
 #include "membership.hpp"
 
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <pficommon/lang/cast.h>
-#include <glog/logging.h>
+#include "jubatus/util/lang/cast.h"
 #include "jubatus/core/common/exception.hpp"
+#include "logger/logger.hpp"
 
 using std::string;
 using std::vector;
-using pfi::lang::lexical_cast;
+using jubatus::util::lang::lexical_cast;
 
 namespace jubatus {
 namespace server {
@@ -53,6 +56,10 @@ void build_existence_path(
 }
 
 void build_actor_path(string& path, const string& type, const string& name) {
+  path = ACTOR_BASE_PATH + "/" + type + "/" + name;
+}
+
+void build_active_path(string& path, const string& type, const string& name) {
   path = ACTOR_BASE_PATH + "/" + type + "/" + name;
 }
 
@@ -86,38 +93,133 @@ void register_actor(
 
   string path;
   build_actor_path(path, type, name);
-  success = z.create(path) && success;
-  success = z.create(path + "/master_lock", "") && success;
+  success = success && z.create(path);
+  success = success && z.create(path + "/master_lock", "");
   path += "/nodes";
-  success = z.create(path) && success;
+  success = success && z.create(path);
+
   {
     string path1;
     build_existence_path(path, ip, port, path1);
-    success = z.create(path1, "", true) && success;
+    success = success && z.create(path1, "", true);
     if (success) {
       LOG(INFO) << "actor created: " << path1;
+    } else {
+      throw JUBATUS_EXCEPTION(
+          core::common::exception::runtime_error("Failed to register_actor")
+          << core::common::exception::error_api_func("lock_service::create"));
     }
   }
 
-  if (!success) {
-    throw JUBATUS_EXCEPTION(
-      core::common::exception::runtime_error("Failed to register_actor")
-      << core::common::exception::error_api_func("lock_service::create"));
+  z.push_cleanup(&shutdown_server);
+}
+
+// zk -> name -> ip -> port -> void
+void register_active(
+    lock_service& z,
+    const string& type,
+    const string& name,
+    const string& ip,
+    int port) {
+  bool success = true;
+
+  string path;
+  build_actor_path(path, type, name);
+  success = success && z.create(path);
+  success = success && z.create(path + "/master_lock", "");
+  path += "/actives";
+  success = success && z.create(path);
+
+  {
+    string path1;
+    build_existence_path(path, ip, port, path1);
+    success = success && z.create(path1, "", true);
+    if (success) {
+      LOG(INFO) << "active created: " << path1;
+    } else {
+      throw JUBATUS_EXCEPTION(
+          core::common::exception::runtime_error("Failed to register_active")
+          << core::common::exception::error_api_func("lock_service::create"));
+    }
   }
 
   // set exit zlistener here
-  pfi::lang::function<void()> f = &force_exit;
-  z.push_cleanup(f);
+  z.push_cleanup(&force_exit);
 }
 
-void register_keeper(
+void unregister_active(
+    lock_service& z,
+    const std::string& type,
+    const std::string& name,
+    const std::string& ip,
+    int port) {
+  bool success = true;
+
+  string path;
+  build_actor_path(path, type, name);
+  path += "/actives";
+  {
+    string path1;
+    build_existence_path(path, ip, port, path1);
+    success = success && z.remove(path1);
+    if (success) {
+      LOG(INFO) << "active removed: " << path1;
+    } else {
+      throw JUBATUS_EXCEPTION(
+          core::common::exception::runtime_error("Failed to unregister_active")
+          << core::common::exception::error_api_func("lock_service::remove"));
+    }
+  }
+}
+
+void watch_delete_actor(
+    lock_service& z,
+    const string& type,
+    const string& name,
+    const string& ip,
+    int port,
+    jubatus::util::lang::function<void(string)> callback) {
+  bool success = true;
+
+  string path;
+  build_actor_path(path, type, name);
+  success = success && z.create(path);
+  success = success && z.create(path + "/master_lock", "");
+  path += "/nodes";
+  success = success && z.create(path);
+
+  if (!success) {
+    throw JUBATUS_EXCEPTION(
+        core::common::exception::runtime_error("Failed to create path")
+        << core::common::exception::error_api_func(
+            "lock_service::create"));
+  }
+
+  {
+    string path1;
+    build_existence_path(path, ip, port, path1);
+    bool success = z.bind_delete_watcher(path1, callback);
+    if (success) {
+      LOG(INFO) << "watch start: " << path1;
+    } else {
+      throw JUBATUS_EXCEPTION(
+          core::common::exception::runtime_error("Failed to watch actor")
+          << core::common::exception::error_api_func(
+              "lock_service::watch_delete_actor"));
+    }
+  }
+
+  z.push_cleanup(&shutdown_server);
+}
+
+void register_proxy(
     lock_service& z,
     const string& type,
     const string& ip,
     int port) {
   bool success = true;
 
-  string path = JUBAKEEPER_BASE_PATH;
+  string path = JUBAPROXY_BASE_PATH;
   success = z.create(path) && success;
   path += "/" + type;
   success = z.create(path) && success;
@@ -126,23 +228,47 @@ void register_keeper(
     build_existence_path(path, ip, port, path1);
     success = z.create(path1, "", true) && success;
     if (success) {
-      LOG(INFO) << "keeper created: " << path1;
+      LOG(INFO) << "proxy created: " << path1;
     }
   }
 
   if (!success) {
     throw JUBATUS_EXCEPTION(
-      core::common::exception::runtime_error("Failed to register_actor")
-      << core::common::exception::error_api_func("lock_service::create"));
+        core::common::exception::runtime_error("Failed to register_proxy")
+        << core::common::exception::error_api_func("lock_service::create"));
   }
 
-  // set exit zlistener here
-  pfi::lang::function<void()> f = &force_exit;
-  z.push_cleanup(f);
+  z.push_cleanup(&shutdown_server);
+}
+
+static bool get_all_node(
+    lock_service& z,
+    const string& path,
+    std::vector<std::pair<string, int> >& ret) {
+  ret.clear();
+  std::vector<string> list;
+  if (!z.list(path, list)) {
+    return false;
+  }
+
+  // split "xxx.xxx.xxx.xxx:ppp" -> ["xxx.xxx.xxx.xxx", ppp]
+  for (std::vector<string>::const_iterator it = list.begin();
+       it != list.end();
+      ++it) {
+    string ip;
+    int port;
+    revert(*it, ip, port);
+    ret.push_back(make_pair(ip, port));
+  }
+  return true;
+}
+
+void shutdown_server() {
+  ::kill(::getpid(), SIGTERM);
 }
 
 // zk -> name -> list( (ip, rpc_port) )
-bool get_all_actors(
+bool get_all_nodes(
     lock_service& z,
     const string& type,
     const string& name,
@@ -151,19 +277,20 @@ bool get_all_actors(
   string path;
   build_actor_path(path, type, name);
   path += "/nodes";
-  std::vector<string> list;
-  if (!z.list(path, list)) {
-    return false;
-  }
+  return get_all_node(z, path, ret);
+}
 
-  for (std::vector<string>::const_iterator it = list.begin(); it != list.end();
-      ++it) {
-    string ip;
-    int port;
-    revert(*it, ip, port);
-    ret.push_back(make_pair(ip, port));
-  }
-  return true;
+// zk -> name -> list( (ip, rpc_port) )
+bool get_all_actives(
+    lock_service& z,
+    const string& type,
+    const string& name,
+    std::vector<std::pair<string, int> >& ret) {
+  ret.clear();
+  string path;
+  build_active_path(path, type, name);
+  path += "/actives";
+  return get_all_node(z, path, ret);
 }
 
 void force_exit() {
@@ -174,7 +301,7 @@ void prepare_jubatus(lock_service& ls, const string& type, const string& name) {
   bool success = true;
   success = ls.create(JUBATUS_BASE_PATH) && success;
   success = ls.create(JUBAVISOR_BASE_PATH) && success;
-  success = ls.create(JUBAKEEPER_BASE_PATH) && success;
+  success = ls.create(JUBAPROXY_BASE_PATH) && success;
   success = ls.create(ACTOR_BASE_PATH) && success;
   success = ls.create(CONFIG_BASE_PATH) && success;
 
@@ -192,8 +319,8 @@ void prepare_jubatus(lock_service& ls, const string& type, const string& name) {
 
   if (!success) {
     throw JUBATUS_EXCEPTION(
-      core::common::exception::runtime_error("Failed to prepare lock_service")
-      << core::common::exception::error_api_func("lock_service::create"));
+        core::common::exception::runtime_error("Failed to prepare lock_service")
+        << core::common::exception::error_api_func("lock_service::create"));
   }
 }
 

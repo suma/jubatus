@@ -19,15 +19,15 @@
 
 #include <string>
 #include <vector>
-#include <glog/logging.h>
 
-#include <pficommon/lang/function.h>
-#include <pficommon/lang/shared_ptr.h>
-#include <pficommon/concurrent/mutex.h>
-#include <pficommon/concurrent/lock.h>
-#include <pficommon/concurrent/threading_model.h>
+#include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/shared_ptr.h"
+#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/threading_model.h"
 
 #include "lock_service.hpp"
+#include "logger/logger.hpp"
 #include ZOOKEEPER_HEADER
 
 namespace jubatus {
@@ -45,6 +45,7 @@ class zk : public lock_service {
 
   virtual ~zk();
 
+  bool wait_until_connected(int timeout);
   void force_close();
   bool create(
       const std::string& path,
@@ -56,7 +57,11 @@ class zk : public lock_service {
 
   bool bind_watcher(
       const std::string& path,
-      pfi::lang::function<void(int, int, std::string)>&);
+      jubatus::util::lang::function<void(int, int, std::string)>&);
+
+  bool bind_delete_watcher(
+      const std::string& path,
+      jubatus::util::lang::function<void(std::string)>&);
 
   // ephemeral only
   bool create_seq(const std::string& path, std::string&);
@@ -69,22 +74,23 @@ class zk : public lock_service {
   // reads data (should be smaller than 1024B)
   bool read(const std::string& path, std::string& out);
 
-  void push_cleanup(pfi::lang::function<void()>& f);
+  void push_cleanup(const jubatus::util::lang::function<void()>& f);
   void run_cleanup();
 
   const std::string& get_hosts() const;
   const std::string type() const;
+
+  const std::string get_connected_host_and_port() const;
 
  protected:
   bool list_(const std::string& path, std::vector<std::string>& out);
 
   zhandle_t* zh_;
   clientid_t* cid_;
-  int state_;
   const std::string hosts_;
 
-  pfi::concurrent::mutex m_;
-  std::vector<pfi::lang::function<void()> > cleanups_;
+  jubatus::util::concurrent::mutex m_;
+  std::vector<jubatus::util::lang::function<void()> > cleanups_;
 
   FILE* logfilep_;
 };
@@ -116,7 +122,7 @@ class zkmutex : public try_lockable {
   std::string seqfile_;
   bool has_lock_;
   bool has_rlock_;
-  pfi::concurrent::mutex m_;
+  jubatus::util::concurrent::mutex m_;
 };
 
 void mywatcher(zhandle_t*, int, int, const char*, void*);

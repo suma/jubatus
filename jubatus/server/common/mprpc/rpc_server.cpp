@@ -16,8 +16,8 @@
 
 #include "rpc_server.hpp"
 #include <string>
-#include <glog/logging.h>
 #include "jubatus/core/common/exception.hpp"
+#include "../logger/logger.hpp"
 
 namespace jubatus {
 namespace server {
@@ -43,16 +43,18 @@ void rpc_server::dispatch(msgpack::rpc::request req) {
   } catch(const msgpack::type_error& e) {
     req.error(msgpack::rpc::ARGUMENT_ERROR, std::string(e.what()));
   } catch(const jubatus::core::common::exception::jubatus_exception& e) {
-    LOG(WARNING) << e.diagnostic_information(true);
+    LOG(WARNING) << "exception in RPC thread: "
+                 << e.diagnostic_information(true);
     req.error(std::string(e.what()));
   } catch(const std::exception& e) {
-    LOG(ERROR) << e.what();
+    LOG(ERROR) << "error in RPC thread: "
+               << e.what();
     req.error(std::string(e.what()));
   }
 }
 
 void rpc_server::add_inner(const std::string& name,
-    pfi::lang::shared_ptr<invoker_base> invoker) {
+    jubatus::util::lang::shared_ptr<invoker_base> invoker) {
   funcs_[name] = invoker;
 }
 
@@ -74,6 +76,10 @@ void rpc_server::start(int nthreads, bool no_hang) {
 
 void rpc_server::join() {
   instance_.join();
+}
+
+void rpc_server::end() {
+  instance_.end();
 }
 
 void rpc_server::stop() {

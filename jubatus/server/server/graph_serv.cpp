@@ -16,17 +16,16 @@
 
 #include "graph_serv.hpp"
 
-#include <cassert>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include <glog/logging.h>
-#include <pficommon/concurrent/lock.h>
-#include <pficommon/text/json.h>
-#include <pficommon/system/time_util.h>
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/text/json.h"
+#include "jubatus/util/system/time_util.h"
+#include "jubatus/util/lang/shared_ptr.h"
 
+#include "jubatus/core/common/assert.hpp"
 #include "jubatus/core/common/vector_util.hpp"
 #include "jubatus/core/common/jsonconfig.hpp"
 #include "jubatus/core/graph/graph_factory.hpp"
@@ -35,8 +34,8 @@
 #include "../common/cht.hpp"
 #endif
 #include "../common/global_id_generator_standalone.hpp"
+#include "../common/logger/logger.hpp"
 #include "../common/unique_lock.hpp"
-#include "../common/util.hpp"
 #ifdef HAVE_ZOOKEEPER_H
 #include "../common/global_id_generator_zk.hpp"
 #include "../common/membership.hpp"
@@ -51,15 +50,16 @@
 using std::string;
 using std::vector;
 using std::pair;
-using pfi::lang::lexical_cast;
-using pfi::text::json::json;
+using jubatus::util::lang::lexical_cast;
+using jubatus::util::text::json::json;
+using jubatus::core::graph::preset_query;
+using jubatus::core::graph::node_info;
 using jubatus::server::common::lock_service;
-using jubatus::server::framework::convert;
 using jubatus::server::framework::server_argv;
 using jubatus::server::framework::mixer::create_mixer;
 
-using pfi::system::time::clock_time;
-using pfi::system::time::get_clock_time;
+using jubatus::util::system::time::clock_time;
+using jubatus::util::system::time::get_clock_time;
 
 namespace jubatus {
 namespace server {
@@ -78,16 +78,16 @@ struct graph_serv_config {
 
   template<typename Ar>
   void serialize(Ar& ar) {
-    ar & MEMBER(method) & MEMBER(parameter);
+    ar & JUBA_MEMBER(method) & JUBA_MEMBER(parameter);
   }
 };
 
 inline node_id uint642nodeid(uint64_t i) {
-  return pfi::lang::lexical_cast<node_id, uint64_t>(i);
+  return jubatus::util::lang::lexical_cast<node_id, uint64_t>(i);
 }
 
 inline uint64_t nodeid2uint64(const node_id& id) {
-  return pfi::lang::lexical_cast<uint64_t, node_id>(id);
+  return jubatus::util::lang::lexical_cast<uint64_t, node_id>(id);
 }
 
 inline node_id i2n(uint64_t i) {
@@ -102,9 +102,9 @@ inline uint64_t n2i(const node_id& id) {
 
 graph_serv::graph_serv(
     const framework::server_argv& a,
-    const pfi::lang::shared_ptr<lock_service>& zk)
+    const jubatus::util::lang::shared_ptr<lock_service>& zk)
     : server_base(a),
-      mixer_(create_mixer(a, zk)) {
+      mixer_(create_mixer(a, zk, rw_mutex())) {
 
 #ifdef HAVE_ZOOKEEPER_H
   if (a.is_standalone()) {
@@ -128,9 +128,9 @@ graph_serv::graph_serv(
 graph_serv::~graph_serv() {
 }
 
-bool graph_serv::set_config(const std::string& config) {
+void graph_serv::set_config(const std::string& config) {
   core::common::jsonconfig::config conf_root(
-      pfi::lang::lexical_cast<pfi::text::json::json>(config));
+      lexical_cast<jubatus::util::text::json::json>(config));
   graph_serv_config conf =
     core::common::jsonconfig::config_cast_check<graph_serv_config>(conf_root);
 
@@ -142,7 +142,7 @@ bool graph_serv::set_config(const std::string& config) {
 
   core::common::jsonconfig::config param;
   if (conf.parameter) {
-    param = core::common::jsonconfig::config(*conf.parameter);
+    param = *conf.parameter;
   }
 #endif
 
@@ -150,10 +150,9 @@ bool graph_serv::set_config(const std::string& config) {
       new core::driver::graph(
           core::graph::graph_factory::create_graph(
               conf.method, conf.parameter)));
-  mixer_->set_mixable_holder(graph_->get_mixable_holder());
+  mixer_->set_driver(graph_.get());
 
   LOG(INFO) << "config loaded: " << config;
-  return true;
 }
 
 std::string graph_serv::get_config() const {
@@ -175,11 +174,15 @@ void graph_serv::get_status(status_t& status) const {
   status.insert(my_status.begin(), my_status.end());
 }
 
+uint64_t graph_serv::user_data_version() const {
+  return 1;  // should be inclemented when model data is modified
+}
+
 std::string graph_serv::create_node() { /* no lock here */
   check_set_config();
 
   uint64_t nid = idgen_->generate();
-  std::string nid_str = pfi::lang::lexical_cast<std::string>(nid);
+  std::string nid_str = jubatus::util::lang::lexical_cast<std::string>(nid);
 
 #ifdef HAVE_ZOOKEEPER_H
   if (!argv().is_standalone()) {
@@ -193,7 +196,13 @@ std::string graph_serv::create_node() { /* no lock here */
             jubatus::core::common::exception::runtime_error(
                 "no server found in cht: " + argv().name));
       }
-      selective_create_node_(nodes[0], nid_str);
+      try {
+        selective_create_node_(nodes[0], nid_str);
+      } catch (const std::runtime_error& e) {
+        throw JUBATUS_EXCEPTION(core::common::exception::runtime_error(
+            "failed to create node " + nid_str + " (" + e.what() + "): " +
+            nodes[0].first + ":" + lexical_cast<std::string>(nodes[0].second)));
+      }
 
       for (size_t i = 1; i < nodes.size(); ++i) {
         try {
@@ -201,15 +210,15 @@ std::string graph_serv::create_node() { /* no lock here */
         } catch (const core::graph::local_node_exists& e) {  // pass through
         } catch (const core::graph::global_node_exists& e) {  // pass through
         } catch (const std::runtime_error& e) {  // error !
-          LOG(WARNING) << "cannot create " << i << "th replica: "
-              << nodes[i].first << ":" << nodes[i].second;
-          LOG(WARNING) << e.what();
+          LOG(WARNING) << "cannot create " << i << "th replica "
+                       << "(" << e.what() << "): "
+                       << nodes[i].first << ":" << nodes[i].second;
         }
       }
     }
   } else {
 #endif
-    pfi::concurrent::scoped_wlock write_lk(rw_mutex());
+    jubatus::util::concurrent::scoped_wlock write_lk(rw_mutex());
     graph_->create_node(nid);
 #ifdef HAVE_ZOOKEEPER_H
   }
@@ -248,7 +257,7 @@ bool graph_serv::remove_node(const std::string& nid_str) {
 
     if (!members.empty()) {
       // create global node
-      common::mprpc::rpc_mclient c(members, argv().timeout);
+      common::mprpc::rpc_mclient c(members, argv().interconnect_timeout);
 
 #ifndef NDEBUG
       for (size_t i = 0; i < members.size(); i++) {
@@ -264,7 +273,7 @@ bool graph_serv::remove_node(const std::string& nid_str) {
         c.call("remove_global_node",
                argv().name,
                nid_str,
-               pfi::lang::function<int(int, int)>(
+               jubatus::util::lang::function<int(int, int)>(
                    &jubatus::server::framework::add<int>));
       } catch (const common::mprpc::rpc_no_result& e) {  // pass through
         DLOG(INFO) << e.diagnostic_information(true);
@@ -296,29 +305,32 @@ edge_id_t graph_serv::create_edge(const std::string& id, const edge& ei) {
     }
     // TODO(kuenishi): assertion: nodes[0] should be myself
     {
-      pfi::concurrent::scoped_wlock wirte_lk(rw_mutex());
+      jubatus::util::concurrent::scoped_wlock wirte_lk(rw_mutex());
       this->create_edge_here(eid, ei);
     }
     for (size_t i = 1; i < nodes.size(); ++i) {
       try {
         if (nodes[i].first == argv().eth && nodes[i].second == argv().port) {
         } else {
-          client::graph c(nodes[i].first, nodes[i].second, 5.0);
+          client::graph c(nodes[i].first,
+                          nodes[i].second,
+                          argv().name,
+                          argv().interconnect_timeout);
           DLOG(INFO) << "request to "
               << nodes[i].first << ":" << nodes[i].second;
-          c.create_edge_here(argv().name, eid, ei);
+          c.create_edge_here(eid, ei);
         }
       } catch (const core::graph::local_node_exists& e) {  // pass through
       } catch (const core::graph::global_node_exists& e) {  // pass through
       } catch (const std::runtime_error& e) {  // error !
-        LOG(WARNING) << "cannot create " << i << "th replica: "
-            << nodes[i].first << ":" << nodes[i].second;
-        LOG(WARNING) << e.what();
+        LOG(WARNING) << "cannot create " << i << "th replica "
+                     << "(" << e.what() << "): "
+                     << nodes[i].first << ":" << nodes[i].second;
       }
     }
   } else {
 #endif
-    pfi::concurrent::scoped_wlock write_lk(rw_mutex());
+    jubatus::util::concurrent::scoped_wlock write_lk(rw_mutex());
     graph_->create_edge(eid, n2i(ei.source), n2i(ei.target), ei.property);
 #ifdef HAVE_ZOOKEEPER_H
   }
@@ -358,8 +370,7 @@ double graph_serv::get_centrality(
   check_set_config();
 
   if (s == 0) {
-    core::graph::preset_query q0;
-    return graph_->get_centrality(n2i(id), core::graph::EIGENSCORE, q0);
+    return graph_->get_centrality(n2i(id), core::graph::EIGENSCORE, q);
   } else {
     std::stringstream msg;
     msg << "unknown centrality type: " << s;
@@ -370,14 +381,12 @@ double graph_serv::get_centrality(
 // @random
 std::vector<node_id> graph_serv::get_shortest_path(
     const shortest_path_query& req) const {
-  core::graph::preset_query q;
-  framework::convert(req.query, q);
   std::vector<core::graph::node_id_t> ret0 =
       graph_->get_shortest_path(
           n2i(req.source),
           n2i(req.target),
           req.max_hop,
-          q);
+          req.query);
   std::vector<node_id> ret;
   for (size_t i = 0; i < ret0.size(); ++i) {
     ret.push_back(i2n(ret0[i]));
@@ -386,64 +395,45 @@ std::vector<node_id> graph_serv::get_shortest_path(
 }
 
 // update, broadcast
-bool graph_serv::add_centrality_query(const preset_query& q0) {
+bool graph_serv::add_centrality_query(const preset_query& q) {
   check_set_config();
 
-  core::graph::preset_query q;
-  framework::convert<jubatus::preset_query, core::graph::preset_query>(
-      q0,
-      q);
   graph_->add_centrality_query(q);
   DLOG(INFO) << "centrality query added";
   return true;
 }
 
 // update, broadcast
-bool graph_serv::add_shortest_path_query(const preset_query& q0) {
+bool graph_serv::add_shortest_path_query(const preset_query& q) {
   check_set_config();
 
-  core::graph::preset_query q;
-  framework::convert<jubatus::preset_query, core::graph::preset_query>(
-      q0,
-      q);
   graph_->add_shortest_path_query(q);
   DLOG(INFO) << "shortest path added";
   return true;
 }
 
 // update, broadcast
-bool graph_serv::remove_centrality_query(const preset_query& q0) {
+bool graph_serv::remove_centrality_query(const preset_query& q) {
   check_set_config();
 
-  core::graph::preset_query q;
-  framework::convert<jubatus::preset_query, core::graph::preset_query>(
-      q0,
-      q);
   graph_->remove_centrality_query(q);
   DLOG(INFO) << "centrality query removed";
   return true;
 }
 
 // update, broadcast
-bool graph_serv::remove_shortest_path_query(const preset_query& q0) {
+bool graph_serv::remove_shortest_path_query(const preset_query& q) {
   check_set_config();
 
-  core::graph::preset_query q;
-  framework::convert<jubatus::preset_query, core::graph::preset_query>(
-      q0,
-      q);
   graph_->remove_shortest_path_query(q);
   DLOG(INFO) << "shortest path removed";
   return true;
 }
 
-node graph_serv::get_node(const std::string& nid) const {
+node_info graph_serv::get_node(const std::string& nid) const {
   check_set_config();
 
-  core::graph::node_info info = graph_->get_node(n2i(nid));
-  jubatus::node ret;
-  framework::convert<core::graph::node_info, jubatus::node>(info, ret);
-  return ret;
+  return graph_->get_node(n2i(nid));
 }
 // @random
 edge graph_serv::get_edge(
@@ -505,16 +495,26 @@ bool graph_serv::create_edge_here(edge_id_t eid, const edge& ei) {
   return true;
 }
 
+/*
+ * Updates the model on the specified node.
+ * If the host/port of the current process is specified, update
+ * is processed locally.
+ * Caller is responsible for handling exceptions including RPC
+ * errors.
+ */
 void graph_serv::selective_create_node_(
     const std::pair<std::string, int>& target,
     const std::string nid_str) {
   if (target.first == argv().eth && target.second == argv().port) {
-    pfi::concurrent::scoped_wlock write_lk(rw_mutex());
+    jubatus::util::concurrent::scoped_wlock write_lk(rw_mutex());
     this->create_node_here(nid_str);
   } else {
     // must not lock here
-    client::graph c(target.first, target.second, 5.0);
-    c.create_node_here(argv().name, nid_str);
+    client::graph c(target.first,
+                    target.second,
+                    argv().name,
+                    argv().interconnect_timeout);
+    c.create_node_here(nid_str);
   }
 }
 
@@ -528,7 +528,8 @@ void graph_serv::find_from_cht_(
   ht.find(key, out, n);  // replication number of local_node
 #else
   // cannot reach here, assertion!
-  assert(argv().is_standalone());
+  JUBATUS_ASSERT_UNREACHABLE();
+  // JUBATUS_ASSERT(argv().is_standalone());
   // out.push_back(make_pair(argv().eth, argv().port));
 #endif
 }
@@ -536,7 +537,7 @@ void graph_serv::find_from_cht_(
 void graph_serv::get_members_(std::vector<std::pair<std::string, int> >& ret) {
   ret.clear();
 #ifdef HAVE_ZOOKEEPER_H
-  common::get_all_actors(*zk_, argv().type, argv().name, ret);
+  common::get_all_nodes(*zk_, argv().type, argv().name, ret);
 
   if (ret.empty()) {
     return;

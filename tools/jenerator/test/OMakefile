@@ -5,10 +5,13 @@ FILES[] =
   parse_test
   cpp_test
   java_test
+  python_test
+  ruby_test
   file_util_test
+  lib_test
 
 USE_OCAMLFIND = true
-OCAMLPACKS[] = oUnit str
+OCAMLPACKS[] = oUnit str extlib
 
 PROGRAM = test
 OCAML_LIBS += ../src/target

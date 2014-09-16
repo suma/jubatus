@@ -21,18 +21,18 @@
 #include <csignal>
 #include <string>
 
-#include <glog/logging.h>
-#include <pficommon/concurrent/lock.h>
-#include <pficommon/lang/bind.h>
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/lang/bind.h"
 
 #include "jubavisor.hpp"
 #include "jubatus/core/common/exception.hpp"
+#include "../common/logger/logger.hpp"
 #include "../common/membership.hpp"
 #include "../common/network.hpp"
-#include "../common/util.hpp"
+#include "../common/signals.hpp"
 
-using pfi::concurrent::scoped_lock;
-using pfi::lang::bind;
+using jubatus::util::concurrent::scoped_lock;
+using jubatus::util::lang::bind;
 
 namespace jubatus {
 namespace server {
@@ -44,10 +44,11 @@ using common::build_loc_str;
 namespace {
 jubavisor* g_jubavisor = NULL;
 
-// for GCC and Clang compatibility:
-// to use pfi::lang::bind 'void (*)(int) __attribute__((noreturn))'
-void exit_wrapper(int status) {
-  exit(status);
+void on_connection_expired() {
+  if (g_jubavisor) {
+    g_jubavisor->stop_all();
+  }
+  exit(-1);
 }
 }  // namespace
 
@@ -56,13 +57,13 @@ jubavisor::jubavisor(
     int port,
     int max,
     const std::string& logfile)
-    : zk_(create_lock_service("zk", hosts, 1024, logfile)),
-      port_base_(port),
+    : port_base_(port),
       logfile_(logfile),
       max_children_(max) {
-  common::util::ignore_sigpipe();
-  common::util::set_exit_on_term();
+  common::prepare_signal_handling();
   ::atexit(jubavisor::atexit_);
+
+  zk_.reset(create_lock_service("zk", hosts, 1024, logfile));
 
   // handle SIG_CHLD
   struct sigaction sa;
@@ -84,7 +85,7 @@ jubavisor::jubavisor(
   std::string path = jubatus::server::common::JUBAVISOR_BASE_PATH + "/" + name_;
   zk_->create(path, "", true);
   // TODO(kumagi):
-  //  pfi::lang::function<void(int,int,std::string)> f
+  //  jubatus::util::lang::function<void(int,int,std::string)> f
   //    = bind(&jubavisor::die_if_deleted, this, _1, _2, _3);
   //  zk_->bind_watcher(path, f);
   DLOG(INFO) << path << " created.";
@@ -93,16 +94,14 @@ jubavisor::jubavisor(
     port_pool_.push(++port_base_);
   }
 
-  pfi::lang::function<void()> h = bind(&jubavisor::stop_all, this);
-  zk_->push_cleanup(h);
-  pfi::lang::function<void()> g = bind(&exit_wrapper, -1);
-  zk_->push_cleanup(g);
+  zk_->push_cleanup(&on_connection_expired);
 
   g_jubavisor = this;
 }
 
 jubavisor::~jubavisor() {
   stop_all();
+  g_jubavisor = NULL;
 }
 
 void jubavisor::atexit_() {
@@ -165,7 +164,7 @@ int jubavisor::start(
     unsigned int N,
     framework::server_argv argv) {
   scoped_lock lk(m_);
-  LOG(INFO) << str << " " << N;
+  LOG(INFO) << "starting " << N << " processes on " << str;
   return start_(str, N, argv);
 }
 

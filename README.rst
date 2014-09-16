@@ -66,6 +66,17 @@ License
 
 LGPL 2.1
 
+Third-party libraries included in Jubatus
+-----------------------------------------
+
+Jubatus source tree includes following third-party library.
+
+- cmdline_ (under BSD 3-Clause License)
+
+.. _cmdline: https://github.com/tanakh/cmdline
+
+Jubatus requires `jubatus_core <https://github.com/jubatus/jubatus_core/>`_ library. jubatus_core contains Eigen source code, which is licensed under MPL2 (partially in LGPL 2.1 or 2.1+).
+
 Update history
 --------------
 

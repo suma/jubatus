@@ -20,7 +20,7 @@
 #include <msgpack.hpp>
 #include <jubatus/msgpack/rpc/future.h>
 
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
 
 namespace jubatus {
 namespace server {
@@ -57,6 +57,9 @@ class rpc_response_t {
   }
   template<typename T> const T as() const {
     return response.a3.as<T>();
+  }
+  msgpack::object operator()() const {
+    return response.a3;
   }
 };
 

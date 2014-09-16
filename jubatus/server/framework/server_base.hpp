@@ -21,11 +21,14 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <pficommon/concurrent/rwmutex.h>
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/system/time_util.h"
+#include "jubatus/util/concurrent/rwmutex.h"
+#include "jubatus/util/lang/shared_ptr.h"
 
-#include "jubatus/core/framework/mixable.hpp"
+#include "jubatus/core/driver/driver.hpp"
 #include "server_util.hpp"
+
+using jubatus::util::system::time::clock_time;
 
 namespace jubatus {
 namespace server {
@@ -43,29 +46,59 @@ class server_base {
   virtual ~server_base() {}
 
   virtual mixer::mixer* get_mixer() const = 0;
-  virtual pfi::lang::shared_ptr<core::framework::mixable_holder>
-      get_mixable_holder() const = 0;
-  virtual void get_status(status_t& status) const = 0;
 
+  virtual core::driver::driver_base* get_driver() const = 0;
+  virtual void get_status(status_t& status) const = 0;
+  virtual void set_config(const std::string& config) = 0;
+
+  virtual bool clear();
   virtual bool save(const std::string& id);
   virtual bool load(const std::string& id);
+
+  void load_file(const std::string& path);
   void event_model_updated();
+  void update_saved_status(const std::string& path);
+  void update_loaded_status(const std::string& path);
+
+  virtual std::string get_config() const = 0;
+  virtual uint64_t user_data_version() const = 0;
 
   uint64_t update_count() const {
     return update_count_;
   }
 
-  pfi::concurrent::rw_mutex& rw_mutex() {
-    return get_mixable_holder()->rw_mutex();
+  jubatus::util::concurrent::rw_mutex& rw_mutex() {
+    return rw_mutex_;
   }
 
   const server_argv& argv() const {
     return argv_;
   }
 
+  uint64_t last_saved_sec() const {
+    return last_saved_.sec;
+  }
+
+  const std::string& last_saved_path() const {
+    return last_saved_path_;
+  }
+
+  uint64_t last_loaded_sec() const {
+    return last_loaded_.sec;
+  }
+
+  const std::string& last_loaded_path() const {
+    return last_loaded_path_;
+  }
+
  private:
   const server_argv argv_;
   uint64_t update_count_;
+  clock_time last_saved_;
+  std::string last_saved_path_;
+  clock_time last_loaded_;
+  std::string last_loaded_path_;
+  jubatus::util::concurrent::rw_mutex rw_mutex_;
 };
 
 }  // namespace framework

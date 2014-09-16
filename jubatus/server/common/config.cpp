@@ -23,9 +23,10 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <pficommon/lang/cast.h>
-#include <pficommon/text/json.h>
+#include "jubatus/util/lang/cast.h"
+#include "jubatus/util/text/json.h"
 #include "jubatus/core/common/exception.hpp"
+#include "logger/logger.hpp"
 
 using std::ifstream;
 using std::string;
@@ -58,7 +59,7 @@ void config_fromzk(
 
   if (!z.exists(path)) {
     throw JUBATUS_EXCEPTION(
-      core::common::exception::runtime_error("config is not exists: " + path));
+      core::common::exception::runtime_error("config does not exist: " + path));
   }
 
   if (!z.read(path, config)) {
@@ -90,13 +91,13 @@ void config_tozk(
   }
 
   try {
-    pfi::lang::lexical_cast<pfi::text::json::json>(config);
-  } catch (pfi::lang::parse_error& e) {
+    jubatus::util::lang::lexical_cast<jubatus::util::text::json::json>(config);
+  } catch (jubatus::util::lang::parse_error& e) {
     std::string msg =
         std::string("syntax error in configuration: ") +
         config_src + ":" +
-        pfi::lang::lexical_cast<std::string>(e.lineno()) + ":" +
-        pfi::lang::lexical_cast<std::string>(e.pos()) + " " +
+        jubatus::util::lang::lexical_cast<std::string>(e.lineno()) + ":" +
+        jubatus::util::lang::lexical_cast<std::string>(e.pos()) + " " +
         e.msg();
     throw JUBATUS_EXCEPTION(core::common::exception::runtime_error(msg));
   }
@@ -107,7 +108,7 @@ void config_tozk(
   if (!z.exists(lock_path)) {
     throw JUBATUS_EXCEPTION(
       core::common::exception::runtime_error(
-        "node is not exists: " + lock_path));
+        "ZooKeeper node does not exist: " + lock_path));
   }
 
   common::lock_service_mutex zk_config_lock(z, lock_path);
@@ -135,7 +136,7 @@ void config_tozk(
 
   if (!success) {
     throw JUBATUS_EXCEPTION(jubatus::core::common::exception::runtime_error(
-          "failed to set config to zookeeper:" + path)
+          "failed to set config to zookeeper: " + path)
         << core::common::exception::error_api_func("lock_service::set"));
   }
 
@@ -152,7 +153,7 @@ void remove_config_fromzk(
   if (!z.exists(lock_path)) {
     throw JUBATUS_EXCEPTION(
       core::common::exception::runtime_error(
-        "node is not exists: " + lock_path));
+        "ZooKeeper node does not exist: " + lock_path));
   }
 
   common::lock_service_mutex zk_config_lock(z, lock_path);
@@ -176,12 +177,12 @@ void remove_config_fromzk(
 
   if (!z.exists(path)) {
     throw JUBATUS_EXCEPTION(
-      core::common::exception::runtime_error("config is not exists: " + path));
+      core::common::exception::runtime_error("config does not exist: " + path));
   }
 
   if (!z.remove(path)) {
     throw JUBATUS_EXCEPTION(jubatus::core::common::exception::runtime_error(
-          "failed to remove config from zookeeper:" + path)
+          "failed to remove config from zookeeper: " + path)
         << core::common::exception::error_api_func("lock_service::remove"));
   }
 
@@ -190,7 +191,7 @@ void remove_config_fromzk(
 
 bool is_no_workers(lock_service& z, const string& type, const string& name) {
   std::vector<std::pair<std::string, int> > nodes;
-  get_all_actors(z, type, name, nodes);
+  get_all_nodes(z, type, name, nodes);
   if (nodes.empty()) {
     return true;
   } else {

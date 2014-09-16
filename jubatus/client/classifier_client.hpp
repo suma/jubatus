@@ -1,4 +1,4 @@
-// This file is auto-generated from classifier.idl
+// This file is auto-generated from classifier.idl(0.5.2-72-g8fd4dbd) with jenerator version 0.5.2-45-gc4cfc98/feature/unlearning
 // *** DO NOT EDIT ***
 
 #ifndef JUBATUS_CLIENT_CLASSIFIER_CLIENT_HPP_
@@ -7,65 +7,51 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <utility>
-#include <jubatus/msgpack/rpc/client.h>
+#include <jubatus/client/common/client.hpp>
+#include <jubatus/client/common/datum.hpp>
 #include "classifier_types.hpp"
 
 namespace jubatus {
 namespace classifier {
 namespace client {
 
-class classifier {
+class classifier : public jubatus::client::common::client {
  public:
-  classifier(const std::string& host, uint64_t port, double timeout_sec)
-      : c_(host, port) {
-    c_.set_timeout(timeout_sec);
+  classifier(const std::string& host, uint64_t port, const std::string& name,
+      unsigned int timeout_sec)
+      : client(host, port, name, timeout_sec) {
   }
 
-  std::string get_config(std::string name) {
-    msgpack::rpc::future f = c_.call("get_config", name);
-    return f.get<std::string>();
-  }
-
-  int32_t train(std::string name, std::vector<std::pair<std::string,
-       datum> > data) {
-    msgpack::rpc::future f = c_.call("train", name, data);
+  int32_t train(const std::vector<labeled_datum>& data) {
+    msgpack::rpc::future f = c_.call("train", name_, data);
     return f.get<int32_t>();
   }
 
-  std::vector<std::vector<estimate_result> > classify(std::string name,
-       std::vector<datum> data) {
-    msgpack::rpc::future f = c_.call("classify", name, data);
+  std::vector<std::vector<estimate_result> > classify(
+      const std::vector<jubatus::client::common::datum>& data) {
+    msgpack::rpc::future f = c_.call("classify", name_, data);
     return f.get<std::vector<std::vector<estimate_result> > >();
   }
 
-  bool clear(std::string name) {
-    msgpack::rpc::future f = c_.call("clear", name);
+  std::vector<std::string> get_labels() {
+    msgpack::rpc::future f = c_.call("get_labels", name_);
+    return f.get<std::vector<std::string> >();
+  }
+
+  bool set_label(const std::string& new_label) {
+    msgpack::rpc::future f = c_.call("set_label", name_, new_label);
     return f.get<bool>();
   }
 
-  bool save(std::string name, std::string id) {
-    msgpack::rpc::future f = c_.call("save", name, id);
+  bool clear() {
+    msgpack::rpc::future f = c_.call("clear", name_);
     return f.get<bool>();
   }
 
-  bool load(std::string name, std::string id) {
-    msgpack::rpc::future f = c_.call("load", name, id);
+  bool delete_label(const std::string& target_label) {
+    msgpack::rpc::future f = c_.call("delete_label", name_, target_label);
     return f.get<bool>();
   }
-
-  std::map<std::string, std::map<std::string, std::string> > get_status(
-      std::string name) {
-    msgpack::rpc::future f = c_.call("get_status", name);
-    return f.get<std::map<std::string, std::map<std::string, std::string> > >();
-  }
-
-  msgpack::rpc::client& get_client() {
-    return c_;
-  }
-
- private:
-  msgpack::rpc::client c_;
 };
 
 }  // namespace client

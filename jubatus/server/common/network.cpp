@@ -16,6 +16,7 @@
 
 #include "network.hpp"
 
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -25,11 +26,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <unistd.h>
 #include <errno.h>
 
+#include <cstring>
 #include <string>
-#include <glog/logging.h>
 #include "jubatus/core/common/exception.hpp"
+#include "logger/logger.hpp"
 
 using std::string;
 
@@ -100,6 +103,37 @@ class ipv4_address : public network_address {
 
 }  // namespace
 
+// TODO(kashihara): AF_INET does not specify IPv6
+void get_ip(const char* nic, string& out) {
+  int fd;
+  struct ifreq ifr;
+
+  fd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (fd == -1) {
+    throw JUBATUS_EXCEPTION(jubatus::core::common::exception::runtime_error(
+          "Failed to create socket(AF_INET, SOCK_DGRAM)")
+        << jubatus::core::common::exception::error_errno(errno));
+  }
+
+  ifr.ifr_addr.sa_family = AF_INET;
+  std::strncpy(ifr.ifr_name, nic, IFNAMSIZ - 1);
+  if (ioctl(fd, SIOCGIFADDR, &ifr) == -1) {
+    throw JUBATUS_EXCEPTION(jubatus::core::common::exception::runtime_error(
+          "Failed to get IP address from interface")
+        << jubatus::core::common::exception::error_errno(errno));
+  }
+  close(fd);
+
+  struct sockaddr_in* sin = (struct sockaddr_in*) (&(ifr.ifr_addr));
+  out = inet_ntoa((struct in_addr) (sin->sin_addr));
+}
+
+string get_ip(const char* nic) {
+  string ret;
+  get_ip(nic, ret);
+  return ret;
+}
+
 address_list get_network_address() {
   address_list result;
 
@@ -120,7 +154,7 @@ address_list get_network_address() {
       int family = ifa->ifa_addr->sa_family;
       if (family == AF_INET) {
         result.push_back(
-            pfi::lang::shared_ptr<network_address>(
+            jubatus::util::lang::shared_ptr<network_address>(
                 new ipv4_address(
                     reinterpret_cast<struct sockaddr_in*>(ifa->ifa_addr),
                     ifa->ifa_name)));
@@ -144,7 +178,7 @@ string get_default_v4_address(string hostaddr) {
   const address_list addrs = get_network_address();
   for (address_list::const_iterator it = addrs.begin(), end = addrs.end();
       it != end; ++it) {
-    pfi::lang::shared_ptr<network_address> a(*it);
+    jubatus::util::lang::shared_ptr<network_address> a(*it);
     if (a->v6()) {
       continue;
     }

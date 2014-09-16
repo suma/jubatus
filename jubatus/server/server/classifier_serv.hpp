@@ -20,10 +20,11 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/core/driver/classifier.hpp"
 #include "classifier_types.hpp"
 #include "../framework/server_base.hpp"
+#include "../fv_converter/so_factory.hpp"
 
 namespace jubatus {
 namespace server {
@@ -32,34 +33,39 @@ class classifier_serv : public framework::server_base {
  public:
   classifier_serv(
       const framework::server_argv& a,
-      const pfi::lang::shared_ptr<common::lock_service>& zk);
+      const jubatus::util::lang::shared_ptr<common::lock_service>& zk);
   virtual ~classifier_serv();
 
   framework::mixer::mixer* get_mixer() const {
     return mixer_.get();
   }
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder>
-    get_mixable_holder() const {
-    return classifier_->get_mixable_holder();
+  core::driver::driver_base* get_driver() const {
+    return classifier_.get();
   }
 
   void get_status(status_t& status) const;
+  uint64_t user_data_version() const;
 
-  bool set_config(const std::string& config);
-  std::string get_config();
-  int train(const std::vector<std::pair<std::string, datum> >& data);
+  int train(const std::vector<labeled_datum>& data);
+  void set_config(const std::string& config);
+  std::string get_config() const;
   std::vector<std::vector<estimate_result> > classify(
-      const std::vector<datum>& data) const;
+      const std::vector<jubatus::core::fv_converter::datum>& data) const;
+
+  std::vector<std::string> get_labels() const;
+  bool set_label(const std::string& label);
+  bool delete_label(const std::string& label);
 
   bool clear();
 
   void check_set_config() const;
 
  private:
-  pfi::lang::shared_ptr<framework::mixer::mixer> mixer_;
-  pfi::lang::shared_ptr<core::driver::classifier> classifier_;
+  jubatus::util::lang::shared_ptr<framework::mixer::mixer> mixer_;
+  jubatus::util::lang::shared_ptr<core::driver::classifier> classifier_;
   std::string config_;
+  fv_converter::so_factory so_loader_;
 };
 
 }  // namespace server

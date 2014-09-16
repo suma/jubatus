@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <pficommon/data/string/utility.h>
+#include "jubatus/util/data/string/utility.h"
 
 #include "jubatus/core/common/exception.hpp"
 #include "exception.hpp"
@@ -54,7 +54,7 @@ class rpc_error {
   }
 
   bool has_exception() const {
-    return exception_;
+    return static_cast<bool>(exception_);
   }
   void throw_exception() const {
     exception_->throw_exception();
@@ -102,7 +102,7 @@ inline std::string to_string(const error_multi_rpc& info) {
 
       // Indent each line
       std::vector<std::string> lines =
-          pfi::data::string::split(tmp.str(), '\n');
+          jubatus::util::data::string::split(tmp.str(), '\n');
       std::ostringstream msg;
       for (std::vector<std::string>::iterator
           it = lines.begin(), end = lines.end();

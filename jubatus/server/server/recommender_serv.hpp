@@ -20,57 +20,66 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/core/driver/recommender.hpp"
 #include "../framework/server_base.hpp"
+#include "../fv_converter/so_factory.hpp"
 #include "recommender_types.hpp"
 
 namespace jubatus {
 namespace server {
 
+typedef std::vector<std::pair<std::string, float> > similar_result;
+
 class recommender_serv : public framework::server_base {
  public:
   recommender_serv(
       const framework::server_argv& a,
-      const pfi::lang::shared_ptr<common::lock_service>& zk);
+      const jubatus::util::lang::shared_ptr<common::lock_service>& zk);
   virtual ~recommender_serv();
-
 
   framework::mixer::mixer* get_mixer() const {
     return mixer_.get();
   }
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder>
-    get_mixable_holder() const {
-    return recommender_->get_mixable_holder();
+  core::driver::driver_base* get_driver() const {
+    return recommender_.get();
   }
 
   void get_status(status_t& status) const;
+  uint64_t user_data_version() const;
 
-  bool set_config(const std::string& config);
-  std::string get_config();
+  void set_config(const std::string& config);
+  std::string get_config() const;
 
   bool clear_row(std::string id);
-  bool update_row(std::string id, datum dat);
+  bool update_row(std::string id, core::fv_converter::datum dat);
   bool clear();
 
-  datum complete_row_from_id(std::string id);
-  datum complete_row_from_datum(datum dat);
-  similar_result similar_row_from_id(std::string id, size_t ret_num);
-  similar_result similar_row_from_datum(datum, size_t);
+  core::fv_converter::datum complete_row_from_id(
+      std::string id);
+  core::fv_converter::datum complete_row_from_datum(
+      core::fv_converter::datum dat);
+  std::vector<id_with_score> similar_row_from_id(
+      std::string id, size_t ret_num);
+  std::vector<id_with_score> similar_row_from_datum(
+      core::fv_converter::datum, size_t);
 
-  float calc_similarity(const datum&, const datum&);
-  float calc_l2norm(const datum& q);
+  float calc_similarity(
+      const core::fv_converter::datum&,
+      const core::fv_converter::datum&);
+  float calc_l2norm(const core::fv_converter::datum& q);
 
-  datum decode_row(std::string id);
+  core::fv_converter::datum decode_row(std::string id);
   std::vector<std::string> get_all_rows();
 
   void check_set_config() const;
 
  private:
-  pfi::lang::shared_ptr<framework::mixer::mixer> mixer_;
-  pfi::lang::shared_ptr<core::driver::recommender> recommender_;
+  jubatus::util::lang::shared_ptr<framework::mixer::mixer> mixer_;
+  jubatus::util::lang::shared_ptr<core::driver::recommender> recommender_;
   std::string config_;
+  fv_converter::so_factory so_loader_;
 
   uint64_t clear_row_cnt_;
   uint64_t update_row_cnt_;

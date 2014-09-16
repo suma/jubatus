@@ -21,10 +21,11 @@
 #include <utility>
 #include <vector>
 
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/core/driver/anomaly.hpp"
 #include "../common/global_id_generator_base.hpp"
 #include "../common/lock_service.hpp"
+#include "../fv_converter/so_factory.hpp"
 #include "../framework/server_base.hpp"
 #include "anomaly_types.hpp"
 
@@ -35,38 +36,45 @@ class anomaly_serv : public framework::server_base {
  public:
   anomaly_serv(
       const framework::server_argv& a,
-      const pfi::lang::shared_ptr<common::lock_service>& zk);
+      const jubatus::util::lang::shared_ptr<common::lock_service>& zk);
   virtual ~anomaly_serv();
 
   framework::mixer::mixer* get_mixer() const {
     return mixer_.get();
   }
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder>
-    get_mixable_holder() const {
-    return anomaly_->get_mixable_holder();
+  core::driver::driver_base* get_driver() const {
+    return anomaly_.get();
   }
 
   void get_status(status_t& status) const;
+  uint64_t user_data_version() const;
 
-  bool set_config(const std::string& config);
+  void set_config(const std::string& config);
   std::string get_config() const;
 
   bool clear_row(const std::string& id);
 
-  std::pair<std::string, float> add(const datum& d);
-  float update(const std::string& id, const datum& d);
+  id_with_score add(const core::fv_converter::datum& d);
+  float update(const std::string& id, const core::fv_converter::datum& d);
+  float overwrite(const std::string& id, const core::fv_converter::datum& d);
 
   bool clear();
 
-  float calc_score(const datum& d) const;
+  float calc_score(const core::fv_converter::datum& d) const;
 
   std::vector<std::string> get_all_rows() const;
 
   void check_set_config() const;
 
+  virtual bool load(const std::string& id);
+  void load_file(const std::string& path);
+
  private:
-  std::pair<std::string, float> add_zk(const std::string& id, const datum& d);
+  id_with_score add_zk(
+      const std::string& id,
+      const core::fv_converter::datum& d);
+
   void find_from_cht(
       const std::string& key,
       size_t n,
@@ -76,14 +84,17 @@ class anomaly_serv : public framework::server_base {
       const std::string& host,
       int port,
       const std::string& id,
-      const datum& d);
+      const core::fv_converter::datum& d);
 
-  pfi::lang::shared_ptr<framework::mixer::mixer> mixer_;
-  pfi::lang::shared_ptr<core::driver::anomaly> anomaly_;
+  void reset_id_generator();
+
+  jubatus::util::lang::shared_ptr<framework::mixer::mixer> mixer_;
+  jubatus::util::lang::shared_ptr<core::driver::anomaly> anomaly_;
   std::string config_;
 
-  pfi::lang::shared_ptr<common::lock_service> zk_;
-  pfi::lang::shared_ptr<common::global_id_generator_base> idgen_;
+  jubatus::util::lang::shared_ptr<common::lock_service> zk_;
+  jubatus::util::lang::shared_ptr<common::global_id_generator_base> idgen_;
+  fv_converter::so_factory so_loader_;
 };
 
 }  // namespace server

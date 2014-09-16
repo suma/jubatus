@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include <pficommon/lang/shared_ptr.h>
+#include "jubatus/util/lang/shared_ptr.h"
 
 #include "jubatus/core/driver/graph.hpp"
 #include "../common/global_id_generator_base.hpp"
@@ -41,22 +41,22 @@ class graph_serv : public framework::server_base {
  public:
   graph_serv(
       const framework::server_argv& a,
-      const pfi::lang::shared_ptr<common::lock_service>& zk);
+      const jubatus::util::lang::shared_ptr<common::lock_service>& zk);
   virtual ~graph_serv();
 
   framework::mixer::mixer* get_mixer() const {
     return mixer_.get();
   }
 
-  pfi::lang::shared_ptr<core::framework::mixable_holder>
-    get_mixable_holder() const {
-    return graph_->get_mixable_holder();
+  core::driver::driver_base* get_driver() const {
+    return graph_.get();
   }
 
-  bool set_config(const std::string& config);
+  void set_config(const std::string& config);
   std::string get_config() const;
 
   void get_status(status_t& status) const;
+  uint64_t user_data_version() const;
 
   std::string create_node();  // no lock
   bool update_node(
@@ -70,18 +70,18 @@ class graph_serv : public framework::server_base {
   double get_centrality(
       const std::string& nid,
       const centrality_type& ct,
-      const preset_query& q) const;
+      const core::graph::preset_query& q) const;
   std::vector<node_id> get_shortest_path(const shortest_path_query& r) const;
-  bool add_centrality_query(const preset_query& q);
-  bool add_shortest_path_query(const preset_query& q);
-  bool remove_centrality_query(const preset_query& q);
-  bool remove_shortest_path_query(const preset_query& q);
+  bool add_centrality_query(const core::graph::preset_query& q);
+  bool add_shortest_path_query(const core::graph::preset_query& q);
+  bool remove_centrality_query(const core::graph::preset_query& q);
+  bool remove_shortest_path_query(const core::graph::preset_query& q);
 
   bool update_index();
 
   bool clear();
 
-  node get_node(const std::string& nid) const;
+  core::graph::node_info get_node(const std::string& nid) const;
   edge get_edge(const std::string& nid, edge_id_t e) const;
 
   // internal apis used between servers
@@ -105,12 +105,12 @@ class graph_serv : public framework::server_base {
   void get_members_(std::vector<std::pair<std::string, int> >& ret);
 
 
-  pfi::lang::shared_ptr<framework::mixer::mixer> mixer_;
-  pfi::lang::shared_ptr<core::driver::graph> graph_;
+  jubatus::util::lang::shared_ptr<framework::mixer::mixer> mixer_;
+  jubatus::util::lang::shared_ptr<core::driver::graph> graph_;
   std::string config_;
 
-  pfi::lang::shared_ptr<common::lock_service> zk_;
-  pfi::lang::shared_ptr<common::global_id_generator_base> idgen_;
+  jubatus::util::lang::shared_ptr<common::lock_service> zk_;
+  jubatus::util::lang::shared_ptr<common::global_id_generator_base> idgen_;
 };
 
 }  // namespace server
